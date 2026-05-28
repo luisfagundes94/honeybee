@@ -1,4 +1,4 @@
-package com.luisfagundes.honeybee.ui.theme
+package com.luisfagundes.designsystem.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

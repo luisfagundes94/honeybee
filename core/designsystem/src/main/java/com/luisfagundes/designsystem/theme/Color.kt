@@ -1,4 +1,4 @@
-package com.luisfagundes.honeybee.ui.theme
+package com.luisfagundes.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
 
