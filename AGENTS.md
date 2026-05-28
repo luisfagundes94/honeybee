@@ -28,10 +28,11 @@ Each feature module must have its own `data/`, `domain/`, `presentation/`, and `
 
 ### ViewModel Hierarchy
 
-Two base classes in `core/presentation/arch/viewmodel/`:
+Three base classes in `core/presentation/arch/viewmodel/`:
 
 - `ViewModel<State : UiState, Event : UiEvent, Effect : UiEffect>` — use when the screen needs MVI events and one-shot side effects like navigation (effects sent via `Channel`, collected as `uiEffect`).
 - `StateViewModel<State : UiState, Event : UiEvent>` — use when MVI events are needed but no side effects are required; exposes only `uiState` and handles incoming `UiEvent`s.
+- `EffectViewModel<Effect : UiEffect>` — use when no MVI events are needed but one-shot side effects are required; exposes only `uiEffect` and handles incoming `UiEffect`s.`
 
 Data flow:
 1. **User Action / Events**: The Compose screen dispatches immutable events implementing `UiEvent` by calling `viewModel.dispatchEvent(event)`. All public business methods on the ViewModel are kept `private`, exposing only `dispatchEvent`.
