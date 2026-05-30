@@ -1,0 +1,192 @@
+package com.luisfagundes.onboarding.impl.presentation.screen
+
+import android.content.res.Configuration.UI_MODE_NIGHT_NO
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.PrivacyTip
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewWrapper
+import com.luisfagundes.designsystem.R.drawable.honeybee_low_res
+import com.luisfagundes.designsystem.components.HoneybeeButton
+import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
+import com.luisfagundes.designsystem.theme.spacing
+import com.luisfagundes.onboarding.impl.R
+
+@Composable
+internal fun PermissionScreen(
+    onAllowAccessClick: () -> Unit,
+    onBackClick: () -> Unit
+) {
+    PermissionContent(
+        onAllowAccessClick = onAllowAccessClick,
+        onBackClick = onBackClick,
+        modifier = Modifier.fillMaxSize().padding(MaterialTheme.spacing.default)
+    )
+}
+
+@Composable
+private fun PermissionContent(
+    onAllowAccessClick: () -> Unit,
+    onBackClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    BackHandler(onBack = onBackClick)
+    Scaffold(
+        modifier = modifier,
+        bottomBar = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.default),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                PermissionAlertCard(
+                    modifier = Modifier.fillMaxWidth()
+                )
+                HoneybeeButton(
+                    onClick = onAllowAccessClick,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = stringResource(R.string.allow_access)
+                    )
+                }
+            }
+        }
+    ) { innerPadding ->
+        Column(
+            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.default),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth().padding(innerPadding)
+        ) {
+            Image(
+                painter = painterResource(honeybee_low_res),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.scale(0.75f)
+            )
+            Text(
+                text = stringResource(R.string.permission_screen_title),
+                style = MaterialTheme.typography.headlineMedium,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold
+            )
+            PermissionCardItem(
+                title = stringResource(R.string.photo_library_permission_title),
+                description = stringResource(R.string.photo_library_permission_description),
+                icon = Icons.Filled.PhotoLibrary,
+                modifier = Modifier.fillMaxWidth()
+            )
+            PermissionCardItem(
+                title = stringResource(R.string.notifications_permission_title),
+                description = stringResource(R.string.notifications_permission_description),
+                icon = Icons.Filled.Notifications,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
+@Composable
+private fun PermissionAlertCard(
+    modifier: Modifier = Modifier,
+    title: String = stringResource(R.string.privacy_assurance),
+    icon: ImageVector = Icons.Filled.PrivacyTip
+) {
+    OutlinedCard(
+        modifier = modifier,
+        colors = CardDefaults.outlinedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(MaterialTheme.spacing.default),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(
+                modifier = Modifier.width(MaterialTheme.spacing.default)
+            )
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+    }
+}
+
+@Composable
+private fun PermissionCardItem(
+    title: String,
+    description: String,
+    icon: ImageVector,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(
+            modifier = Modifier.width(MaterialTheme.spacing.default)
+        )
+        Column {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
+
+@Preview(uiMode = UI_MODE_NIGHT_YES)
+@Preview(uiMode = UI_MODE_NIGHT_NO)
+@PreviewWrapper(wrapper = HoneybeeThemeWrapper::class)
+@Composable
+private fun PermissionContentPreview() {
+    PermissionContent(
+        onAllowAccessClick = {},
+        onBackClick = {},
+        modifier = Modifier.fillMaxSize().padding(MaterialTheme.spacing.default)
+    )
+}

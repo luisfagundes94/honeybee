@@ -28,11 +28,14 @@ import com.luisfagundes.designsystem.components.HoneybeeButton
 import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.designsystem.theme.spacing
 import com.luisfagundes.onboarding.impl.R
+import com.luisfagundes.designsystem.R.drawable.honeybee_low_res
 
 @Composable
-internal fun OnboardingScreen() {
+internal fun OnboardingScreen(
+    onGetStartedClick: () -> Unit
+) {
     OnboardingContent(
-        onGetStartedClick = {},
+        onGetStartedClick = onGetStartedClick,
         modifier = Modifier
             .fillMaxSize()
             .padding(MaterialTheme.spacing.default)
@@ -65,7 +68,7 @@ private fun OnboardingContent(
                 .padding(innerPadding)
         ) {
             Image(
-                painter = painterResource(com.luisfagundes.designsystem.R.drawable.honeybee_low_res),
+                painter = painterResource(honeybee_low_res),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.scale(0.75f)

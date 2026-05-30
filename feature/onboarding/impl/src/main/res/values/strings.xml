@@ -4,4 +4,11 @@
     <string name="honeybee">Honeybee</string>
     <string name="honeybee_app_description">Because you don\'t need 10 blurry photos of the same sunset. Swipe up to delete the junk, save the memories, and free up space!</string>
     <string name="get_started">Get Started</string>
+    <string name="photo_library_permission_title">Photo Library</string>
+    <string name="photo_library_permission_description">Allow our bees to access your photo library</string>
+    <string name="notifications_permission_title">Notifications</string>
+    <string name="notifications_permission_description">Allow Honeybee to send you notifications</string>
+    <string name="allow_access">Allow access</string>
+    <string name="privacy_assurance">Your media stays secure, stored only on your device</string>
+    <string name="permission_screen_title">Allow permissions to use Honeybee</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.luisfagundes.library.impl.presentation.tools
+package com.luisfagundes.onboarding.impl.presentation.tools
 
 import android.Manifest
 import android.content.pm.PackageManager.PERMISSION_GRANTED
@@ -15,7 +15,7 @@ import androidx.core.content.ContextCompat
 
 @Composable
 internal fun PermissionsHandler(
-    hasPermissions: () -> Unit,
+    hasPermissions: () -> Unit
 ) {
     val context = LocalContext.current
 
