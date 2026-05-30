@@ -20,6 +20,7 @@
             <option value="$PROJECT_DIR$/feature/library/impl" />
             <option value="$PROJECT_DIR$/feature/onboarding" />
             <option value="$PROJECT_DIR$/feature/onboarding/api" />
+            <option value="$PROJECT_DIR$/feature/onboarding/impl" />
           </set>
         </option>
       </GradleProjectSettings>
