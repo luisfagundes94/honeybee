@@ -18,13 +18,9 @@ internal fun EntryProviderScope<NavKey>.onboardingEntries() {
         )
     }
     entry<PermissionRoute> {
-        val backStack = LocalNavBackStack.current
         PermissionScreen(
             onAllowAccessClick = {
                 // Handle permission and navigate
-            },
-            onBackClick = {
-                backStack?.removeLastOrNull()
             }
         )
     }

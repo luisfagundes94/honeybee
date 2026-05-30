@@ -42,12 +42,10 @@ import com.luisfagundes.onboarding.impl.R
 
 @Composable
 internal fun PermissionScreen(
-    onAllowAccessClick: () -> Unit,
-    onBackClick: () -> Unit
+    onAllowAccessClick: () -> Unit
 ) {
     PermissionContent(
         onAllowAccessClick = onAllowAccessClick,
-        onBackClick = onBackClick,
         modifier = Modifier.fillMaxSize().padding(MaterialTheme.spacing.default)
     )
 }
@@ -55,10 +53,8 @@ internal fun PermissionScreen(
 @Composable
 private fun PermissionContent(
     onAllowAccessClick: () -> Unit,
-    onBackClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    BackHandler(onBack = onBackClick)
     Scaffold(
         modifier = modifier,
         bottomBar = {
@@ -186,7 +182,6 @@ private fun PermissionCardItem(
 private fun PermissionContentPreview() {
     PermissionContent(
         onAllowAccessClick = {},
-        onBackClick = {},
         modifier = Modifier.fillMaxSize().padding(MaterialTheme.spacing.default)
     )
 }
