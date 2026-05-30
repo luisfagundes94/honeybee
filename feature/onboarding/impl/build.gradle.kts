@@ -23,6 +23,14 @@ android {
     buildFeatures {
         compose = true
     }
+    testOptions {
+        unitTests {
+            isReturnDefaultValues = true
+            all {
+                it.useJUnitPlatform()
+            }
+        }
+    }
 }
 
 dependencies {
@@ -53,7 +61,17 @@ dependencies {
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
 
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
+
     // Testing
+    testImplementation(project(":core:testing"))
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.junit5.jupiter.api)
+    testRuntimeOnly(libs.junit5.jupiter.engine)
+    testRuntimeOnly(libs.junit5.platform.launcher)
+    testImplementation(libs.mockk)
+    testImplementation(libs.turbine)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
