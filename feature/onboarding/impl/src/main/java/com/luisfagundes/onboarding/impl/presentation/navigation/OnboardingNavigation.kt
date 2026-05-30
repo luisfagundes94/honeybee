@@ -3,6 +3,7 @@ package com.luisfagundes.onboarding.impl.presentation.navigation
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.luisfagundes.core.common.presentation.navigation.LocalNavBackStack
+import com.luisfagundes.library.api.presentation.navigation.LibraryRoute
 import com.luisfagundes.onboarding.api.presentation.navigation.OnboardingRoute
 import com.luisfagundes.onboarding.impl.presentation.navigation.routes.PermissionRoute
 import com.luisfagundes.onboarding.impl.presentation.screen.OnboardingScreen
@@ -18,9 +19,11 @@ internal fun EntryProviderScope<NavKey>.onboardingEntries() {
         )
     }
     entry<PermissionRoute> {
+        val backStack = LocalNavBackStack.current
         PermissionScreen(
-            onAllowAccessClick = {
-                // Handle permission and navigate
+            onNavigateToLibrary = {
+                backStack?.clear()
+                backStack?.add(LibraryRoute)
             }
         )
     }

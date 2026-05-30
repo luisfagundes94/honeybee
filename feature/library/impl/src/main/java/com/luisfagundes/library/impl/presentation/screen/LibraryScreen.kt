@@ -1,21 +1,27 @@
 package com.luisfagundes.library.impl.presentation.screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.draw.clip
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -41,6 +47,10 @@ internal fun LibraryScreen(
         when (effect) {
             is LibraryUiEffect -> Unit
         }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.dispatchEvent(LibraryUiEvent.LoadPhotos)
     }
 
     LibraryContent(
@@ -80,19 +90,21 @@ private fun Library(
     modifier: Modifier = Modifier
 ) {
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 128.dp),
+        columns = GridCells.Adaptive(minSize = 100.dp),
+        modifier = modifier,
         contentPadding = PaddingValues(MaterialTheme.spacing.default),
-        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.default),
-        modifier = modifier
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall),
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall)
     ) {
         photoSectionList.forEach { photoSection ->
-            item {
+            item(span = { GridItemSpan(maxLineSpan) }) {
                 val month = photoSection.yearMonth.getFormattedMonthName()
                 val year = photoSection.yearMonth.year
 
                 Text(
                     text = "$month $year",
-                    style = MaterialTheme.typography.headlineMedium
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
                 )
             }
             items(photoSection.photos) { photo ->
@@ -102,6 +114,7 @@ private fun Library(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .aspectRatio(1f)
+                        .clip(MaterialTheme.shapes.small)
                         .clickable { onEvent(LibraryUiEvent.PhotoClick(photo.id)) }
                 )
             }

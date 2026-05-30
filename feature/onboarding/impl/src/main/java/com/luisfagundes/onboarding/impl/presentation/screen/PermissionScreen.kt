@@ -1,7 +1,9 @@
 package com.luisfagundes.onboarding.impl.presentation.screen
 
+import android.annotation.SuppressLint
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -28,24 +30,54 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewWrapper
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.designsystem.R.drawable.honeybee_low_res
 import com.luisfagundes.designsystem.components.HoneybeeButton
 import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.designsystem.theme.spacing
 import com.luisfagundes.onboarding.impl.R
+import com.luisfagundes.onboarding.impl.presentation.effect.PermissionUiEffect
+import com.luisfagundes.onboarding.impl.presentation.event.PermissionUiEvent
+import com.luisfagundes.onboarding.impl.presentation.tools.rememberPermissionsHandler
+import com.luisfagundes.onboarding.impl.presentation.viewmodel.PermissionViewModel
+
 
 @Composable
 internal fun PermissionScreen(
-    onAllowAccessClick: () -> Unit
+    onNavigateToLibrary: () -> Unit,
+    viewModel: PermissionViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
+    val permissionsDeniedMessage = stringResource(R.string.permissions_denied_message)
+
+    val requestPermissions = rememberPermissionsHandler(
+        onPermissionsGranted = {
+            viewModel.dispatchEvent(PermissionUiEvent.PermissionsGranted)
+        },
+        onPermissionsDenied = {
+            viewModel.dispatchEvent(PermissionUiEvent.PermissionsDenied)
+        }
+    )
+
+    CollectUiEffects(viewModel.uiEffect) { effect ->
+        when (effect) {
+            is PermissionUiEffect.NavigateToLibrary -> onNavigateToLibrary()
+            is PermissionUiEffect.ShowDeniedMessage -> {
+                Toast.makeText(context, permissionsDeniedMessage, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
     PermissionContent(
-        onAllowAccessClick = onAllowAccessClick,
+        onAllowAccessClick = requestPermissions,
         modifier = Modifier.fillMaxSize().padding(MaterialTheme.spacing.default)
     )
 }

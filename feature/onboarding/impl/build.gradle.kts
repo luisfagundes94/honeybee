@@ -35,6 +35,8 @@ android {
 
 dependencies {
     implementation(project(":feature:onboarding:api"))
+    implementation(project(":feature:library:api"))
+
     implementation(project(":core:common"))
     implementation(project(":core:designsystem"))
 

@@ -20,7 +20,7 @@ internal class LibraryRepositoryImpl @Inject constructor(
     override suspend fun getPhotosByMonth(): Result<List<PhotoSection>> = withContext(dispatcher) {
         dataSource.fetchPhotoList().map { photos ->
             val groupedMap = photos.groupBy { photo ->
-                val instant = Instant.ofEpochMilli(photo.dateAdded)
+                val instant = Instant.ofEpochSecond(photo.dateAdded)
                 YearMonth.from(instant.atZone(ZoneId.systemDefault()))
             }
             groupedMap.map { (month, photosByMonth) ->
