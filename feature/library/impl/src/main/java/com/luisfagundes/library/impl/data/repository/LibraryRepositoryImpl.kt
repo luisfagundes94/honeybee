@@ -1,10 +1,10 @@
 package com.luisfagundes.library.impl.data.repository
 
 import com.luisfagundes.core.common.di.DefaultDispatcher
-import com.luisfagundes.impl.data.datasource.LibraryDataSource
-import com.luisfagundes.impl.data.mapper.PhotoMapper
-import com.luisfagundes.impl.domain.model.PhotoSection
-import com.luisfagundes.impl.domain.repository.LibraryRepository
+import com.luisfagundes.library.impl.data.datasource.LibraryDataSource
+import com.luisfagundes.library.impl.data.mapper.PhotoMapper
+import com.luisfagundes.library.impl.domain.model.PhotoSection
+import com.luisfagundes.library.impl.domain.repository.LibraryRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.time.Instant

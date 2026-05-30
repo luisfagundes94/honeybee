@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="welcome_to">Welcome to</string>
+    <string name="honeybee">Honeybee</string>
+    <string name="honeybee_app_description">Because you don\'t need 14 blurry photos of the same sunset. Swipe up to delete the junk, save the memories, and free up space!</string>
+    <string name="get_started">Get Started</string>
+</resources>

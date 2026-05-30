@@ -1,7 +1,7 @@
 package com.luisfagundes.library.impl.di
 
-import com.luisfagundes.impl.data.datasource.LocalLibraryDataSource
-import com.luisfagundes.impl.data.datasource.LibraryDataSource
+import com.luisfagundes.library.impl.data.datasource.LocalLibraryDataSource
+import com.luisfagundes.library.impl.data.datasource.LibraryDataSource
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

@@ -3,11 +3,11 @@ package com.luisfagundes.library.impl.presentation.viewmodel
 import androidx.lifecycle.viewModelScope
 import com.luisfagundes.core.common.presentation.arch.viewmodel.ViewModel
 import com.luisfagundes.core.common.presentation.tools.ResourceProvider
-import com.luisfagundes.impl.R
-import com.luisfagundes.impl.domain.usecase.GetPhotosByMonthUseCase
-import com.luisfagundes.impl.presentation.effect.LibraryUiEffect
-import com.luisfagundes.impl.presentation.event.LibraryUiEvent
-import com.luisfagundes.impl.presentation.state.LibraryUiState
+import com.luisfagundes.library.impl.R.string.error_loading_photos_message
+import com.luisfagundes.library.impl.domain.usecase.GetPhotosByMonthUseCase
+import com.luisfagundes.library.impl.presentation.effect.LibraryUiEffect
+import com.luisfagundes.library.impl.presentation.event.LibraryUiEvent
+import com.luisfagundes.library.impl.presentation.state.LibraryUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -34,7 +34,7 @@ internal class LibraryViewModel @Inject constructor(
                 setState { LibraryUiState.Content(photoSectionList) }
             },
             onFailure = {
-                val message = resourceProvider.getString(R.string.error_loading_photos_message)
+                val message = resourceProvider.getString(error_loading_photos_message)
                 setState { LibraryUiState.Error(message = message) }
             }
         )

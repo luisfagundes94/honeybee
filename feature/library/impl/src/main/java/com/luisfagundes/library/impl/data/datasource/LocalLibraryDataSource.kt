@@ -4,7 +4,7 @@ import android.content.ContentUris
 import android.content.Context
 import android.provider.MediaStore
 import com.luisfagundes.core.common.tools.safeRunCatching
-import com.luisfagundes.impl.data.model.PhotoDto
+import com.luisfagundes.library.impl.data.model.PhotoDto
 import com.luisfagundes.core.common.di.IoDispatcher
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher

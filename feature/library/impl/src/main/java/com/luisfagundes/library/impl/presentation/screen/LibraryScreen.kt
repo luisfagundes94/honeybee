@@ -24,12 +24,12 @@ import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.designsystem.components.HoneybeeLoadingTemplate
 import com.luisfagundes.designsystem.theme.spacing
-import com.luisfagundes.impl.domain.model.PhotoSection
-import com.luisfagundes.impl.presentation.effect.LibraryUiEffect
-import com.luisfagundes.impl.presentation.event.LibraryUiEvent
-import com.luisfagundes.impl.presentation.state.LibraryUiState
-import com.luisfagundes.impl.presentation.tools.getFormattedMonthName
-import com.luisfagundes.impl.presentation.viewmodel.LibraryViewModel
+import com.luisfagundes.library.impl.domain.model.PhotoSection
+import com.luisfagundes.library.impl.presentation.effect.LibraryUiEffect
+import com.luisfagundes.library.impl.presentation.event.LibraryUiEvent
+import com.luisfagundes.library.impl.presentation.state.LibraryUiState
+import com.luisfagundes.library.impl.presentation.tools.getFormattedMonthName
+import com.luisfagundes.library.impl.presentation.viewmodel.LibraryViewModel
 
 @Composable
 internal fun LibraryScreen(

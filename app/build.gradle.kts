@@ -40,8 +40,12 @@ android {
 dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:designsystem"))
+
     implementation(project(":feature:library:api"))
     implementation(project(":feature:library:impl"))
+
+    implementation(project(":feature:onboarding:api"))
+    implementation(project(":feature:onboarding:impl"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
