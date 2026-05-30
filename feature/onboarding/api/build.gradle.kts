@@ -1,11 +1,12 @@
 plugins {
-    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.android.library)
 }
 
 android {
-    namespace = "com.luisfagundes.library.api"
-    compileSdk = 37
+    namespace = "com.luisfagundes.onboarding.api"
+    compileSdk {
+        version = release(37)
+    }
 
     defaultConfig {
         minSdk = 26
@@ -21,6 +22,10 @@ android {
 }
 
 dependencies {
-    // Navigation
-    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.material)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.junit)
 }

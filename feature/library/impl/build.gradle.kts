@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.luisfagundes.impl"
+    namespace = "com.luisfagundes.library.impl"
     compileSdk = 37
 
     defaultConfig {

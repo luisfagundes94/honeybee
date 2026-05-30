@@ -17,7 +17,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.luisfagundes.api.presentation.navigation.LibraryRoute
+import com.luisfagundes.library.api.presentation.navigation.LibraryRoute
 import com.luisfagundes.designsystem.theme.HoneybeeTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
