@@ -93,9 +93,6 @@ internal fun CongratulationsScreen(
                 progress = { progress },
                 modifier = Modifier.size(240.dp)
             )
-            Spacer(
-                modifier = Modifier.height(MaterialTheme.spacing.large)
-            )
             Row(
                 verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.Center
