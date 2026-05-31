@@ -2,6 +2,7 @@ package com.luisfagundes.library.impl.presentation.navigation
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
+import com.luisfagundes.core.common.presentation.navigation.LocalNavBackStack
 import com.luisfagundes.library.api.presentation.navigation.LibraryRoute
 import com.luisfagundes.library.api.presentation.navigation.MediaDetailsRoute
 import com.luisfagundes.library.api.presentation.navigation.TrashRoute
@@ -11,12 +12,34 @@ import com.luisfagundes.library.impl.presentation.screen.TrashScreen
 
 internal fun EntryProviderScope<NavKey>.libraryEntries() {
     entry<LibraryRoute> {
-        LibraryScreen()
+        val backStack = LocalNavBackStack.current
+        LibraryScreen(
+            onNavigateToPhotoDetail = { photoId ->
+                backStack?.add(MediaDetailsRoute(photoId))
+            },
+            onNavigateToTrash = {
+                backStack?.add(TrashRoute)
+            }
+        )
     }
     entry<MediaDetailsRoute> { route ->
-        MediaDetailsScreen(initialPhotoId = route.initialPhotoId)
+        val backStack = LocalNavBackStack.current
+        MediaDetailsScreen(
+            initialPhotoId = route.initialPhotoId,
+            onNavigateBack = {
+                backStack?.removeLastOrNull()
+            },
+            onNavigateToTrash = {
+                backStack?.add(TrashRoute)
+            }
+        )
     }
     entry<TrashRoute> {
-        TrashScreen()
+        val backStack = LocalNavBackStack.current
+        TrashScreen(
+            onNavigateBack = {
+                backStack?.removeLastOrNull()
+            }
+        )
     }
 }

@@ -57,11 +57,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
-import com.luisfagundes.core.common.presentation.navigation.LocalNavBackStack
 import com.luisfagundes.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.designsystem.components.HoneybeeLoadingTemplate
 import com.luisfagundes.designsystem.theme.spacing
-import com.luisfagundes.library.api.presentation.navigation.TrashRoute
 import com.luisfagundes.library.impl.presentation.effect.MediaDetailsUiEffect
 import com.luisfagundes.library.impl.presentation.event.MediaDetailsUiEvent
 import com.luisfagundes.library.impl.presentation.state.MediaDetailsUiState
@@ -77,15 +75,16 @@ import kotlin.math.pow
 @Composable
 internal fun MediaDetailsScreen(
     initialPhotoId: Long,
+    onNavigateBack: () -> Unit,
+    onNavigateToTrash: () -> Unit,
     viewModel: MediaDetailsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val backStack = LocalNavBackStack.current
 
     CollectUiEffects(viewModel.uiEffect) { effect ->
         when (effect) {
-            MediaDetailsUiEffect.NavigateBack -> backStack?.removeLastOrNull()
-            MediaDetailsUiEffect.NavigateToTrash -> backStack?.add(TrashRoute)
+            MediaDetailsUiEffect.NavigateBack -> onNavigateBack()
+            MediaDetailsUiEffect.NavigateToTrash -> onNavigateToTrash()
         }
     }
 
@@ -96,7 +95,7 @@ internal fun MediaDetailsScreen(
     MediaDetailsContent(
         uiState = uiState,
         onEvent = viewModel::dispatchEvent,
-        onBackClick = { backStack?.removeLastOrNull() }
+        onBackClick = onNavigateBack
     )
 }
 

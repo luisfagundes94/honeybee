@@ -45,7 +45,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
-import com.luisfagundes.core.common.presentation.navigation.LocalNavBackStack
 import com.luisfagundes.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.designsystem.components.HoneybeeLoadingTemplate
 import com.luisfagundes.designsystem.theme.spacing
@@ -57,14 +56,14 @@ import com.luisfagundes.library.impl.presentation.viewmodel.TrashViewModel
 
 @Composable
 internal fun TrashScreen(
+    onNavigateBack: () -> Unit,
     viewModel: TrashViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val backStack = LocalNavBackStack.current
 
     CollectUiEffects(viewModel.uiEffect) { effect ->
         when (effect) {
-            TrashUiEffect.NavigateBack -> backStack?.removeLastOrNull()
+            TrashUiEffect.NavigateBack -> onNavigateBack()
         }
     }
 
@@ -75,7 +74,7 @@ internal fun TrashScreen(
     TrashContent(
         uiState = uiState,
         onEvent = viewModel::dispatchEvent,
-        onBackClick = { backStack?.removeLastOrNull() }
+        onBackClick = onNavigateBack
     )
 }
 
