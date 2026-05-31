@@ -41,6 +41,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import android.app.Activity
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
@@ -57,13 +63,29 @@ import com.luisfagundes.library.impl.presentation.viewmodel.TrashViewModel
 @Composable
 internal fun TrashScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToLibrary: () -> Unit,
     viewModel: TrashViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    val deleteLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            viewModel.dispatchEvent(TrashUiEvent.OnDeleteApproved)
+        } else {
+            Toast.makeText(context, "You didn't allow photo deletion", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     CollectUiEffects(viewModel.uiEffect) { effect ->
         when (effect) {
-            TrashUiEffect.NavigateBack -> onNavigateBack()
+            TrashUiEffect.NavigateBack -> onNavigateToLibrary()
+            is TrashUiEffect.ShowDeleteConfirmation -> {
+                val request = IntentSenderRequest.Builder(effect.intentSender).build()
+                deleteLauncher.launch(request)
+            }
         }
     }
 

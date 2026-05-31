@@ -1,5 +1,7 @@
 package com.luisfagundes.library.impl.data.repository
 
+import android.app.PendingIntent
+import android.os.Build
 import android.content.ContentUris
 import android.content.Context
 import android.provider.MediaStore
@@ -104,5 +106,15 @@ internal class LibraryRepositoryImpl @Inject constructor(
                 e.printStackTrace()
             }
         }
+    }
+
+    override fun createDeleteRequest(photoIds: List<Long>): PendingIntent? {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val uris = photoIds.map { id ->
+                ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+            }
+            return MediaStore.createDeleteRequest(context.contentResolver, uris)
+        }
+        return null
     }
 }

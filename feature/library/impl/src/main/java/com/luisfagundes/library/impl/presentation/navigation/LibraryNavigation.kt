@@ -39,6 +39,10 @@ internal fun EntryProviderScope<NavKey>.libraryEntries() {
         TrashScreen(
             onNavigateBack = {
                 backStack?.removeLastOrNull()
+            },
+            onNavigateToLibrary = {
+                backStack?.clear()
+                backStack?.add(LibraryRoute)
             }
         )
     }

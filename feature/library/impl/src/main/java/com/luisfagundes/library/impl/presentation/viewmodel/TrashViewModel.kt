@@ -2,6 +2,7 @@ package com.luisfagundes.library.impl.presentation.viewmodel
 
 import androidx.lifecycle.viewModelScope
 import com.luisfagundes.core.common.presentation.arch.viewmodel.ViewModel
+import com.luisfagundes.library.impl.domain.usecase.CreateDeleteRequestUseCase
 import com.luisfagundes.library.impl.domain.usecase.GetTrashPhotosUseCase
 import com.luisfagundes.library.impl.domain.usecase.PermanentlyDeleteUseCase
 import com.luisfagundes.library.impl.domain.usecase.RestoreFromTrashUseCase
@@ -16,7 +17,8 @@ import javax.inject.Inject
 internal class TrashViewModel @Inject constructor(
     private val getTrashPhotosUseCase: GetTrashPhotosUseCase,
     private val restoreFromTrashUseCase: RestoreFromTrashUseCase,
-    private val permanentlyDeleteUseCase: PermanentlyDeleteUseCase
+    private val permanentlyDeleteUseCase: PermanentlyDeleteUseCase,
+    private val createDeleteRequestUseCase: CreateDeleteRequestUseCase
 ) : ViewModel<TrashUiState, TrashUiEvent, TrashUiEffect>(
     TrashUiState.Loading
 ) {
@@ -25,6 +27,7 @@ internal class TrashViewModel @Inject constructor(
             is TrashUiEvent.LoadTrash -> loadTrash()
             is TrashUiEvent.RestorePhoto -> restorePhoto(event.photoId)
             is TrashUiEvent.ConfirmDeletion -> confirmDeletion()
+            is TrashUiEvent.OnDeleteApproved -> onDeleteApproved()
         }
     }
 
@@ -49,15 +52,31 @@ internal class TrashViewModel @Inject constructor(
         }
     }
 
-    private fun confirmDeletion() = viewModelScope.launch {
+    private fun confirmDeletion() {
         val currentState = uiState.value
         if (currentState is TrashUiState.Content) {
             val deleteIds = currentState.deletePhotos.map { it.id }
+            if (deleteIds.isEmpty()) return
 
+            val pendingIntent = createDeleteRequestUseCase(deleteIds)
+            if (pendingIntent != null) {
+                sendEffect { TrashUiEffect.ShowDeleteConfirmation(pendingIntent.intentSender) }
+            } else {
+                viewModelScope.launch {
+                    permanentlyDeleteUseCase(deleteIds)
+                    sendEffect { TrashUiEffect.NavigateBack }
+                }
+            }
+        }
+    }
+
+    private fun onDeleteApproved() = viewModelScope.launch {
+        val currentState = uiState.value
+        if (currentState is TrashUiState.Content) {
+            val deleteIds = currentState.deletePhotos.map { it.id }
             if (deleteIds.isNotEmpty()) {
                 permanentlyDeleteUseCase(deleteIds)
             }
-
             sendEffect { TrashUiEffect.NavigateBack }
         }
     }
