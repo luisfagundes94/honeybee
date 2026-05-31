@@ -33,16 +33,16 @@ internal class LibraryRepositoryImpl @Inject constructor(
             val filteredPhotos = photos.filter { photo ->
                 photo.id !in trashedIds && photo.id !in deletedIds
             }
-            val groupedMap = filteredPhotos.groupBy { photo ->
+            val photosByMonth = filteredPhotos.groupBy { photo ->
                 val instant = Instant.ofEpochSecond(photo.dateAdded)
                 YearMonth.from(instant.atZone(ZoneId.systemDefault()))
             }
-            groupedMap.map { (month, photosByMonth) ->
+            photosByMonth.map { (month, photos) ->
                 PhotoSection(
                     yearMonth = month,
-                    photos = photosByMonth
+                    photos = photos
                         .map { photoMapper.mapToDomain(it) }
-                        .sortedBy { it.dateAdded }
+                        .sortedByDescending { it.dateAdded }
                 )
             }.sortedByDescending { it.yearMonth }
         }
@@ -55,6 +55,7 @@ internal class LibraryRepositoryImpl @Inject constructor(
             photos.filter { photo ->
                 photo.id !in trashedIds && photo.id !in deletedIds
             }.map { photoMapper.mapToDomain(it) }
+             .sortedByDescending { it.dateAdded }
         }
     }
 

@@ -81,8 +81,8 @@ class LibraryRepositoryImplTest {
         assertEquals(YearMonth.of(2026, 5), sections[1].yearMonth)
         assertEquals(2, sections[1].photos.size)
 
-        // Within May 2026, the oldest/first photo (May 1st) must be first
-        assertEquals(3L, sections[1].photos[0].id)
-        assertEquals(1L, sections[1].photos[1].id)
+        // Within May 2026, the most recent photo (May 15th) must be first
+        assertEquals(1L, sections[1].photos[0].id)
+        assertEquals(3L, sections[1].photos[1].id)
     }
 }

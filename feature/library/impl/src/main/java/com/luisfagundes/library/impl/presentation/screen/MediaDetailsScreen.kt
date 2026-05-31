@@ -143,16 +143,16 @@ private fun MediaPager(
 ) {
     val photos = content.photos
     val totalCount = photos.size
-    val initialPage = (totalCount - 1 - content.initialIndex).coerceAtLeast(0)
+    val initialPage = content.initialIndex.coerceIn(0, (totalCount - 1).coerceAtLeast(0))
 
     val pagerState = rememberPagerState(initialPage = initialPage) { totalCount }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
     // Calculate current visible photo based on swiping direction logic:
-    // User requested swiping right to left shows previous photo, left to right shows next photo.
+    // Swiping right-to-left shows next photo, left-to-right shows previous photo.
     val currentPage = pagerState.currentPage
-    val currentPhotoIndex = (totalCount - 1 - currentPage).coerceIn(0, totalCount - 1)
+    val currentPhotoIndex = currentPage.coerceIn(0, (totalCount - 1).coerceAtLeast(0))
     val currentPhoto = photos[currentPhotoIndex]
 
     val percent =
@@ -239,7 +239,7 @@ private fun MediaPager(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) { page ->
-            val pagePhotoIndex = (totalCount - 1 - page).coerceIn(0, totalCount - 1)
+            val pagePhotoIndex = page.coerceIn(0, (totalCount - 1).coerceAtLeast(0))
             val photo = photos[pagePhotoIndex]
 
             Box(
