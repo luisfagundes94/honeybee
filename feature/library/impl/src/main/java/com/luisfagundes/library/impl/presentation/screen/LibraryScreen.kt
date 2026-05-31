@@ -152,7 +152,7 @@ private fun Library(
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 100.dp),
             modifier = Modifier.padding(innerPadding),
-            contentPadding = PaddingValues(MaterialTheme.spacing.default),
+            contentPadding = PaddingValues(horizontal = MaterialTheme.spacing.default),
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall),
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall)
         ) {
