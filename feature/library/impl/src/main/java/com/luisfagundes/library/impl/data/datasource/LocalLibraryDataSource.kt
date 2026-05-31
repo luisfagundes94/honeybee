@@ -17,7 +17,8 @@ internal class LocalLibraryDataSource @Inject constructor(
 ) : LibraryDataSource {
     private val photoProjection = arrayOf(
         MediaStore.Images.Media._ID,
-        MediaStore.Images.Media.DATE_ADDED
+        MediaStore.Images.Media.DATE_ADDED,
+        MediaStore.Images.Media.SIZE
     )
     private val sortOrder = "${MediaStore.MediaColumns.DATE_ADDED} DESC"
 
@@ -37,10 +38,12 @@ internal class LocalLibraryDataSource @Inject constructor(
                 val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
                 val dateAddedColumn =
                     cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED)
+                val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)
 
                 while (cursor.moveToNext()) {
                     val id = cursor.getLong(idColumn)
                     val dateAdded = cursor.getLong(dateAddedColumn)
+                    val size = cursor.getLong(sizeColumn)
                     val photoUri = ContentUris.withAppendedId(
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                         id
@@ -49,7 +52,8 @@ internal class LocalLibraryDataSource @Inject constructor(
                         PhotoDto(
                             id = id,
                             uri = photoUri,
-                            dateAdded = dateAdded
+                            dateAdded = dateAdded,
+                            size = size
                         )
                     )
                 }

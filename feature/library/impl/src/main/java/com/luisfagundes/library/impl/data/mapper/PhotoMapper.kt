@@ -10,7 +10,8 @@ internal class PhotoMapper @Inject constructor() {
         return Photo(
             id = source.id,
             uri = source.uri,
-            dateAdded = source.dateAdded
+            dateAdded = source.dateAdded,
+            size = source.size
         )
     }
 }

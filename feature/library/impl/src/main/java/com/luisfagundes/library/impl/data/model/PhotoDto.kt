@@ -5,5 +5,6 @@ import android.net.Uri
 internal data class PhotoDto(
     val id: Long,
     val uri: Uri,
-    val dateAdded: Long
+    val dateAdded: Long,
+    val size: Long
 )
