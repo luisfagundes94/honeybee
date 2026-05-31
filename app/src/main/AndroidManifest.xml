@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Honeybee">
         <activity
-            android:name=".presentation.MainActivity"
+            android:name=".presentation.activity.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Honeybee">
             <intent-filter>
