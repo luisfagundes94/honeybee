@@ -7,7 +7,6 @@ internal sealed interface TrashUiState : UiState {
     data object Loading : TrashUiState
     data class Error(val message: String) : TrashUiState
     data class Content(
-        val deletePhotos: List<Photo>,
-        val keepPhotos: List<Photo>
+        val deletePhotos: List<Photo>
     ) : TrashUiState
 }

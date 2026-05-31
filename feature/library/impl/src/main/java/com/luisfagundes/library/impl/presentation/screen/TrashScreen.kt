@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
@@ -22,7 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -31,7 +30,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -115,25 +113,18 @@ private fun TrashView(
     onBackClick: () -> Unit
 ) {
     val deleteCount = content.deletePhotos.size
-    val totalTrashed = deleteCount + content.keepPhotos.size
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Trash",
-                            color = Color.White,
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(end = 48.dp) // Offset for close button balance
-                        )
-                    }
+                    Text(
+                        text = "Trash",
+                        color = Color.White,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
@@ -147,7 +138,7 @@ private fun TrashView(
             )
         },
         bottomBar = {
-            if (totalTrashed > 0) {
+            if (deleteCount > 0) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -177,7 +168,7 @@ private fun TrashView(
             }
         }
     ) { innerPadding ->
-        if (totalTrashed == 0) {
+        if (deleteCount == 0) {
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
@@ -198,55 +189,17 @@ private fun TrashView(
                     .padding(innerPadding)
                     .padding(horizontal = MaterialTheme.spacing.default)
             ) {
-                if (content.deletePhotos.isNotEmpty()) {
-                    item {
-                        Text(
-                            text = "DELETE",
-                            color = Color.Gray,
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(vertical = MaterialTheme.spacing.small)
-                        )
-                        
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall),
-                            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            content.deletePhotos.forEach { photo ->
-                                TrashPhotoItem(
-                                    photo = photo,
-                                    showTrashIcon = true,
-                                    onItemClick = { onEvent(TrashUiEvent.TogglePhotoSelection(photo.id)) }
-                                )
-                            }
-                        }
-                    }
-                }
-
-                // KEEP section
-                if (content.keepPhotos.isNotEmpty()) {
-                    item {
-                        Text(
-                            text = "KEEP",
-                            color = Color.Gray,
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(vertical = MaterialTheme.spacing.small)
-                        )
-
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall),
-                            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            content.keepPhotos.forEach { photo ->
-                                TrashPhotoItem(
-                                    photo = photo,
-                                    showTrashIcon = false,
-                                    onItemClick = { onEvent(TrashUiEvent.TogglePhotoSelection(photo.id)) }
-                                )
-                            }
+                item {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall),
+                        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        content.deletePhotos.forEach { photo ->
+                            TrashPhotoItem(
+                                photo = photo,
+                                onItemClick = { onEvent(TrashUiEvent.RestorePhoto(photo.id)) }
+                            )
                         }
                     }
                 }
@@ -258,7 +211,6 @@ private fun TrashView(
 @Composable
 private fun TrashPhotoItem(
     photo: Photo,
-    showTrashIcon: Boolean,
     onItemClick: () -> Unit
 ) {
     Box(
@@ -275,22 +227,20 @@ private fun TrashPhotoItem(
             modifier = Modifier.fillMaxSize()
         )
 
-        if (showTrashIcon) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(4.dp)
-                    .size(24.dp)
-                    .background(MaterialTheme.colorScheme.primary, CircleShape)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(14.dp)
-                )
-            }
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(4.dp)
+                .size(24.dp)
+                .background(MaterialTheme.colorScheme.primary, CircleShape)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.size(14.dp)
+            )
         }
     }
 }

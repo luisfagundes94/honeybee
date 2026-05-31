@@ -23,7 +23,7 @@ internal class TrashViewModel @Inject constructor(
     override fun dispatchEvent(event: TrashUiEvent) {
         when (event) {
             is TrashUiEvent.LoadTrash -> loadTrash()
-            is TrashUiEvent.TogglePhotoSelection -> togglePhotoSelection(event.photoId)
+            is TrashUiEvent.RestorePhoto -> restorePhoto(event.photoId)
             is TrashUiEvent.ConfirmDeletion -> confirmDeletion()
         }
     }
@@ -32,7 +32,7 @@ internal class TrashViewModel @Inject constructor(
         setState { TrashUiState.Loading }
         getTrashPhotosUseCase().fold(
             onSuccess = { photos ->
-                setState { TrashUiState.Content(deletePhotos = photos, keepPhotos = emptyList()) }
+                setState { TrashUiState.Content(deletePhotos = photos) }
             },
             onFailure = {
                 setState { TrashUiState.Error("Failed to load trash photos") }
@@ -40,30 +40,12 @@ internal class TrashViewModel @Inject constructor(
         )
     }
 
-    private fun togglePhotoSelection(photoId: Long) {
+    private fun restorePhoto(photoId: Long) = viewModelScope.launch {
+        restoreFromTrashUseCase(listOf(photoId))
         val currentState = uiState.value
         if (currentState is TrashUiState.Content) {
-            val deleteList = currentState.deletePhotos.toMutableList()
-            val keepList = currentState.keepPhotos.toMutableList()
-
-            val photoInDelete = deleteList.find { it.id == photoId }
-            if (photoInDelete != null) {
-                deleteList.remove(photoInDelete)
-                keepList.add(photoInDelete)
-            } else {
-                val photoInKeep = keepList.find { it.id == photoId }
-                if (photoInKeep != null) {
-                    keepList.remove(photoInKeep)
-                    deleteList.add(photoInKeep)
-                }
-            }
-
-            setState {
-                currentState.copy(
-                    deletePhotos = deleteList,
-                    keepPhotos = keepList
-                )
-            }
+            val updatedList = currentState.deletePhotos.filterNot { it.id == photoId }
+            setState { currentState.copy(deletePhotos = updatedList) }
         }
     }
 
@@ -71,13 +53,9 @@ internal class TrashViewModel @Inject constructor(
         val currentState = uiState.value
         if (currentState is TrashUiState.Content) {
             val deleteIds = currentState.deletePhotos.map { it.id }
-            val keepIds = currentState.keepPhotos.map { it.id }
 
             if (deleteIds.isNotEmpty()) {
                 permanentlyDeleteUseCase(deleteIds)
-            }
-            if (keepIds.isNotEmpty()) {
-                restoreFromTrashUseCase(keepIds)
             }
 
             sendEffect { TrashUiEffect.NavigateBack }
