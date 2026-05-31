@@ -80,6 +80,8 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlin.math.log10
+import kotlin.math.pow
 
 @Composable
 internal fun MediaDetailsScreen(
@@ -376,12 +378,12 @@ private fun formatPhotoDate(epochSeconds: Long): String {
 private fun formatPhotoSize(bytes: Long): String {
     if (bytes <= 0) return "0 B"
     val units = arrayOf("B", "KB", "MB", "GB")
-    val digitGroups = (Math.log10(bytes.toDouble()) / Math.log10(1024.0)).toInt()
+    val digitGroups = (log10(bytes.toDouble()) / log10(1024.0)).toInt()
     return try {
         String.format(
             Locale.US,
             "%.1f %s",
-            bytes / Math.pow(1024.0, digitGroups.toDouble()),
+            bytes / 1024.0.pow(digitGroups.toDouble()),
             units[digitGroups]
         )
     } catch (e: Exception) {
