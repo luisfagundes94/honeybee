@@ -4,6 +4,16 @@ Honeybee is a modern Android application designed for photo library management, 
 
 ---
 
+## 📷 Screenshots
+<p float="center">
+  <img src="screenshots/screenshot1.png" width="200" />
+  <img src="screenshots/screenshot2.png" width="200" />
+  <img src="screenshots/screenshot3.png" width="200" />
+  <img src="screenshots/screenshot4.png" width="200" />
+  <img src="screenshots/screenshot5.png" width="200" />
+  <img src="screenshots/screenshot6.png" width="200" />
+</p>
+
 ## 🚀 Tech Stack
 
 The application leverages standard, modern libraries and APIs in the Android ecosystem:
