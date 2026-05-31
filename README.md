@@ -38,14 +38,10 @@ The UI layer operates on a unidirectional state flow powered by three base ViewM
 2. **`StateViewModel<State, Event>`**: Used when events and state changes are required but no side-effects are emitted.
 3. **`EffectViewModel<Effect>`**: Exposes only effects for screens with no complex state or events.
 
-```mermaid
-graph TD
-    User([User Screen]) -->|Dispatch Event| ViewModel[ViewModel]
-    ViewModel -->|Mutate state via setState| State[Ui State]
-    State -->|Flow Collection| User
-    ViewModel -->|Emit Effect via sendEffect| Effect[Ui Effect]
-    Effect -->|CollectUiEffects| User
-```
+**Unidirectional Data Flow:**
+1. **User Action / Event:** Screen dispatches a `UiEvent` by calling `viewModel.dispatchEvent(event)`.
+2. **State Updates:** ViewModel handles the event and updates the immutable `UiState` via `setState { }`. The Screen observes the state flow and recomposes.
+3. **Side Effects:** ViewModel dispatches one-shot side-effects (e.g., navigation, toasts) using `sendEffect { }`. The Screen collects them using `CollectUiEffects(viewModel.uiEffect)`.
 
 ---
 
