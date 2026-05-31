@@ -357,27 +357,23 @@ private fun MediaPager(
 
 
 private fun formatPhotoDate(epochSeconds: Long): String {
-    return try {
+    return runCatching {
         val instant = Instant.ofEpochSecond(epochSeconds)
         val formatter = DateTimeFormatter.ofPattern("MMM d, yyyy • h:mm a", Locale.ENGLISH)
         instant.atZone(ZoneId.systemDefault()).format(formatter)
-    } catch (e: Exception) {
-        ""
-    }
+    }.getOrDefault("")
 }
 
 private fun formatPhotoSize(bytes: Long): String {
     if (bytes <= 0) return "0 B"
     val units = arrayOf("B", "KB", "MB", "GB")
     val digitGroups = (log10(bytes.toDouble()) / log10(1024.0)).toInt()
-    return try {
+    return runCatching {
         String.format(
             Locale.US,
             "%.1f %s",
             bytes / 1024.0.pow(digitGroups.toDouble()),
             units[digitGroups]
         )
-    } catch (e: Exception) {
-        "$bytes B"
-    }
+    }.getOrDefault("$bytes B")
 }
