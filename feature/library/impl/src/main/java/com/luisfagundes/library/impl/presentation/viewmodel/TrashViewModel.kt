@@ -63,8 +63,10 @@ internal class TrashViewModel @Inject constructor(
                 sendEffect { TrashUiEffect.ShowDeleteConfirmation(pendingIntent.intentSender) }
             } else {
                 viewModelScope.launch {
+                    val count = currentState.deletePhotos.size
+                    val size = currentState.deletePhotos.sumOf { it.size }
                     permanentlyDeleteUseCase(deleteIds)
-                    sendEffect { TrashUiEffect.NavigateBack }
+                    sendEffect { TrashUiEffect.NavigateToCongratulations(count, size) }
                 }
             }
         }
@@ -75,9 +77,11 @@ internal class TrashViewModel @Inject constructor(
         if (currentState is TrashUiState.Content) {
             val deleteIds = currentState.deletePhotos.map { it.id }
             if (deleteIds.isNotEmpty()) {
+                val count = currentState.deletePhotos.size
+                val size = currentState.deletePhotos.sumOf { it.size }
                 permanentlyDeleteUseCase(deleteIds)
+                sendEffect { TrashUiEffect.NavigateToCongratulations(count, size) }
             }
-            sendEffect { TrashUiEffect.NavigateBack }
         }
     }
 }

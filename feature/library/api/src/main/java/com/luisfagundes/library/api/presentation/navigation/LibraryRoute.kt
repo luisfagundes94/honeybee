@@ -11,3 +11,6 @@ data class MediaDetailsRoute(val initialPhotoId: Long) : NavKey
 
 @Serializable
 data object TrashRoute : NavKey
+
+@Serializable
+data class CongratulationsRoute(val deletedCount: Int, val deletedSize: Long) : NavKey

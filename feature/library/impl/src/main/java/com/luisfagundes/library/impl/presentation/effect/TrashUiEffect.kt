@@ -6,4 +6,5 @@ import com.luisfagundes.core.common.presentation.arch.effect.UiEffect
 internal sealed interface TrashUiEffect : UiEffect {
     data object NavigateBack : TrashUiEffect
     data class ShowDeleteConfirmation(val intentSender: IntentSender) : TrashUiEffect
+    data class NavigateToCongratulations(val deletedCount: Int, val deletedSize: Long) : TrashUiEffect
 }

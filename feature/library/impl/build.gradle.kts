@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.coil.compose)
+    implementation(libs.lottie.compose)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     // Hilt

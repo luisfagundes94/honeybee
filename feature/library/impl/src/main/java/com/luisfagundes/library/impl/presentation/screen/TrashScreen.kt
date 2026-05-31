@@ -63,7 +63,7 @@ import com.luisfagundes.library.impl.presentation.viewmodel.TrashViewModel
 @Composable
 internal fun TrashScreen(
     onNavigateBack: () -> Unit,
-    onNavigateToLibrary: () -> Unit,
+    onNavigateToCongratulations: (Int, Long) -> Unit,
     viewModel: TrashViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -81,10 +81,13 @@ internal fun TrashScreen(
 
     CollectUiEffects(viewModel.uiEffect) { effect ->
         when (effect) {
-            TrashUiEffect.NavigateBack -> onNavigateToLibrary()
+            TrashUiEffect.NavigateBack -> onNavigateBack()
             is TrashUiEffect.ShowDeleteConfirmation -> {
                 val request = IntentSenderRequest.Builder(effect.intentSender).build()
                 deleteLauncher.launch(request)
+            }
+            is TrashUiEffect.NavigateToCongratulations -> {
+                onNavigateToCongratulations(effect.deletedCount, effect.deletedSize)
             }
         }
     }
