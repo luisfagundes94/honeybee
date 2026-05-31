@@ -26,10 +26,8 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -51,8 +49,8 @@ import com.luisfagundes.designsystem.theme.spacing
 import com.luisfagundes.onboarding.impl.R
 import com.luisfagundes.onboarding.impl.presentation.effect.PermissionUiEffect
 import com.luisfagundes.onboarding.impl.presentation.event.PermissionUiEvent
-import com.luisfagundes.onboarding.impl.presentation.tools.rememberPermissionsHandler
 import com.luisfagundes.onboarding.impl.presentation.screen.components.PermissionsSettingsDialog
+import com.luisfagundes.onboarding.impl.presentation.tools.rememberPermissionsHandler
 import com.luisfagundes.onboarding.impl.presentation.viewmodel.PermissionViewModel
 
 
@@ -63,8 +61,7 @@ internal fun PermissionScreen(
 ) {
     val context = LocalContext.current
     val permissionsDeniedMessage = stringResource(R.string.permissions_denied_message)
-    var showSettingsDialog by remember { mutableStateOf(false) }
-
+    val (showSettingsDialog, setShowSettingsDialog) = remember { mutableStateOf(false) }
     val requestPermissions = rememberPermissionsHandler(
         onPermissionsGranted = {
             viewModel.dispatchEvent(PermissionUiEvent.PermissionsGranted)
@@ -81,7 +78,7 @@ internal fun PermissionScreen(
                 Toast.makeText(context, permissionsDeniedMessage, Toast.LENGTH_LONG).show()
             }
             is PermissionUiEffect.ShowSettingsDialog -> {
-                showSettingsDialog = true
+                setShowSettingsDialog(true)
             }
         }
     }
@@ -93,9 +90,9 @@ internal fun PermissionScreen(
 
     if (showSettingsDialog) {
         PermissionsSettingsDialog(
-            onDismiss = { showSettingsDialog = false },
+            onDismiss = { setShowSettingsDialog(false) },
             onConfirm = {
-                showSettingsDialog = false
+                setShowSettingsDialog(false)
                 val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
                     data = Uri.fromParts("package", context.packageName, null)
                 }
