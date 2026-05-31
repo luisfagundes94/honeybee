@@ -165,7 +165,7 @@ private fun Library(
                         text = "$month $year",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = MaterialTheme.spacing.small)
+                        modifier = Modifier.padding(vertical = MaterialTheme.spacing.small)
                     )
                 }
                 items(photoSection.photos) { photo ->
