@@ -5,3 +5,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data object LibraryRoute : NavKey
+
+@Serializable
+data class MediaDetailsRoute(val initialPhotoId: Long) : NavKey
+
+@Serializable
+data object TrashRoute : NavKey
