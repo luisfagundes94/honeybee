@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="error_loading_photos_message">Error loading photos</string>
+    <string name="items_in_trash">Items in trash</string>
+    <string name="library">Library</string>
 </resources>

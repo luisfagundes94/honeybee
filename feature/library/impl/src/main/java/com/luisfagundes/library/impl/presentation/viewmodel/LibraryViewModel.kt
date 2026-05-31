@@ -22,6 +22,7 @@ internal class LibraryViewModel @Inject constructor(
     override fun dispatchEvent(event: LibraryUiEvent) {
         when (event) {
             is LibraryUiEvent.LoadPhotos -> loadPhotos()
+            is LibraryUiEvent.TrashClick -> Unit
             is LibraryUiEvent.PhotoClick -> navigateToPhotoDetail(event.photoId)
         }
     }
