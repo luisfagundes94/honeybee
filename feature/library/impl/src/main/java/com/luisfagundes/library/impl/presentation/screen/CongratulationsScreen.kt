@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewWrapper
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.airbnb.lottie.compose.LottieClipSpec
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
@@ -52,10 +53,14 @@ internal fun CongratulationsScreen(
     onDoneClick: () -> Unit
 ) {
     val animationResource = LottieCompositionSpec.RawRes(congratulations_animation)
-    val composition by rememberLottieComposition(animationResource)
+    val composition by rememberLottieComposition(
+        spec = animationResource,
+        cacheKey = "congratulations_anim"
+    )
     val progress by animateLottieCompositionAsState(
-        speed = 0.5f,
         composition = composition,
+        speed = 1.2f,
+        clipSpec = LottieClipSpec.Progress(0.1f, 1.0f),
         iterations = 1
     )
     val (sizeValue, sizeUnit) = formatSize(deletedSize)
