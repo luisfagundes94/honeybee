@@ -40,9 +40,11 @@ internal class LibraryRepositoryImpl @Inject constructor(
             groupedMap.map { (month, photosByMonth) ->
                 PhotoSection(
                     yearMonth = month,
-                    photos = photosByMonth.map { photoMapper.mapToDomain(it) }
+                    photos = photosByMonth
+                        .map { photoMapper.mapToDomain(it) }
+                        .sortedBy { it.dateAdded }
                 )
-            }
+            }.sortedByDescending { it.yearMonth }
         }
     }
 
