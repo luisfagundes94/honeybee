@@ -35,6 +35,9 @@ import com.luisfagundes.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.designsystem.components.HoneybeeLoadingTemplate
 import com.luisfagundes.designsystem.components.HoneybeeTopAppBar
 import com.luisfagundes.designsystem.theme.spacing
+import com.luisfagundes.core.common.presentation.navigation.LocalNavBackStack
+import com.luisfagundes.library.api.presentation.navigation.MediaDetailsRoute
+import com.luisfagundes.library.api.presentation.navigation.TrashRoute
 import com.luisfagundes.library.impl.R
 import com.luisfagundes.library.impl.domain.model.PhotoSection
 import com.luisfagundes.library.impl.presentation.effect.LibraryUiEffect
@@ -48,10 +51,12 @@ internal fun LibraryScreen(
     viewModel: LibraryViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val backStack = LocalNavBackStack.current
 
     CollectUiEffects(viewModel.uiEffect) { effect ->
         when (effect) {
-            is LibraryUiEffect.NavigateToPhotoDetail -> Unit
+            is LibraryUiEffect.NavigateToPhotoDetail -> backStack?.add(MediaDetailsRoute(effect.photoId))
+            LibraryUiEffect.NavigateToTrash -> backStack?.add(TrashRoute)
         }
     }
 
@@ -83,7 +88,7 @@ private fun LibraryContent(
 
         is LibraryUiState.Content -> Library(
             photoSectionList = uiState.photoSectionList,
-            itemsInTrash = 10,
+            itemsInTrash = uiState.itemsInTrash,
             onEvent = onEvent,
             modifier = Modifier.fillMaxWidth()
         )
