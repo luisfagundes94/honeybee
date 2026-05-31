@@ -5,7 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,7 +14,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -29,7 +31,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -182,26 +183,18 @@ private fun TrashView(
                 )
             }
         } else {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.large),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(horizontal = MaterialTheme.spacing.default)
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 100.dp),
+                modifier = Modifier.padding(innerPadding),
+                contentPadding = PaddingValues(horizontal = MaterialTheme.spacing.default),
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall),
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall)
             ) {
-                item {
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall),
-                        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        content.deletePhotos.forEach { photo ->
-                            TrashPhotoItem(
-                                photo = photo,
-                                onItemClick = { onEvent(TrashUiEvent.RestorePhoto(photo.id)) }
-                            )
-                        }
-                    }
+                items(content.deletePhotos) { photo ->
+                    TrashPhotoItem(
+                        photo = photo,
+                        onItemClick = { onEvent(TrashUiEvent.RestorePhoto(photo.id)) }
+                    )
                 }
             }
         }
