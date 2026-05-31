@@ -378,6 +378,6 @@ private fun formatPhotoSize(bytes: Long): String {
             units[digitGroups]
         )
     } catch (e: Exception) {
-        "${bytes} B"
+        "$bytes B"
     }
 }
