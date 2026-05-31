@@ -1,10 +1,11 @@
 package com.luisfagundes.onboarding.impl.presentation.screen
 
-import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.net.Uri
+import android.provider.Settings
 import android.widget.Toast
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,6 +26,10 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -47,6 +52,7 @@ import com.luisfagundes.onboarding.impl.R
 import com.luisfagundes.onboarding.impl.presentation.effect.PermissionUiEffect
 import com.luisfagundes.onboarding.impl.presentation.event.PermissionUiEvent
 import com.luisfagundes.onboarding.impl.presentation.tools.rememberPermissionsHandler
+import com.luisfagundes.onboarding.impl.presentation.screen.components.PermissionsSettingsDialog
 import com.luisfagundes.onboarding.impl.presentation.viewmodel.PermissionViewModel
 
 
@@ -57,13 +63,14 @@ internal fun PermissionScreen(
 ) {
     val context = LocalContext.current
     val permissionsDeniedMessage = stringResource(R.string.permissions_denied_message)
+    var showSettingsDialog by remember { mutableStateOf(false) }
 
     val requestPermissions = rememberPermissionsHandler(
         onPermissionsGranted = {
             viewModel.dispatchEvent(PermissionUiEvent.PermissionsGranted)
         },
-        onPermissionsDenied = {
-            viewModel.dispatchEvent(PermissionUiEvent.PermissionsDenied)
+        onPermissionsDenied = { shouldShowRationale ->
+            viewModel.dispatchEvent(PermissionUiEvent.PermissionsDenied(shouldShowRationale))
         }
     )
 
@@ -73,6 +80,9 @@ internal fun PermissionScreen(
             is PermissionUiEffect.ShowDeniedMessage -> {
                 Toast.makeText(context, permissionsDeniedMessage, Toast.LENGTH_LONG).show()
             }
+            is PermissionUiEffect.ShowSettingsDialog -> {
+                showSettingsDialog = true
+            }
         }
     }
 
@@ -80,6 +90,19 @@ internal fun PermissionScreen(
         onAllowAccessClick = requestPermissions,
         modifier = Modifier.fillMaxSize().padding(MaterialTheme.spacing.default)
     )
+
+    if (showSettingsDialog) {
+        PermissionsSettingsDialog(
+            onDismiss = { showSettingsDialog = false },
+            onConfirm = {
+                showSettingsDialog = false
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    data = Uri.fromParts("package", context.packageName, null)
+                }
+                context.startActivity(intent)
+            }
+        )
+    }
 }
 
 @Composable

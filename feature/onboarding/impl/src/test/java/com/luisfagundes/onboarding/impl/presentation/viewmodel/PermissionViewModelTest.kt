@@ -45,12 +45,22 @@ class PermissionViewModelTest {
     }
 
     @Test
-    fun `dispatchEvent PermissionsDenied should send ShowDeniedMessage effect`() = runTest {
+    fun `dispatchEvent PermissionsDenied with shouldShowRationale true should send ShowDeniedMessage effect`() = runTest {
         // When & Then
         viewModel.uiEffect.test {
-            viewModel.dispatchEvent(PermissionUiEvent.PermissionsDenied)
+            viewModel.dispatchEvent(PermissionUiEvent.PermissionsDenied(shouldShowRationale = true))
 
             assertEquals(PermissionUiEffect.ShowDeniedMessage, awaitItem())
+        }
+    }
+
+    @Test
+    fun `dispatchEvent PermissionsDenied with shouldShowRationale false should send ShowSettingsDialog effect`() = runTest {
+        // When & Then
+        viewModel.uiEffect.test {
+            viewModel.dispatchEvent(PermissionUiEvent.PermissionsDenied(shouldShowRationale = false))
+
+            assertEquals(PermissionUiEffect.ShowSettingsDialog, awaitItem())
         }
     }
 }

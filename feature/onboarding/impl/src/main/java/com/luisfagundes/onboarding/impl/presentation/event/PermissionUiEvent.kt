@@ -4,5 +4,5 @@ import com.luisfagundes.core.common.presentation.arch.event.UiEvent
 
 internal sealed interface PermissionUiEvent : UiEvent {
     data object PermissionsGranted : PermissionUiEvent
-    data object PermissionsDenied : PermissionUiEvent
+    data class PermissionsDenied(val shouldShowRationale: Boolean) : PermissionUiEvent
 }

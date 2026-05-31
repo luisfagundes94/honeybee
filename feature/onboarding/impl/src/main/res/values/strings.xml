@@ -12,4 +12,8 @@
     <string name="privacy_assurance">Your media stays secure, stored only on your device</string>
     <string name="permission_screen_title">Allow permissions to use Honeybee</string>
     <string name="permissions_denied_message">We need these permissions for the app to function</string>
+    <string name="permissions_required_title">Permissions Required</string>
+    <string name="permissions_required_description">You have denied the required permissions. Please enable them in settings to continue.</string>
+    <string name="go_to_settings">Go to settings</string>
+    <string name="cancel">Cancel</string>
 </resources>

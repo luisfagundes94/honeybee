@@ -13,16 +13,23 @@ import javax.inject.Inject
 internal class PermissionViewModel @Inject constructor(
     private val completeOnboardingUseCase: CompleteOnboardingUseCase
 ) : EffectViewModel<PermissionUiEffect, PermissionUiEvent>() {
-
     override fun dispatchEvent(event: PermissionUiEvent) {
         when (event) {
             is PermissionUiEvent.PermissionsGranted -> completeOnboarding()
-            is PermissionUiEvent.PermissionsDenied -> sendEffect { PermissionUiEffect.ShowDeniedMessage }
+            is PermissionUiEvent.PermissionsDenied -> handlePermissionsDenied(event)
         }
     }
 
     private fun completeOnboarding() = viewModelScope.launch {
         completeOnboardingUseCase()
         sendEffect { PermissionUiEffect.NavigateToLibrary }
+    }
+
+    private fun handlePermissionsDenied(event: PermissionUiEvent.PermissionsDenied) {
+        if (event.shouldShowRationale) {
+            sendEffect { PermissionUiEffect.ShowDeniedMessage }
+        } else {
+            sendEffect { PermissionUiEffect.ShowSettingsDialog }
+        }
     }
 }

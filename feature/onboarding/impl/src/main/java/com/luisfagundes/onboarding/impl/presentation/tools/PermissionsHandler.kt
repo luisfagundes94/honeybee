@@ -1,6 +1,9 @@
 package com.luisfagundes.onboarding.impl.presentation.tools
 
 import android.Manifest
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -8,12 +11,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
 @Composable
 internal fun rememberPermissionsHandler(
     onPermissionsGranted: () -> Unit,
-    onPermissionsDenied: () -> Unit
+    onPermissionsDenied: (shouldShowRationale: Boolean) -> Unit
 ): () -> Unit {
     val context = LocalContext.current
 
@@ -35,7 +39,14 @@ internal fun rememberPermissionsHandler(
         if (allGranted) {
             onPermissionsGranted()
         } else {
-            onPermissionsDenied()
+            val deniedPermissions = results.filter { !it.value }.keys
+            val activity = context.findActivity()
+            val shouldShowRationale = activity?.let { act ->
+                deniedPermissions.any { permission ->
+                    ActivityCompat.shouldShowRequestPermissionRationale(act, permission)
+                }
+            } ?: false
+            onPermissionsDenied(shouldShowRationale)
         }
     }
 
@@ -49,4 +60,13 @@ internal fun rememberPermissionsHandler(
             permissionLauncher.launch(permissions)
         }
     }
+}
+
+private fun Context.findActivity(): Activity? {
+    var context = this
+    while (context is ContextWrapper) {
+        if (context is Activity) return context
+        context = context.baseContext
+    }
+    return null
 }
