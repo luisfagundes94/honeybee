@@ -18,18 +18,20 @@ Honeybee is a modern Android application designed for photo library management, 
 
 The application leverages standard, modern libraries and APIs in the Android ecosystem:
 
-| Category | Technology / Library |
-| :--- | :--- |
-| **UI Framework** | Jetpack Compose (Material 3 Expressive APIs) |
-| **Image Loading** | Coil (Compose) |
-| **Animation** | Lottie (Compose) |
-| **Dependency Injection** | Hilt |
-| **Asynchronous Programming** | Kotlin Coroutines & Kotlin Flow |
-| **Serialization** | Kotlinx Serialization |
-| **Database** | Room Database |
-| **Network** | Retrofit (with OkHttp interceptors) |
-| **Navigation** | `androidx.navigation3` (Jetpack Navigation 3) |
-| **Build Tool** | Gradle (Kotlin DSL) with Version Catalogs |
+| Category                     | Technology / Library                          |
+|:-----------------------------|:----------------------------------------------|
+| **UI Framework**             | Jetpack Compose (Material 3 Expressive APIs)  |
+| **Image Loading**            | Coil (Compose)                                |
+| **Animation**                | Lottie (Compose)                              |
+| **Dependency Injection**     | Hilt                                          |
+| **Asynchronous Programming** | Kotlin Coroutines & Kotlin Flow               |
+| **Serialization**            | Kotlinx Serialization                         |
+| **Database**                 | Room Database                                 |
+| **Network**                  | Retrofit (with OkHttp interceptors)           |
+| **Navigation**               | `androidx.navigation3` (Jetpack Navigation 3) |
+| **Build Tool**               | Gradle (Kotlin DSL) with Version Catalogs     |
+
+**Min SDK:** 26 | **Target SDK:** 36
 
 ---
 
