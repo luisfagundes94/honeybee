@@ -30,7 +30,6 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -38,7 +37,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -60,6 +58,7 @@ import coil.compose.AsyncImage
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.designsystem.components.HoneybeeLoadingTemplate
+import com.luisfagundes.designsystem.components.HoneybeeTopAppBar
 import com.luisfagundes.designsystem.theme.spacing
 import com.luisfagundes.library.impl.presentation.effect.MediaDetailsUiEffect
 import com.luisfagundes.library.impl.presentation.event.MediaDetailsUiEvent
@@ -154,7 +153,7 @@ private fun MediaPager(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            CenterAlignedTopAppBar(
+            HoneybeeTopAppBar(
                 title = {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,

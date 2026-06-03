@@ -23,7 +23,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -53,6 +52,7 @@ import coil.compose.AsyncImage
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.designsystem.components.HoneybeeLoadingTemplate
+import com.luisfagundes.designsystem.components.HoneybeeTopAppBar
 import com.luisfagundes.designsystem.theme.spacing
 import com.luisfagundes.library.impl.domain.model.Photo
 import com.luisfagundes.library.impl.presentation.effect.TrashUiEffect
@@ -142,7 +142,7 @@ private fun TrashView(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            CenterAlignedTopAppBar(
+            HoneybeeTopAppBar(
                 title = {
                     Text(
                         text = "Trash",
