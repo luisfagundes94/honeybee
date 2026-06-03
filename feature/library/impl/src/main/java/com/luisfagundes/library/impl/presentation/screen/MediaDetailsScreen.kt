@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -20,14 +19,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
+import com.luisfagundes.library.impl.presentation.components.TrashBadgedBox
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.RestoreFromTrash
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -38,7 +34,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -51,6 +46,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -61,6 +57,7 @@ import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.designsystem.components.HoneybeeLoadingTemplate
 import com.luisfagundes.designsystem.theme.spacing
+import com.luisfagundes.library.impl.R
 import com.luisfagundes.library.impl.presentation.effect.MediaDetailsUiEffect
 import com.luisfagundes.library.impl.presentation.event.MediaDetailsUiEvent
 import com.luisfagundes.library.impl.presentation.state.MediaDetailsUiState
@@ -183,28 +180,12 @@ private fun MediaPager(
                     }
                 },
                 actions = {
-                    val trashCount = content.trashCount
-                    BadgedBox(
-                        badge = {
-                            if (trashCount > 0) {
-                                Badge(
-                                    modifier = Modifier.offset(x = (-12).dp, y = 12.dp)
-                                ) {
-                                    val displayCount = if (trashCount > 99) "99+" else trashCount.toString()
-                                    Text(text = displayCount)
-                                }
-                            }
-                        },
+                    TrashBadgedBox(
+                        itemsInTrash = content.trashCount,
+                        onClick = { onEvent(MediaDetailsUiEvent.TrashClick) },
+                        contentDescription = stringResource(R.string.items_in_trash),
                         modifier = Modifier.padding(end = MaterialTheme.spacing.default)
-                    ) {
-                        IconButton(onClick = { onEvent(MediaDetailsUiEvent.TrashClick) }) {
-                            Icon(
-                                imageVector = if (trashCount > 0) Icons.Default.Delete else Icons.Default.RestoreFromTrash,
-                                contentDescription = "Trash",
-                                tint = Color.White
-                            )
-                        }
-                    }
+                    )
                 }
             )
         },
