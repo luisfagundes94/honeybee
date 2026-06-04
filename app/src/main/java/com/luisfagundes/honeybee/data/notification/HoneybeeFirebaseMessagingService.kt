@@ -91,7 +91,7 @@ class HoneybeeFirebaseMessagingService : FirebaseMessagingService() {
         )
 
         val builder = NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(com.luisfagundes.honeybee.R.drawable.ic_launcher_foreground)
+            .setSmallIcon(com.luisfagundes.honeybee.R.drawable.honeybee_really_low_res)
             .setContentTitle(notification.title)
             .setContentText(notification.body)
             .setAutoCancel(true)
@@ -104,7 +104,7 @@ class HoneybeeFirebaseMessagingService : FirebaseMessagingService() {
                 }
             )
 
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(notification.id.hashCode(), builder.build())
     }
 
