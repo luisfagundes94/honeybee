@@ -55,12 +55,9 @@ internal class TrashViewModel @Inject constructor(
         }
     }
 
-    private fun confirmDeletion() {
-        val currentState = uiState.value
-        if (currentState is TrashUiState.Content) {
-            val deleteIds = currentState.deletePhotos.map { it.id }
-            if (deleteIds.isEmpty()) return
-
+    private fun confirmDeletion() = runIfStateIs<TrashUiState.Content> { currentState ->
+        val deleteIds = currentState.deletePhotos.map { it.id }
+        if (deleteIds.isNotEmpty()) {
             val pendingIntent = createDeleteRequestUseCase(deleteIds)
             if (pendingIntent != null) {
                 sendEffect { TrashUiEffect.ShowDeleteConfirmation(pendingIntent.intentSender) }
@@ -75,11 +72,10 @@ internal class TrashViewModel @Inject constructor(
         }
     }
 
-    private fun onDeleteApproved() = viewModelScope.launch {
-        val currentState = uiState.value
-        if (currentState is TrashUiState.Content) {
-            val deleteIds = currentState.deletePhotos.map { it.id }
-            if (deleteIds.isNotEmpty()) {
+    private fun onDeleteApproved() = runIfStateIs<TrashUiState.Content> { currentState ->
+        val deleteIds = currentState.deletePhotos.map { it.id }
+        if (deleteIds.isNotEmpty()) {
+            viewModelScope.launch {
                 val count = currentState.deletePhotos.size
                 val size = currentState.deletePhotos.sumOf { it.size }
                 permanentlyDeleteUseCase(deleteIds)

@@ -53,8 +53,7 @@ internal class MediaDetailsViewModel @Inject constructor(
 
     private fun moveToTrash(photoId: Long) = viewModelScope.launch {
         moveToTrashUseCase(photoId)
-        val currentState = uiState.value
-        if (currentState is MediaDetailsUiState.Content) {
+        runIfStateIs<MediaDetailsUiState.Content> { currentState ->
             val updatedPhotos = currentState.photos.filterNot { it.id == photoId }
             if (updatedPhotos.isEmpty()) {
                 sendEffect { MediaDetailsUiEffect.NavigateBack }
@@ -70,16 +69,13 @@ internal class MediaDetailsViewModel @Inject constructor(
         }
     }
 
-    private fun toggleFavorite(photoId: Long) {
-        val currentState = uiState.value
-        if (currentState is MediaDetailsUiState.Content) {
-            val favorites = currentState.favoritePhotoIds.toMutableSet()
-            if (favorites.contains(photoId)) {
-                favorites.remove(photoId)
-            } else {
-                favorites.add(photoId)
-            }
-            setState { currentState.copy(favoritePhotoIds = favorites) }
+    private fun toggleFavorite(photoId: Long) = runIfStateIs<MediaDetailsUiState.Content> { currentState ->
+        val favorites = currentState.favoritePhotoIds.toMutableSet()
+        if (favorites.contains(photoId)) {
+            favorites.remove(photoId)
+        } else {
+            favorites.add(photoId)
         }
+        setState { currentState.copy(favoritePhotoIds = favorites) }
     }
 }
