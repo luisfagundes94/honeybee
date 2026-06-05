@@ -154,13 +154,18 @@ private fun MediaPager(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = "All Photos",
+                            text = stringResource(R.string.all_photos),
                             color = Color.White,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "${currentPhotoIndex + 1}/$totalCount • $percent%",
+                            text = stringResource(
+                                R.string.media_details_progress_format,
+                                currentPhotoIndex + 1,
+                                totalCount,
+                                percent
+                            ),
                             color = Color.Gray,
                             style = MaterialTheme.typography.bodySmall
                         )
@@ -170,7 +175,7 @@ private fun MediaPager(
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Close",
+                            contentDescription = stringResource(R.string.close),
                             tint = Color.White
                         )
                     }
@@ -195,7 +200,11 @@ private fun MediaPager(
                 val formattedDate = formatPhotoDate(currentPhoto.dateAdded)
                 val formattedSize = formatPhotoSize(currentPhoto.size)
                 Text(
-                    text = "$formattedDate • $formattedSize",
+                    text = stringResource(
+                        R.string.media_details_info_format,
+                        formattedDate,
+                        formattedSize
+                    ),
                     color = Color.White,
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center
@@ -280,18 +289,18 @@ private fun MediaPager(
                             onClick = {
                                 Toast.makeText(
                                     context,
-                                    "File size: ${formatPhotoSize(photo.size)}\nDate added: ${
-                                        formatPhotoDate(
-                                            photo.dateAdded
-                                        )
-                                    }",
+                                    context.getString(
+                                        R.string.media_details_toast_info,
+                                        formatPhotoSize(photo.size),
+                                        formatPhotoDate(photo.dateAdded)
+                                    ),
                                     Toast.LENGTH_LONG
                                 ).show()
                             }
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Info,
-                                contentDescription = "Info",
+                                contentDescription = stringResource(R.string.info),
                                 tint = Color.White
                             )
                         }
@@ -305,14 +314,14 @@ private fun MediaPager(
                                 context.startActivity(
                                     Intent.createChooser(
                                         shareIntent,
-                                        "Share photo"
+                                        context.getString(R.string.share_photo)
                                     )
                                 )
                             }
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Share,
-                                contentDescription = "Share",
+                                contentDescription = stringResource(R.string.share),
                                 tint = Color.White
                             )
                         }
@@ -321,7 +330,7 @@ private fun MediaPager(
                         ) {
                             Icon(
                                 imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                contentDescription = "Favorite",
+                                contentDescription = stringResource(R.string.favorite),
                                 tint = if (isFavorite) Color.Red else Color.White
                             )
                         }

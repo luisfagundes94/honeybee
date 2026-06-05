@@ -8,4 +8,13 @@
     <string name="saved">saved</string>
     <string name="failed_to_load_photo_details">Failed to load photo details</string>
     <string name="failed_to_load_trash_photos">Failed to load trash photos</string>
+    <string name="all_photos">All Photos</string>
+    <string name="media_details_progress_format">%1$d/%2$d • %3$d%%</string>
+    <string name="close">Close</string>
+    <string name="media_details_info_format">%1$s • %2$s</string>
+    <string name="media_details_toast_info">File size: %1$s\nDate added: %2$s</string>
+    <string name="info">Info</string>
+    <string name="share_photo">Share photo</string>
+    <string name="share">Share</string>
+    <string name="favorite">Favorite</string>
 </resources>
