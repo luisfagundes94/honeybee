@@ -49,10 +49,9 @@ internal class TrashViewModel @Inject constructor(
 
     private fun restorePhoto(photoId: Long) = viewModelScope.launch {
         restoreFromTrashUseCase(listOf(photoId))
-        val currentState = uiState.value
-        if (currentState is TrashUiState.Content) {
+        setStateOf<TrashUiState.Content> { currentState ->
             val updatedList = currentState.deletePhotos.filterNot { it.id == photoId }
-            setState { currentState.copy(deletePhotos = updatedList) }
+            currentState.copy(deletePhotos = updatedList)
         }
     }
 
