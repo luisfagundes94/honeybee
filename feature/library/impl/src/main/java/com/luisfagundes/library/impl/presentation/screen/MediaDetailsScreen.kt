@@ -66,6 +66,11 @@ import com.luisfagundes.library.impl.presentation.viewmodel.MediaDetailsViewMode
 import com.luisfagundes.library.impl.presentation.tools.formatPhotoDate
 import com.luisfagundes.library.impl.presentation.tools.formatPhotoSize
 import kotlinx.coroutines.launch
+import android.content.res.Configuration
+import android.net.Uri
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewWrapper
+import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
 
 @Composable
 internal fun MediaDetailsScreen(
@@ -403,4 +408,25 @@ private fun MediaPagerItemActionsColumn(
             )
         }
     }
+}
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@PreviewWrapper(wrapper = HoneybeeThemeWrapper::class)
+@Composable
+private fun MediaPagerPreview() {
+    MediaPager(
+        content = MediaDetailsUiState.Content(
+            photos = listOf(
+                Photo(id = 1L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L),
+                Photo(id = 2L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L),
+                Photo(id = 3L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L)
+            ),
+            initialIndex = 0,
+            trashCount = 2,
+            favoritePhotoIds = setOf()
+        ),
+        onEvent = {},
+        onBackClick = {}
+    )
 }
