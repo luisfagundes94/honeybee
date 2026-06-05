@@ -175,28 +175,27 @@ private fun Library(
 @PreviewWrapper(wrapper = HoneybeeThemeWrapper::class)
 @Composable
 private fun LibraryContentPreview() {
-    LibraryContent(
-        uiState = LibraryUiState.Content(
-            photoSectionList = listOf(
-                PhotoSection(
-                    yearMonth = YearMonth.of(2026, 6),
-                    photos = listOf(
-                        Photo(id = 1L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L),
-                        Photo(id = 2L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L),
-                        Photo(id = 3L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L),
-                    )
-                ),
-                PhotoSection(
-                    yearMonth = YearMonth.of(2026, 5),
-                    photos = listOf(
-                        Photo(id = 4L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L),
-                        Photo(id = 5L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L),
-                    )
+    Library(
+        photoSectionList = listOf(
+            PhotoSection(
+                yearMonth = YearMonth.of(2026, 6),
+                photos = listOf(
+                    Photo(id = 1L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L),
+                    Photo(id = 2L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L),
+                    Photo(id = 3L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L),
                 )
             ),
-            itemsInTrash = 3
+            PhotoSection(
+                yearMonth = YearMonth.of(2026, 5),
+                photos = listOf(
+                    Photo(id = 4L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L),
+                    Photo(id = 5L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L),
+                )
+            )
         ),
-        onEvent = {}
+        itemsInTrash = 3,
+        onEvent = {},
+        modifier = Modifier.fillMaxWidth()
     )
 }
-
+
