@@ -38,12 +38,19 @@ import com.luisfagundes.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.designsystem.components.HoneybeeLoadingTemplate
 import com.luisfagundes.designsystem.theme.spacing
 import com.luisfagundes.library.impl.R
+import android.content.res.Configuration
+import android.net.Uri
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewWrapper
+import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
+import com.luisfagundes.library.impl.domain.model.Photo
 import com.luisfagundes.library.impl.domain.model.PhotoSection
 import com.luisfagundes.library.impl.presentation.effect.LibraryUiEffect
 import com.luisfagundes.library.impl.presentation.event.LibraryUiEvent
 import com.luisfagundes.library.impl.presentation.state.LibraryUiState
 import com.luisfagundes.library.impl.presentation.tools.getFormattedMonthName
 import com.luisfagundes.library.impl.presentation.viewmodel.LibraryViewModel
+import java.time.YearMonth
 
 @Composable
 internal fun LibraryScreen(
@@ -161,3 +168,35 @@ private fun Library(
         }
     }
 }
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@PreviewWrapper(wrapper = HoneybeeThemeWrapper::class)
+@Composable
+private fun LibraryContentPreview() {
+    LibraryContent(
+        uiState = LibraryUiState.Content(
+            photoSectionList = listOf(
+                PhotoSection(
+                    yearMonth = YearMonth.of(2026, 6),
+                    photos = listOf(
+                        Photo(id = 1L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L),
+                        Photo(id = 2L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L),
+                        Photo(id = 3L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L),
+                    )
+                ),
+                PhotoSection(
+                    yearMonth = YearMonth.of(2026, 5),
+                    photos = listOf(
+                        Photo(id = 4L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L),
+                        Photo(id = 5L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L),
+                    )
+                )
+            ),
+            itemsInTrash = 3
+        ),
+        onEvent = {}
+    )
+}
+
