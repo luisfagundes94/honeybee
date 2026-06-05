@@ -39,6 +39,15 @@ abstract class ViewModel<State : UiState, Event : UiEvent, Effect : UiEffect>(
         }
     }
 
+    protected inline fun <reified UiStateType : State> runIfStateIs(
+        block: (UiStateType) -> Unit
+    ) {
+        val currentState = getCurrentState()
+        if (currentState is UiStateType) {
+            block(currentState)
+        }
+    }
+
     protected fun sendEffect(effect: () -> Effect) = viewModelScope.launch {
         runCatching {
             _uiEffect.send(effect())

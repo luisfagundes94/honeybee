@@ -28,4 +28,13 @@ abstract class StateViewModel<State: UiState, Event: UiEvent>(
             if (current is UiStateType) reducer(current) else current
         }
     }
+
+    protected inline fun <reified UiStateType : State> runIfStateIs(
+        block: (UiStateType) -> Unit
+    ) {
+        val currentState = getCurrentState()
+        if (currentState is UiStateType) {
+            block(currentState)
+        }
+    }
 }
