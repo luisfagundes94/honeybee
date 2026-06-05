@@ -47,7 +47,10 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.luisfagundes.library.impl.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
@@ -68,6 +71,7 @@ internal fun TrashScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val deletionNotAllowedMessage = stringResource(R.string.deletion_not_allowed)
 
     val deleteLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult()
@@ -75,7 +79,7 @@ internal fun TrashScreen(
         if (result.resultCode == Activity.RESULT_OK) {
             viewModel.dispatchEvent(TrashUiEvent.ApproveDeletion)
         } else {
-            Toast.makeText(context, "You didn't allow photo deletion", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, deletionNotAllowedMessage, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -145,7 +149,7 @@ private fun Trash(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Trash",
+                        text = stringResource(R.string.trash),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
@@ -154,7 +158,7 @@ private fun Trash(
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Close"
+                            contentDescription = stringResource(R.string.close)
                         )
                     }
                 }
@@ -167,7 +171,6 @@ private fun Trash(
                         .fillMaxWidth()
                         .padding(MaterialTheme.spacing.default)
                 ) {
-                    val fileText = if (deleteCount == 1) "File" else "Files"
                     Button(
                         onClick = { onEvent(TrashUiEvent.ConfirmDeletion) },
                         shape = RoundedCornerShape(24.dp),
@@ -182,7 +185,11 @@ private fun Trash(
                         )
                         Spacer(modifier = Modifier.width(MaterialTheme.spacing.small))
                         Text(
-                            text = "Delete ($deleteCount $fileText)",
+                            text = pluralStringResource(
+                                id = R.plurals.delete_photos_format,
+                                count = deleteCount,
+                                deleteCount
+                            ),
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.titleMedium
                         )
@@ -199,7 +206,7 @@ private fun Trash(
                     .padding(innerPadding)
             ) {
                 Text(
-                    text = "Trash is empty",
+                    text = stringResource(R.string.trash_is_empty),
                     color = Color.Gray,
                     style = MaterialTheme.typography.bodyLarge
                 )

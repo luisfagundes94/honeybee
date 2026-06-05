@@ -17,4 +17,11 @@
     <string name="share_photo">Share photo</string>
     <string name="share">Share</string>
     <string name="favorite">Favorite</string>
+    <string name="trash">Trash</string>
+    <string name="deletion_not_allowed">You didn\'t allow photo deletion</string>
+    <string name="trash_is_empty">Trash is empty</string>
+    <plurals name="delete_photos_format">
+        <item quantity="one">Delete (%1$d File)</item>
+        <item quantity="other">Delete (%1$d Files)</item>
+    </plurals>
 </resources>
