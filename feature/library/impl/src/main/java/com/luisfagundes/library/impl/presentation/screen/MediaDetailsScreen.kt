@@ -61,6 +61,7 @@ import com.luisfagundes.library.impl.R
 import com.luisfagundes.library.impl.presentation.effect.MediaDetailsUiEffect
 import com.luisfagundes.library.impl.presentation.event.MediaDetailsUiEvent
 import com.luisfagundes.library.impl.presentation.state.MediaDetailsUiState
+import com.luisfagundes.library.impl.domain.model.Photo
 import com.luisfagundes.library.impl.presentation.viewmodel.MediaDetailsViewModel
 import com.luisfagundes.library.impl.presentation.tools.formatPhotoDate
 import com.luisfagundes.library.impl.presentation.tools.formatPhotoSize
@@ -120,7 +121,7 @@ private fun MediaDetailsContent(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MediaPager(
     content: MediaDetailsUiState.Content,
@@ -132,14 +133,12 @@ private fun MediaPager(
     val initialPage = content.initialIndex.coerceIn(0, (totalCount - 1).coerceAtLeast(0))
 
     val pagerState = rememberPagerState(initialPage = initialPage) { totalCount }
-    val coroutineScope = rememberCoroutineScope()
-    val context = LocalContext.current
 
     // Calculate current visible photo based on swiping direction logic:
     // Swiping right-to-left shows next photo, left-to-right shows previous photo.
     val currentPage = pagerState.currentPage
     val currentPhotoIndex = currentPage.coerceIn(0, (totalCount - 1).coerceAtLeast(0))
-    val currentPhoto = photos[currentPhotoIndex]
+    val currentPhoto = photos.getOrNull(currentPhotoIndex)
 
     val percent =
         if (totalCount > 0) (content.trashCount * 100) / (totalCount + content.trashCount) else 0
@@ -147,68 +146,18 @@ private fun MediaPager(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = stringResource(R.string.all_photos),
-                            color = Color.White,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = stringResource(
-                                R.string.media_details_progress_format,
-                                currentPhotoIndex + 1,
-                                totalCount,
-                                percent
-                            ),
-                            color = Color.Gray,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = stringResource(R.string.close),
-                            tint = Color.White
-                        )
-                    }
-                },
-                actions = {
-                    TrashBadgedBox(
-                        itemsInTrash = content.trashCount,
-                        onClick = { onEvent(MediaDetailsUiEvent.TrashClick) },
-                        contentDescription = stringResource(R.string.items_in_trash),
-                        modifier = Modifier.padding(end = MaterialTheme.spacing.default)
-                    )
-                }
+            MediaDetailsTopAppBar(
+                currentPhotoIndex = currentPhotoIndex,
+                totalCount = totalCount,
+                percent = percent,
+                trashCount = content.trashCount,
+                onBackClick = onBackClick,
+                onEvent = onEvent
             )
         },
         bottomBar = {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = MaterialTheme.spacing.large)
-            ) {
-                val formattedDate = formatPhotoDate(currentPhoto.dateAdded)
-                val formattedSize = formatPhotoSize(currentPhoto.size)
-                Text(
-                    text = stringResource(
-                        R.string.media_details_info_format,
-                        formattedDate,
-                        formattedSize
-                    ),
-                    color = Color.White,
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center
-                )
+            currentPhoto?.let { photo ->
+                MediaDetailsBottomBar(photo = photo)
             }
         }
     ) { innerPadding ->
@@ -219,126 +168,239 @@ private fun MediaPager(
                 .padding(innerPadding)
         ) { page ->
             val pagePhotoIndex = page.coerceIn(0, (totalCount - 1).coerceAtLeast(0))
-            val photo = photos[pagePhotoIndex]
-
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                val swipeOffset = remember(photo.id) { Animatable(0f) }
-                val swipeLimit = -350f
-
-                Box(
-                    modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default)
-                ) {
-                    Card(
-                        shape = RoundedCornerShape(24.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .graphicsLayer {
-                                translationY = swipeOffset.value
-                                alpha = (1f + (swipeOffset.value / 1200f)).coerceIn(0.2f, 1f)
-                                shape = RoundedCornerShape(24.dp)
-                                clip = true
-                            }
-                            .pointerInput(photo.id) {
-                                detectVerticalDragGestures(
-                                    onDragEnd = {
-                                        if (swipeOffset.value < swipeLimit) {
-                                            coroutineScope.launch {
-                                                swipeOffset.animateTo(-1500f, tween(300))
-                                                onEvent(MediaDetailsUiEvent.SwipeUp(photo.id))
-                                            }
-                                        } else {
-                                            coroutineScope.launch {
-                                                swipeOffset.animateTo(0f, spring())
-                                            }
-                                        }
-                                    },
-                                    onVerticalDrag = { change, dragAmount ->
-                                        if (dragAmount < 0 || swipeOffset.value < 0) {
-                                            change.consume()
-                                            coroutineScope.launch {
-                                                swipeOffset.snapTo(swipeOffset.value + dragAmount)
-                                            }
-                                        }
-                                    }
-                                )
-                            }
-                    ) {
-                        AsyncImage(
-                            model = photo.uri,
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(MaterialTheme.spacing.default)
-                            .background(Color.Black.copy(alpha = 0.3f), CircleShape)
-                            .padding(MaterialTheme.spacing.verySmall)
-                    ) {
-                        val isFavorite = content.favoritePhotoIds.contains(photo.id)
-                        val toastMessage = stringResource(
-                            R.string.media_details_toast_info,
-                            formatPhotoSize(photo.size),
-                            formatPhotoDate(photo.dateAdded)
-                        )
-                        val sharePhotoTitle = stringResource(R.string.share_photo)
-
-                        IconButton(
-                            onClick = {
-                                Toast.makeText(
-                                    context,
-                                    toastMessage,
-                                    Toast.LENGTH_LONG
-                                ).show()
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Info,
-                                contentDescription = stringResource(R.string.info),
-                                tint = Color.White
-                            )
-                        }
-                        IconButton(
-                            onClick = {
-                                val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                                    type = "image/*"
-                                    putExtra(Intent.EXTRA_STREAM, photo.uri)
-                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                }
-                                context.startActivity(
-                                    Intent.createChooser(
-                                        shareIntent,
-                                        sharePhotoTitle
-                                    )
-                                )
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Share,
-                                contentDescription = stringResource(R.string.share),
-                                tint = Color.White
-                            )
-                        }
-                        IconButton(
-                            onClick = { onEvent(MediaDetailsUiEvent.ToggleFavorite(photo.id)) }
-                        ) {
-                            Icon(
-                                imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                contentDescription = stringResource(R.string.favorite),
-                                tint = if (isFavorite) Color.Red else Color.White
-                            )
-                        }
-                    }
-                }
+            photos.getOrNull(pagePhotoIndex)?.let { photo ->
+                val isFavorite = content.favoritePhotoIds.contains(photo.id)
+                MediaPagerItem(
+                    photo = photo,
+                    isFavorite = isFavorite,
+                    onEvent = onEvent
+                )
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MediaDetailsTopAppBar(
+    currentPhotoIndex: Int,
+    totalCount: Int,
+    percent: Int,
+    trashCount: Int,
+    onBackClick: () -> Unit,
+    onEvent: (MediaDetailsUiEvent) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    CenterAlignedTopAppBar(
+        modifier = modifier,
+        title = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(R.string.all_photos),
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = stringResource(
+                        R.string.media_details_progress_format,
+                        currentPhotoIndex + 1,
+                        totalCount,
+                        percent
+                    ),
+                    color = Color.Gray,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        },
+        navigationIcon = {
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = stringResource(R.string.close),
+                    tint = Color.White
+                )
+            }
+        },
+        actions = {
+            TrashBadgedBox(
+                itemsInTrash = trashCount,
+                onClick = { onEvent(MediaDetailsUiEvent.TrashClick) },
+                contentDescription = stringResource(R.string.items_in_trash),
+                modifier = Modifier.padding(end = MaterialTheme.spacing.default)
+            )
+        }
+    )
+}
+
+@Composable
+private fun MediaDetailsBottomBar(
+    photo: Photo,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = MaterialTheme.spacing.large)
+    ) {
+        val formattedDate = formatPhotoDate(photo.dateAdded)
+        val formattedSize = formatPhotoSize(photo.size)
+        Text(
+            text = stringResource(
+                R.string.media_details_info_format,
+                formattedDate,
+                formattedSize
+            ),
+            color = Color.White,
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun MediaPagerItem(
+    photo: Photo,
+    isFavorite: Boolean,
+    onEvent: (MediaDetailsUiEvent) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val coroutineScope = rememberCoroutineScope()
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier.fillMaxSize()
+    ) {
+        val swipeOffset = remember(photo.id) { Animatable(0f) }
+        val swipeLimit = -350f
+
+        Box(
+            modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default)
+        ) {
+            Card(
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        translationY = swipeOffset.value
+                        alpha = (1f + (swipeOffset.value / 1200f)).coerceIn(0.2f, 1f)
+                        shape = RoundedCornerShape(24.dp)
+                        clip = true
+                    }
+                    .pointerInput(photo.id) {
+                        detectVerticalDragGestures(
+                            onDragEnd = {
+                                if (swipeOffset.value < swipeLimit) {
+                                    coroutineScope.launch {
+                                        swipeOffset.animateTo(-1500f, tween(300))
+                                        onEvent(MediaDetailsUiEvent.SwipeUp(photo.id))
+                                    }
+                                } else {
+                                    coroutineScope.launch {
+                                        swipeOffset.animateTo(0f, spring())
+                                    }
+                                }
+                            },
+                            onVerticalDrag = { change, dragAmount ->
+                                if (dragAmount < 0 || swipeOffset.value < 0) {
+                                    change.consume()
+                                    coroutineScope.launch {
+                                        swipeOffset.snapTo(swipeOffset.value + dragAmount)
+                                    }
+                                }
+                            }
+                        )
+                    }
+            ) {
+                AsyncImage(
+                    model = photo.uri,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            MediaPagerItemActionsColumn(
+                photo = photo,
+                isFavorite = isFavorite,
+                onEvent = onEvent,
+                modifier = Modifier.align(Alignment.BottomEnd)
+            )
+        }
+    }
+}
+
+@Composable
+private fun MediaPagerItemActionsColumn(
+    photo: Photo,
+    isFavorite: Boolean,
+    onEvent: (MediaDetailsUiEvent) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .padding(MaterialTheme.spacing.default)
+            .background(Color.Black.copy(alpha = 0.3f), CircleShape)
+            .padding(MaterialTheme.spacing.verySmall)
+    ) {
+        val toastMessage = stringResource(
+            R.string.media_details_toast_info,
+            formatPhotoSize(photo.size),
+            formatPhotoDate(photo.dateAdded)
+        )
+        val sharePhotoTitle = stringResource(R.string.share_photo)
+
+        IconButton(
+            onClick = {
+                Toast.makeText(
+                    context,
+                    toastMessage,
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        ) {
+            Icon(
+                imageVector = Icons.Default.Info,
+                contentDescription = stringResource(R.string.info),
+                tint = Color.White
+            )
+        }
+        IconButton(
+            onClick = {
+                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                    type = "image/*"
+                    putExtra(Intent.EXTRA_STREAM, photo.uri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                context.startActivity(
+                    Intent.createChooser(
+                        shareIntent,
+                        sharePhotoTitle
+                    )
+                )
+            }
+        ) {
+            Icon(
+                imageVector = Icons.Default.Share,
+                contentDescription = stringResource(R.string.share),
+                tint = Color.White
+            )
+        }
+        IconButton(
+            onClick = { onEvent(MediaDetailsUiEvent.ToggleFavorite(photo.id)) }
+        ) {
+            Icon(
+                imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                contentDescription = stringResource(R.string.favorite),
+                tint = if (isFavorite) Color.Red else Color.White
+            )
         }
     }
 }
