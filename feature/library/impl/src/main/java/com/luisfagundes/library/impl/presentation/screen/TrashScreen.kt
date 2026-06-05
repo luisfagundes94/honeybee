@@ -122,7 +122,7 @@ private fun TrashContent(
             onRetry = { onEvent(TrashUiEvent.LoadTrash) }
         )
 
-        is TrashUiState.Content -> TrashView(
+        is TrashUiState.Content -> Trash(
             content = uiState,
             onEvent = onEvent,
             onBackClick = onBackClick
@@ -132,7 +132,7 @@ private fun TrashContent(
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-private fun TrashView(
+private fun Trash(
     content: TrashUiState.Content,
     onEvent: (TrashUiEvent) -> Unit,
     onBackClick: () -> Unit
@@ -146,7 +146,6 @@ private fun TrashView(
                 title = {
                     Text(
                         text = "Trash",
-                        color = Color.White,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
@@ -155,8 +154,7 @@ private fun TrashView(
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = "Close",
-                            tint = Color.White
+                            contentDescription = "Close"
                         )
                     }
                 }
