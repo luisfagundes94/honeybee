@@ -73,7 +73,7 @@ internal fun TrashScreen(
         contract = ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            viewModel.dispatchEvent(TrashUiEvent.OnDeleteApproved)
+            viewModel.dispatchEvent(TrashUiEvent.ApproveDeletion)
         } else {
             Toast.makeText(context, "You didn't allow photo deletion", Toast.LENGTH_SHORT).show()
         }

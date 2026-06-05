@@ -31,7 +31,7 @@ internal class TrashViewModel @Inject constructor(
             is TrashUiEvent.LoadTrash -> loadTrash()
             is TrashUiEvent.RestorePhoto -> restorePhoto(event.photoId)
             is TrashUiEvent.ConfirmDeletion -> confirmDeletion()
-            is TrashUiEvent.OnDeleteApproved -> onDeleteApproved()
+            is TrashUiEvent.ApproveDeletion -> approveDeletion()
         }
     }
 
@@ -71,7 +71,7 @@ internal class TrashViewModel @Inject constructor(
         }
     }
 
-    private fun onDeleteApproved() {
+    private fun approveDeletion() {
         runIfStateIs<TrashUiState.Content> { currentState ->
             val photos = currentState.deletePhotos
             if (photos.isNotEmpty()) deletePhotosPermanently(photos)

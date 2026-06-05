@@ -215,7 +215,7 @@ class TrashViewModelTest {
     }
 
     @Test
-    fun `dispatchEvent OnDeleteApproved should permanently delete photos and navigate to congratulations`() = runTest {
+    fun `dispatchEvent ApproveDeletion should permanently delete photos and navigate to congratulations`() = runTest {
         // Given
         val mockUri = mockk<Uri>()
         val photo1 = Photo(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L)
@@ -233,7 +233,7 @@ class TrashViewModelTest {
             awaitItem() // Skip Content state emissions
 
             viewModel.uiEffect.test {
-                viewModel.dispatchEvent(TrashUiEvent.OnDeleteApproved)
+                viewModel.dispatchEvent(TrashUiEvent.ApproveDeletion)
 
                 val effect = awaitItem() as TrashUiEffect.NavigateToCongratulations
                 assertEquals(2, effect.deletedCount)
