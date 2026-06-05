@@ -205,7 +205,6 @@ private fun MediaDetailsTopAppBar(
             ) {
                 Text(
                     text = stringResource(R.string.all_photos),
-                    color = Color.White,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -216,7 +215,6 @@ private fun MediaDetailsTopAppBar(
                         totalCount,
                         percent
                     ),
-                    color = Color.Gray,
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -225,8 +223,7 @@ private fun MediaDetailsTopAppBar(
             IconButton(onClick = onBackClick) {
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = stringResource(R.string.close),
-                    tint = Color.White
+                    contentDescription = stringResource(R.string.close)
                 )
             }
         },
@@ -260,7 +257,6 @@ private fun MediaDetailsBottomBar(
                 formattedDate,
                 formattedSize
             ),
-            color = Color.White,
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center
         )
