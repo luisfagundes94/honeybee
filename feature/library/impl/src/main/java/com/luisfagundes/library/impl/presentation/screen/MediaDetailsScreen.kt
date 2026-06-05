@@ -284,16 +284,18 @@ private fun MediaPager(
                             .padding(MaterialTheme.spacing.verySmall)
                     ) {
                         val isFavorite = content.favoritePhotoIds.contains(photo.id)
+                        val toastMessage = stringResource(
+                            R.string.media_details_toast_info,
+                            formatPhotoSize(photo.size),
+                            formatPhotoDate(photo.dateAdded)
+                        )
+                        val sharePhotoTitle = stringResource(R.string.share_photo)
 
                         IconButton(
                             onClick = {
                                 Toast.makeText(
                                     context,
-                                    context.getString(
-                                        R.string.media_details_toast_info,
-                                        formatPhotoSize(photo.size),
-                                        formatPhotoDate(photo.dateAdded)
-                                    ),
+                                    toastMessage,
                                     Toast.LENGTH_LONG
                                 ).show()
                             }
@@ -314,7 +316,7 @@ private fun MediaPager(
                                 context.startActivity(
                                     Intent.createChooser(
                                         shareIntent,
-                                        context.getString(R.string.share_photo)
+                                        sharePhotoTitle
                                     )
                                 )
                             }
