@@ -69,13 +69,11 @@ internal class MediaDetailsViewModel @Inject constructor(
         }
     }
 
-    private fun toggleFavorite(photoId: Long) = runIfStateIs<MediaDetailsUiState.Content> { currentState ->
-        val favorites = currentState.favoritePhotoIds.toMutableSet()
-        if (favorites.contains(photoId)) {
-            favorites.remove(photoId)
-        } else {
-            favorites.add(photoId)
+    private fun toggleFavorite(photoId: Long) {
+        runIfStateIs<MediaDetailsUiState.Content> { currentState ->
+            val favorites = currentState.favoritePhotoIds.toMutableSet()
+            if (favorites.contains(photoId)) favorites.remove(photoId) else favorites.add(photoId)
+            setState { currentState.copy(favoritePhotoIds = favorites) }
         }
-        setState { currentState.copy(favoritePhotoIds = favorites) }
     }
 }
