@@ -134,7 +134,6 @@ private fun TrashContent(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 private fun Trash(
     content: TrashUiState.Content,
@@ -146,56 +145,13 @@ private fun Trash(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.trash),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = stringResource(R.string.close)
-                        )
-                    }
-                }
-            )
+            TrashTopBar(onBackClick = onBackClick)
         },
         bottomBar = {
-            if (deleteCount > 0) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(MaterialTheme.spacing.default)
-                ) {
-                    Button(
-                        onClick = { onEvent(TrashUiEvent.ConfirmDeletion) },
-                        shape = RoundedCornerShape(24.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(MaterialTheme.spacing.small))
-                        Text(
-                            text = pluralStringResource(
-                                id = R.plurals.delete_photos_format,
-                                count = deleteCount,
-                                deleteCount
-                            ),
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                }
-            }
+            TrashBottomBar(
+                deleteCount = deleteCount,
+                onConfirmDeletion = { onEvent(TrashUiEvent.ConfirmDeletion) }
+            )
         }
     ) { innerPadding ->
         if (deleteCount == 0) {
@@ -225,6 +181,71 @@ private fun Trash(
                         onItemClick = { onEvent(TrashUiEvent.RestorePhoto(photo.id)) }
                     )
                 }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TrashTopBar(
+    onBackClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    CenterAlignedTopAppBar(
+        modifier = modifier,
+        title = {
+            Text(
+                text = stringResource(R.string.trash),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = stringResource(R.string.close)
+                )
+            }
+        }
+    )
+}
+
+@Composable
+private fun TrashBottomBar(
+    deleteCount: Int,
+    onConfirmDeletion: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (deleteCount > 0) {
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(MaterialTheme.spacing.default)
+        ) {
+            Button(
+                onClick = onConfirmDeletion,
+                shape = RoundedCornerShape(24.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(MaterialTheme.spacing.small))
+                Text(
+                    text = pluralStringResource(
+                        id = R.plurals.delete_photos_format,
+                        count = deleteCount,
+                        deleteCount
+                    ),
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleMedium
+                )
             }
         }
     }
