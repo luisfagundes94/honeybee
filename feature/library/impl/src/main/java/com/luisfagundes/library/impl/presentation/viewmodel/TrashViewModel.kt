@@ -2,6 +2,8 @@ package com.luisfagundes.library.impl.presentation.viewmodel
 
 import androidx.lifecycle.viewModelScope
 import com.luisfagundes.core.common.presentation.arch.viewmodel.ViewModel
+import com.luisfagundes.core.common.presentation.tools.ResourceProvider
+import com.luisfagundes.library.impl.R.string.failed_to_load_trash_photos
 import com.luisfagundes.library.impl.domain.usecase.CreateDeleteRequestUseCase
 import com.luisfagundes.library.impl.domain.usecase.GetTrashPhotosUseCase
 import com.luisfagundes.library.impl.domain.usecase.PermanentlyDeleteUseCase
@@ -18,7 +20,8 @@ internal class TrashViewModel @Inject constructor(
     private val getTrashPhotosUseCase: GetTrashPhotosUseCase,
     private val restoreFromTrashUseCase: RestoreFromTrashUseCase,
     private val permanentlyDeleteUseCase: PermanentlyDeleteUseCase,
-    private val createDeleteRequestUseCase: CreateDeleteRequestUseCase
+    private val createDeleteRequestUseCase: CreateDeleteRequestUseCase,
+    private val resourceProvider: ResourceProvider
 ) : ViewModel<TrashUiState, TrashUiEvent, TrashUiEffect>(
     TrashUiState.Loading
 ) {
@@ -38,7 +41,8 @@ internal class TrashViewModel @Inject constructor(
                 setState { TrashUiState.Content(deletePhotos = photos) }
             },
             onFailure = {
-                setState { TrashUiState.Error("Failed to load trash photos") }
+                val errorMessage = resourceProvider.getString(failed_to_load_trash_photos)
+                setState { TrashUiState.Error(errorMessage) }
             }
         )
     }
