@@ -19,6 +19,14 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+    testOptions {
+        unitTests {
+            all {
+                it.useJUnitPlatform()
+            }
+        }
+    }
+
 
 }
 
@@ -45,4 +53,10 @@ dependencies {
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+
+    // Testing
+    testImplementation(project(":core:testing"))
+    testImplementation(libs.junit5.jupiter.api)
+    testRuntimeOnly(libs.junit5.jupiter.engine)
+    testRuntimeOnly(libs.junit5.platform.launcher)
 }

@@ -42,9 +42,7 @@ import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.designsystem.theme.spacing
 import com.luisfagundes.library.impl.R
 import com.luisfagundes.library.impl.R.raw.congratulations_animation
-import java.util.Locale
-import kotlin.math.log10
-import kotlin.math.pow
+import com.luisfagundes.core.common.presentation.tools.formatSize
 
 @Composable
 internal fun CongratulationsScreen(
@@ -163,19 +161,6 @@ internal fun CongratulationsScreen(
             }
         }
     }
-}
-
-private fun formatSize(bytes: Long): Pair<String, String> {
-    if (bytes <= 0) return Pair("0", "B")
-    val units = arrayOf("B", "KB", "MB", "GB")
-    val digitGroups = (log10(bytes.toDouble()) / log10(1024.0)).toInt().coerceIn(0, units.size - 1)
-    val value = bytes / 1024.0.pow(digitGroups.toDouble())
-    val formattedValue = if (value % 1.0 == 0.0) {
-        String.format(Locale.US, "%.0f", value)
-    } else {
-        String.format(Locale.US, "%.1f", value)
-    }
-    return Pair(formattedValue, units[digitGroups])
 }
 
 @Preview(uiMode = UI_MODE_NIGHT_YES)
