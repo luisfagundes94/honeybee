@@ -11,6 +11,7 @@ import com.luisfagundes.library.impl.domain.usecase.RestoreFromTrashUseCase
 import com.luisfagundes.library.impl.presentation.effect.TrashUiEffect
 import com.luisfagundes.library.impl.presentation.event.TrashUiEvent
 import com.luisfagundes.library.impl.presentation.state.TrashUiState
+import com.luisfagundes.library.impl.domain.model.Photo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -55,32 +56,33 @@ internal class TrashViewModel @Inject constructor(
         }
     }
 
-    private fun confirmDeletion() = runIfStateIs<TrashUiState.Content> { currentState ->
-        val deleteIds = currentState.deletePhotos.map { it.id }
-        if (deleteIds.isNotEmpty()) {
+    private fun confirmDeletion() {
+        runIfStateIs<TrashUiState.Content> { currentState ->
+            val photos = currentState.deletePhotos
+            if (photos.isEmpty()) return@runIfStateIs
+
+            val deleteIds = photos.map { it.id }
             val pendingIntent = createDeleteRequestUseCase(deleteIds)
             if (pendingIntent != null) {
                 sendEffect { TrashUiEffect.ShowDeleteConfirmation(pendingIntent.intentSender) }
             } else {
-                viewModelScope.launch {
-                    val count = currentState.deletePhotos.size
-                    val size = currentState.deletePhotos.sumOf { it.size }
-                    permanentlyDeleteUseCase(deleteIds)
-                    sendEffect { TrashUiEffect.NavigateToCongratulations(count, size) }
-                }
+                deletePhotosPermanently(photos)
             }
         }
     }
 
-    private fun onDeleteApproved() = runIfStateIs<TrashUiState.Content> { currentState ->
-        val deleteIds = currentState.deletePhotos.map { it.id }
-        if (deleteIds.isNotEmpty()) {
-            viewModelScope.launch {
-                val count = currentState.deletePhotos.size
-                val size = currentState.deletePhotos.sumOf { it.size }
-                permanentlyDeleteUseCase(deleteIds)
-                sendEffect { TrashUiEffect.NavigateToCongratulations(count, size) }
-            }
+    private fun onDeleteApproved() {
+        runIfStateIs<TrashUiState.Content> { currentState ->
+            val photos = currentState.deletePhotos
+            if (photos.isNotEmpty()) deletePhotosPermanently(photos)
         }
+    }
+
+    private fun deletePhotosPermanently(photos: List<Photo>) = viewModelScope.launch {
+        val deleteIds = photos.map { it.id }
+        val count = photos.size
+        val size = photos.sumOf { it.size }
+        permanentlyDeleteUseCase(deleteIds)
+        sendEffect { TrashUiEffect.NavigateToCongratulations(count, size) }
     }
 }
