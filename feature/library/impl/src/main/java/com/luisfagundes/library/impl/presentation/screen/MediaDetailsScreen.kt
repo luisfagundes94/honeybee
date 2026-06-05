@@ -62,13 +62,9 @@ import com.luisfagundes.library.impl.presentation.effect.MediaDetailsUiEffect
 import com.luisfagundes.library.impl.presentation.event.MediaDetailsUiEvent
 import com.luisfagundes.library.impl.presentation.state.MediaDetailsUiState
 import com.luisfagundes.library.impl.presentation.viewmodel.MediaDetailsViewModel
+import com.luisfagundes.library.impl.presentation.tools.formatPhotoDate
+import com.luisfagundes.library.impl.presentation.tools.formatPhotoSize
 import kotlinx.coroutines.launch
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Locale
-import kotlin.math.log10
-import kotlin.math.pow
 
 @Composable
 internal fun MediaDetailsScreen(
@@ -334,27 +330,4 @@ private fun MediaPager(
             }
         }
     }
-}
-
-
-private fun formatPhotoDate(epochSeconds: Long): String {
-    return runCatching {
-        val instant = Instant.ofEpochSecond(epochSeconds)
-        val formatter = DateTimeFormatter.ofPattern("MMM d, yyyy • h:mm a", Locale.ENGLISH)
-        instant.atZone(ZoneId.systemDefault()).format(formatter)
-    }.getOrDefault("")
-}
-
-private fun formatPhotoSize(bytes: Long): String {
-    if (bytes <= 0) return "0 B"
-    val units = arrayOf("B", "KB", "MB", "GB")
-    val digitGroups = (log10(bytes.toDouble()) / log10(1024.0)).toInt()
-    return runCatching {
-        String.format(
-            Locale.US,
-            "%.1f %s",
-            bytes / 1024.0.pow(digitGroups.toDouble()),
-            units[digitGroups]
-        )
-    }.getOrDefault("$bytes B")
 }
