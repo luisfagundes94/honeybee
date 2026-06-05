@@ -6,4 +6,5 @@
     <string name="done">Done</string>
     <string name="media_deleted">Media Deleted</string>
     <string name="saved">saved</string>
+    <string name="failed_to_load_photo_details">Failed to load photo details</string>
 </resources>

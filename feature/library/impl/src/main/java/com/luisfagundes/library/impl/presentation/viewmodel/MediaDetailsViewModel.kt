@@ -2,6 +2,8 @@ package com.luisfagundes.library.impl.presentation.viewmodel
 
 import androidx.lifecycle.viewModelScope
 import com.luisfagundes.core.common.presentation.arch.viewmodel.ViewModel
+import com.luisfagundes.core.common.presentation.tools.ResourceProvider
+import com.luisfagundes.library.impl.R.string.failed_to_load_photo_details
 import com.luisfagundes.library.impl.domain.usecase.GetActivePhotosUseCase
 import com.luisfagundes.library.impl.domain.usecase.GetItemsInTrashCountUseCase
 import com.luisfagundes.library.impl.domain.usecase.MoveToTrashUseCase
@@ -16,7 +18,8 @@ import javax.inject.Inject
 internal class MediaDetailsViewModel @Inject constructor(
     private val getActivePhotosUseCase: GetActivePhotosUseCase,
     private val moveToTrashUseCase: MoveToTrashUseCase,
-    private val getItemsInTrashCountUseCase: GetItemsInTrashCountUseCase
+    private val getItemsInTrashCountUseCase: GetItemsInTrashCountUseCase,
+    private val resourceProvider: ResourceProvider
 ) : ViewModel<MediaDetailsUiState, MediaDetailsUiEvent, MediaDetailsUiEffect>(
     MediaDetailsUiState.Loading
 ) {
@@ -24,7 +27,7 @@ internal class MediaDetailsViewModel @Inject constructor(
         when (event) {
             is MediaDetailsUiEvent.LoadDetails -> loadDetails(event.initialPhotoId)
             is MediaDetailsUiEvent.SwipeUp -> moveToTrash(event.photoId)
-            MediaDetailsUiEvent.TrashClick -> navigateToTrash()
+            is MediaDetailsUiEvent.TrashClick -> navigateToTrash()
             is MediaDetailsUiEvent.ToggleFavorite -> toggleFavorite(event.photoId)
         }
     }
@@ -42,7 +45,8 @@ internal class MediaDetailsViewModel @Inject constructor(
                 setState { MediaDetailsUiState.Content(photos, initialIndex, trashCount) }
             },
             onFailure = {
-                setState { MediaDetailsUiState.Error("Failed to load photo details") }
+                val errorMessage = resourceProvider.getString(failed_to_load_photo_details)
+                setState { MediaDetailsUiState.Error(errorMessage) }
             }
         )
     }
