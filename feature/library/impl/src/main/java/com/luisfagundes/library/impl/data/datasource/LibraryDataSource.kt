@@ -1,7 +1,7 @@
 package com.luisfagundes.library.impl.data.datasource
 
-import com.luisfagundes.library.impl.data.model.PhotoDto
+import com.luisfagundes.library.impl.data.model.MediaDto
 
 internal interface LibraryDataSource {
-    suspend fun fetchPhotoList(): Result<List<PhotoDto>>
+    suspend fun fetchMediaList(): Result<List<MediaDto>>
 }

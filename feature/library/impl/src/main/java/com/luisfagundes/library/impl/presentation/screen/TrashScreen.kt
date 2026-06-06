@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -64,7 +65,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewWrapper
 import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.designsystem.theme.spacing
-import com.luisfagundes.library.impl.domain.model.Photo
+import com.luisfagundes.library.impl.domain.model.Media
 import com.luisfagundes.library.impl.presentation.effect.TrashUiEffect
 import com.luisfagundes.library.impl.presentation.event.TrashUiEvent
 import com.luisfagundes.library.impl.presentation.state.TrashUiState
@@ -134,7 +135,7 @@ private fun TrashContent(
         )
 
         is TrashUiState.Content -> Trash(
-            photosToBeDeleted = uiState.photosToBeDeleted,
+            mediaToBeDeleted = uiState.mediaToBeDeleted,
             onEvent = onEvent,
             onBackClick = onBackClick
         )
@@ -143,7 +144,7 @@ private fun TrashContent(
 
 @Composable
 private fun Trash(
-    photosToBeDeleted: List<Photo>,
+    mediaToBeDeleted: List<Media>,
     onEvent: (TrashUiEvent) -> Unit,
     onBackClick: () -> Unit
 ) {
@@ -154,12 +155,12 @@ private fun Trash(
         },
         bottomBar = {
             TrashBottomBar(
-                deleteCount = photosToBeDeleted.size,
+                deleteCount = mediaToBeDeleted.size,
                 onConfirmDeletion = { onEvent(TrashUiEvent.ConfirmDeletion) }
             )
         }
     ) { innerPadding ->
-        if (photosToBeDeleted.isEmpty()) {
+        if (mediaToBeDeleted.isEmpty()) {
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
@@ -187,10 +188,10 @@ private fun Trash(
                 horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall),
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall)
             ) {
-                items(photosToBeDeleted) { photo ->
-                    TrashPhotoItem(
-                        photo = photo,
-                        onItemClick = { onEvent(TrashUiEvent.RestorePhoto(photo.id)) }
+                items(mediaToBeDeleted) { media ->
+                    TrashMediaItem(
+                        media = media,
+                        onItemClick = { onEvent(TrashUiEvent.RestoreMedia(media.id)) }
                     )
                 }
             }
@@ -248,7 +249,7 @@ private fun TrashBottomBar(
             Spacer(modifier = Modifier.width(MaterialTheme.spacing.small))
             Text(
                 text = pluralStringResource(
-                    id = R.plurals.delete_photos_format,
+                    id = R.plurals.delete_media_format,
                     count = deleteCount,
                     deleteCount
                 ),
@@ -260,8 +261,8 @@ private fun TrashBottomBar(
 }
 
 @Composable
-private fun TrashPhotoItem(
-    photo: Photo,
+private fun TrashMediaItem(
+    media: Media,
     onItemClick: () -> Unit
 ) {
     Box(
@@ -272,11 +273,29 @@ private fun TrashPhotoItem(
             .clickable(onClick = onItemClick)
     ) {
         AsyncImage(
-            model = photo.uri,
+            model = media.uri,
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
+
+        if (media.isVideo) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(4.dp)
+                    .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                    .padding(4.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = "Video",
+                    tint = Color.White,
+                    modifier = Modifier.size(10.dp)
+                )
+            }
+        }
 
         Box(
             contentAlignment = Alignment.Center,
@@ -302,10 +321,10 @@ private fun TrashPhotoItem(
 @Composable
 private fun TrashPreview() {
     Trash(
-        photosToBeDeleted = listOf(
-            Photo(id = 1L, uri = Uri.EMPTY, dateAdded = 0L, size = 1024L),
-            Photo(id = 2L, uri = Uri.EMPTY, dateAdded = 0L, size = 2048L),
-            Photo(id = 3L, uri = Uri.EMPTY, dateAdded = 0L, size = 4096L),
+        mediaToBeDeleted = listOf(
+            Media(id = 1L, uri = Uri.EMPTY, dateAdded = 0L, size = 1024L, isVideo = false),
+            Media(id = 2L, uri = Uri.EMPTY, dateAdded = 0L, size = 2048L, isVideo = true),
+            Media(id = 3L, uri = Uri.EMPTY, dateAdded = 0L, size = 4096L, isVideo = false),
         ),
         onEvent = {},
         onBackClick = {}

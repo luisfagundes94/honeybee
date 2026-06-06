@@ -4,7 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.luisfagundes.core.common.presentation.arch.viewmodel.ViewModel
 import com.luisfagundes.core.common.presentation.tools.ResourceProvider
 import com.luisfagundes.library.impl.R.string.failed_to_load_photo_details
-import com.luisfagundes.library.impl.domain.usecase.GetActivePhotosUseCase
+import com.luisfagundes.library.impl.domain.usecase.GetActiveMediaUseCase
 import com.luisfagundes.library.impl.domain.usecase.GetItemsInTrashCountUseCase
 import com.luisfagundes.library.impl.domain.usecase.MoveToTrashUseCase
 import com.luisfagundes.library.impl.presentation.effect.MediaDetailsUiEffect
@@ -16,7 +16,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class MediaDetailsViewModel @Inject constructor(
-    private val getActivePhotosUseCase: GetActivePhotosUseCase,
+    private val getActiveMediaUseCase: GetActiveMediaUseCase,
     private val moveToTrashUseCase: MoveToTrashUseCase,
     private val getItemsInTrashCountUseCase: GetItemsInTrashCountUseCase,
     private val resourceProvider: ResourceProvider
@@ -25,10 +25,10 @@ internal class MediaDetailsViewModel @Inject constructor(
 ) {
     override fun dispatchEvent(event: MediaDetailsUiEvent) {
         when (event) {
-            is MediaDetailsUiEvent.LoadDetails -> loadDetails(event.initialPhotoId)
-            is MediaDetailsUiEvent.SwipeUp -> moveToTrash(event.photoId)
+            is MediaDetailsUiEvent.LoadDetails -> loadDetails(event.initialMediaId)
+            is MediaDetailsUiEvent.SwipeUp -> moveToTrash(event.mediaId)
             is MediaDetailsUiEvent.TrashClick -> navigateToTrash()
-            is MediaDetailsUiEvent.ToggleFavorite -> toggleFavorite(event.photoId)
+            is MediaDetailsUiEvent.ToggleFavorite -> toggleFavorite(event.mediaId)
         }
     }
 
@@ -36,13 +36,13 @@ internal class MediaDetailsViewModel @Inject constructor(
         sendEffect { MediaDetailsUiEffect.NavigateToTrash }
     }
 
-    private fun loadDetails(initialPhotoId: Long) = viewModelScope.launch {
+    private fun loadDetails(initialMediaId: Long) = viewModelScope.launch {
         setState { MediaDetailsUiState.Loading }
-        getActivePhotosUseCase().fold(
-            onSuccess = { photos ->
-                val initialIndex = photos.indexOfFirst { it.id == initialPhotoId }.coerceAtLeast(0)
+        getActiveMediaUseCase().fold(
+            onSuccess = { mediaList ->
+                val initialIndex = mediaList.indexOfFirst { it.id == initialMediaId }.coerceAtLeast(0)
                 val trashCount = getItemsInTrashCountUseCase()
-                setState { MediaDetailsUiState.Content(photos, initialIndex, trashCount) }
+                setState { MediaDetailsUiState.Content(mediaList, initialIndex, trashCount) }
             },
             onFailure = {
                 val errorMessage = resourceProvider.getString(failed_to_load_photo_details)
@@ -51,17 +51,17 @@ internal class MediaDetailsViewModel @Inject constructor(
         )
     }
 
-    private fun moveToTrash(photoId: Long) = viewModelScope.launch {
-        moveToTrashUseCase(photoId)
+    private fun moveToTrash(mediaId: Long) = viewModelScope.launch {
+        moveToTrashUseCase(mediaId)
         runIfStateIs<MediaDetailsUiState.Content> { currentState ->
-            val updatedPhotos = currentState.photos.filterNot { it.id == photoId }
-            if (updatedPhotos.isEmpty()) {
+            val updatedMedia = currentState.mediaList.filterNot { it.id == mediaId }
+            if (updatedMedia.isEmpty()) {
                 sendEffect { MediaDetailsUiEffect.NavigateBack }
             } else {
                 val trashCount = getItemsInTrashCountUseCase()
                 setState {
                     currentState.copy(
-                        photos = updatedPhotos,
+                        mediaList = updatedMedia,
                         trashCount = trashCount
                     )
                 }
@@ -69,11 +69,11 @@ internal class MediaDetailsViewModel @Inject constructor(
         }
     }
 
-    private fun toggleFavorite(photoId: Long) {
+    private fun toggleFavorite(mediaId: Long) {
         runIfStateIs<MediaDetailsUiState.Content> { currentState ->
-            val favorites = currentState.favoritePhotoIds.toMutableSet()
-            if (favorites.contains(photoId)) favorites.remove(photoId) else favorites.add(photoId)
-            setState { currentState.copy(favoritePhotoIds = favorites) }
+            val favorites = currentState.favoriteMediaIds.toMutableSet()
+            if (favorites.contains(mediaId)) favorites.remove(mediaId) else favorites.add(mediaId)
+            setState { currentState.copy(favoriteMediaIds = favorites) }
         }
     }
 }

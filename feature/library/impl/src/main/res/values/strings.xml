@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="error_loading_photos_message">Error loading photos</string>
+    <string name="error_loading_photos_message">Error loading media</string>
     <string name="items_in_trash">Items in trash</string>
     <string name="library">Library</string>
     <string name="done">Done</string>
     <string name="media_deleted">Media Deleted</string>
     <string name="saved">saved</string>
-    <string name="failed_to_load_photo_details">Failed to load photo details</string>
-    <string name="failed_to_load_trash_photos">Failed to load trash photos</string>
-    <string name="all_photos">All Photos</string>
+    <string name="failed_to_load_photo_details">Failed to load media details</string>
+    <string name="failed_to_load_trash_photos">Failed to load trash media</string>
+    <string name="all_photos">All Media</string>
     <string name="media_details_progress_format">%1$d/%2$d • %3$d%%</string>
     <string name="close">Close</string>
     <string name="media_details_info_format">%1$s • %2$s</string>
     <string name="media_details_toast_info">File size: %1$s\nDate added: %2$s</string>
     <string name="info">Info</string>
-    <string name="share_photo">Share photo</string>
+    <string name="share_photo">Share media</string>
     <string name="share">Share</string>
     <string name="favorite">Favorite</string>
     <string name="trash">Trash</string>
-    <string name="deletion_not_allowed">You didn\'t allow photo deletion</string>
+    <string name="deletion_not_allowed">You didn\'t allow media deletion</string>
     <string name="trash_is_empty">Trash is empty</string>
-    <plurals name="delete_photos_format">
+    <plurals name="delete_media_format">
         <item quantity="one">Delete (%1$d File)</item>
         <item quantity="other">Delete (%1$d Files)</item>
     </plurals>

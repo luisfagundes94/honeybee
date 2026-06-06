@@ -1,16 +1,16 @@
 package com.luisfagundes.library.impl.domain.repository
 
 import android.app.PendingIntent
-import com.luisfagundes.library.impl.domain.model.Photo
-import com.luisfagundes.library.impl.domain.model.PhotoSection
+import com.luisfagundes.library.impl.domain.model.Media
+import com.luisfagundes.library.impl.domain.model.MediaSection
 
 internal interface LibraryRepository {
-    suspend fun getPhotosByMonth(): Result<List<PhotoSection>>
-    suspend fun getActivePhotos(): Result<List<Photo>>
-    suspend fun getTrashPhotos(): Result<List<Photo>>
+    suspend fun getMediaByMonth(): Result<List<MediaSection>>
+    suspend fun getActiveMedia(): Result<List<Media>>
+    suspend fun getTrashMedia(): Result<List<Media>>
     suspend fun getItemsInTrashCount(): Int
-    suspend fun moveToTrash(photoId: Long)
-    suspend fun restoreFromTrash(photoIds: List<Long>)
-    suspend fun permanentlyDelete(photoIds: List<Long>)
-    fun createDeleteRequest(photoIds: List<Long>): PendingIntent?
+    suspend fun moveToTrash(mediaId: Long)
+    suspend fun restoreFromTrash(mediaIds: List<Long>)
+    suspend fun permanentlyDelete(mediaIds: List<Long>)
+    suspend fun createDeleteRequest(mediaIds: List<Long>): PendingIntent?
 }

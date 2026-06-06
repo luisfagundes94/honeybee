@@ -1,31 +1,40 @@
 package com.luisfagundes.library.impl.presentation.screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import com.luisfagundes.library.impl.presentation.components.TrashBadgedBox
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -43,8 +52,8 @@ import android.net.Uri
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewWrapper
 import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
-import com.luisfagundes.library.impl.domain.model.Photo
-import com.luisfagundes.library.impl.domain.model.PhotoSection
+import com.luisfagundes.library.impl.domain.model.Media
+import com.luisfagundes.library.impl.domain.model.MediaSection
 import com.luisfagundes.library.impl.presentation.effect.LibraryUiEffect
 import com.luisfagundes.library.impl.presentation.event.LibraryUiEvent
 import com.luisfagundes.library.impl.presentation.state.LibraryUiState
@@ -54,7 +63,7 @@ import java.time.YearMonth
 
 @Composable
 internal fun LibraryScreen(
-    onNavigateToPhotoDetail: (Long) -> Unit,
+    onNavigateToMediaDetail: (Long) -> Unit,
     onNavigateToTrash: () -> Unit,
     viewModel: LibraryViewModel = hiltViewModel()
 ) {
@@ -62,13 +71,13 @@ internal fun LibraryScreen(
 
     CollectUiEffects(viewModel.uiEffect) { effect ->
         when (effect) {
-            is LibraryUiEffect.NavigateToPhotoDetail -> onNavigateToPhotoDetail(effect.photoId)
+            is LibraryUiEffect.NavigateToMediaDetail -> onNavigateToMediaDetail(effect.mediaId)
             LibraryUiEffect.NavigateToTrash -> onNavigateToTrash()
         }
     }
 
     LaunchedEffect(Unit) {
-        viewModel.dispatchEvent(LibraryUiEvent.LoadPhotos)
+        viewModel.dispatchEvent(LibraryUiEvent.LoadMedia)
     }
 
     LibraryContent(
@@ -90,11 +99,11 @@ private fun LibraryContent(
 
         is LibraryUiState.Error -> HoneybeeErrorTemplate(
             message = uiState.message,
-            onRetry = { onEvent(LibraryUiEvent.LoadPhotos) }
+            onRetry = { onEvent(LibraryUiEvent.LoadMedia) }
         )
 
         is LibraryUiState.Content -> Library(
-            photoSectionList = uiState.photoSectionList,
+            mediaSectionList = uiState.mediaSectionList,
             itemsInTrash = uiState.itemsInTrash,
             onEvent = onEvent,
             modifier = Modifier.fillMaxWidth()
@@ -105,7 +114,7 @@ private fun LibraryContent(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun Library(
-    photoSectionList: List<PhotoSection>,
+    mediaSectionList: List<MediaSection>,
     itemsInTrash: Int,
     onEvent: (LibraryUiEvent) -> Unit,
     modifier: Modifier = Modifier
@@ -147,10 +156,10 @@ private fun Library(
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall),
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall)
         ) {
-            photoSectionList.forEach { photoSection ->
+            mediaSectionList.forEach { mediaSection ->
                 item(span = { GridItemSpan(maxLineSpan) }) {
-                    val month = photoSection.yearMonth.getFormattedMonthName()
-                    val year = photoSection.yearMonth.year
+                    val month = mediaSection.yearMonth.getFormattedMonthName()
+                    val year = mediaSection.yearMonth.year
 
                     Text(
                         text = "$month $year",
@@ -159,16 +168,37 @@ private fun Library(
                         modifier = Modifier.padding(vertical = MaterialTheme.spacing.small)
                     )
                 }
-                items(photoSection.photos) { photo ->
-                    AsyncImage(
-                        model = photo.uri,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
+                items(mediaSection.mediaList) { media ->
+                    Box(
                         modifier = Modifier
                             .aspectRatio(1f)
                             .clip(MaterialTheme.shapes.small)
-                            .clickable { onEvent(LibraryUiEvent.PhotoClick(photo.id)) }
-                    )
+                            .clickable { onEvent(LibraryUiEvent.MediaClick(media.id)) }
+                    ) {
+                        AsyncImage(
+                            model = media.uri,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                        if (media.isVideo) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(MaterialTheme.spacing.verySmall)
+                                    .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                                    .padding(4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.PlayArrow,
+                                    contentDescription = "Video",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -182,20 +212,20 @@ private fun Library(
 @Composable
 private fun LibraryContentPreview() {
     Library(
-        photoSectionList = listOf(
-            PhotoSection(
+        mediaSectionList = listOf(
+            MediaSection(
                 yearMonth = YearMonth.of(2026, 6),
-                photos = listOf(
-                    Photo(id = 1L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L),
-                    Photo(id = 2L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L),
-                    Photo(id = 3L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L),
+                mediaList = listOf(
+                    Media(id = 1L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L, isVideo = false),
+                    Media(id = 2L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L, isVideo = true),
+                    Media(id = 3L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L, isVideo = false),
                 )
             ),
-            PhotoSection(
+            MediaSection(
                 yearMonth = YearMonth.of(2026, 5),
-                photos = listOf(
-                    Photo(id = 4L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L),
-                    Photo(id = 5L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L),
+                mediaList = listOf(
+                    Media(id = 4L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L, isVideo = true),
+                    Media(id = 5L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L, isVideo = false),
                 )
             )
         ),

@@ -5,8 +5,8 @@ import app.cash.turbine.test
 import com.luisfagundes.core.common.presentation.tools.ResourceProvider
 import com.luisfagundes.core.testing.MainDispatcherRule
 import com.luisfagundes.library.impl.R
-import com.luisfagundes.library.impl.domain.model.Photo
-import com.luisfagundes.library.impl.domain.usecase.GetActivePhotosUseCase
+import com.luisfagundes.library.impl.domain.model.Media
+import com.luisfagundes.library.impl.domain.usecase.GetActiveMediaUseCase
 import com.luisfagundes.library.impl.domain.usecase.GetItemsInTrashCountUseCase
 import com.luisfagundes.library.impl.domain.usecase.MoveToTrashUseCase
 import com.luisfagundes.library.impl.presentation.effect.MediaDetailsUiEffect
@@ -30,7 +30,7 @@ class MediaDetailsViewModelTest {
     @RegisterExtension
     val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
 
-    private val getActivePhotosUseCase: GetActivePhotosUseCase = mockk()
+    private val getActiveMediaUseCase: GetActiveMediaUseCase = mockk()
     private val moveToTrashUseCase: MoveToTrashUseCase = mockk()
     private val getItemsInTrashCountUseCase: GetItemsInTrashCountUseCase = mockk()
     private val resourceProvider: ResourceProvider = mockk()
@@ -40,7 +40,7 @@ class MediaDetailsViewModelTest {
     @BeforeEach
     fun setUp() {
         viewModel = MediaDetailsViewModel(
-            getActivePhotosUseCase = getActivePhotosUseCase,
+            getActiveMediaUseCase = getActiveMediaUseCase,
             moveToTrashUseCase = moveToTrashUseCase,
             getItemsInTrashCountUseCase = getItemsInTrashCountUseCase,
             resourceProvider = resourceProvider
@@ -57,27 +57,27 @@ class MediaDetailsViewModelTest {
     fun `dispatchEvent LoadDetails success should set Content state with correct initialIndex`() = runTest {
         // Given
         val mockUri = mockk<Uri>()
-        val photo1 = Photo(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L)
-        val photo2 = Photo(id = 2L, uri = mockUri, dateAdded = 1100L, size = 2100L)
-        val photo3 = Photo(id = 3L, uri = mockUri, dateAdded = 1200L, size = 2200L)
-        val photos = listOf(photo1, photo2, photo3)
+        val media1 = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false)
+        val media2 = Media(id = 2L, uri = mockUri, dateAdded = 1100L, size = 2100L, isVideo = true)
+        val media3 = Media(id = 3L, uri = mockUri, dateAdded = 1200L, size = 2200L, isVideo = false)
+        val mediaList = listOf(media1, media2, media3)
         val trashCount = 2
 
-        coEvery { getActivePhotosUseCase() } returns Result.success(photos)
+        coEvery { getActiveMediaUseCase() } returns Result.success(mediaList)
         coEvery { getItemsInTrashCountUseCase() } returns trashCount
 
         // When & Then
         viewModel.uiState.test {
             assertEquals(MediaDetailsUiState.Loading, awaitItem())
 
-            viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialPhotoId = 2L))
+            viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialMediaId = 2L))
 
             val contentState = awaitItem() as MediaDetailsUiState.Content
-            assertEquals(photos, contentState.photos)
+            assertEquals(mediaList, contentState.mediaList)
             assertEquals(1, contentState.initialIndex)
             assertEquals(trashCount, contentState.trashCount)
 
-            coVerify(exactly = 1) { getActivePhotosUseCase() }
+            coVerify(exactly = 1) { getActiveMediaUseCase() }
             coVerify(exactly = 1) { getItemsInTrashCountUseCase() }
         }
     }
@@ -86,25 +86,25 @@ class MediaDetailsViewModelTest {
     fun `dispatchEvent LoadDetails success with non-existent id should set Content state with initialIndex 0`() = runTest {
         // Given
         val mockUri = mockk<Uri>()
-        val photo1 = Photo(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L)
-        val photos = listOf(photo1)
+        val media1 = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false)
+        val mediaList = listOf(media1)
         val trashCount = 0
 
-        coEvery { getActivePhotosUseCase() } returns Result.success(photos)
+        coEvery { getActiveMediaUseCase() } returns Result.success(mediaList)
         coEvery { getItemsInTrashCountUseCase() } returns trashCount
 
         // When & Then
         viewModel.uiState.test {
             assertEquals(MediaDetailsUiState.Loading, awaitItem())
 
-            viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialPhotoId = 999L))
+            viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialMediaId = 999L))
 
             val contentState = awaitItem() as MediaDetailsUiState.Content
-            assertEquals(photos, contentState.photos)
+            assertEquals(mediaList, contentState.mediaList)
             assertEquals(0, contentState.initialIndex)
             assertEquals(trashCount, contentState.trashCount)
 
-            coVerify(exactly = 1) { getActivePhotosUseCase() }
+            coVerify(exactly = 1) { getActiveMediaUseCase() }
             coVerify(exactly = 1) { getItemsInTrashCountUseCase() }
         }
     }
@@ -112,90 +112,90 @@ class MediaDetailsViewModelTest {
     @Test
     fun `dispatchEvent LoadDetails failure should set Error state`() = runTest {
         // Given
-        val errorMessage = "Failed to load photo details"
-        val exception = Exception("Failed to load photos")
+        val errorMessage = "Failed to load media details"
+        val exception = Exception("Failed to load media")
 
-        coEvery { getActivePhotosUseCase() } returns Result.failure(exception)
+        coEvery { getActiveMediaUseCase() } returns Result.failure(exception)
         every { resourceProvider.getString(R.string.failed_to_load_photo_details) } returns errorMessage
 
         // When & Then
         viewModel.uiState.test {
             assertEquals(MediaDetailsUiState.Loading, awaitItem())
 
-            viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialPhotoId = 1L))
+            viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialMediaId = 1L))
 
             val errorState = awaitItem() as MediaDetailsUiState.Error
             assertEquals(errorMessage, errorState.message)
 
-            coVerify(exactly = 1) { getActivePhotosUseCase() }
+            coVerify(exactly = 1) { getActiveMediaUseCase() }
             coVerify(exactly = 1) { resourceProvider.getString(R.string.failed_to_load_photo_details) }
         }
     }
 
     @Test
-    fun `dispatchEvent SwipeUp should move photo to trash and update state when other photos remain`() = runTest {
+    fun `dispatchEvent SwipeUp should move media to trash and update state when other media remain`() = runTest {
         // Given
         val mockUri = mockk<Uri>()
-        val photo1 = Photo(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L)
-        val photo2 = Photo(id = 2L, uri = mockUri, dateAdded = 1100L, size = 2100L)
-        val photos = listOf(photo1, photo2)
+        val media1 = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false)
+        val media2 = Media(id = 2L, uri = mockUri, dateAdded = 1100L, size = 2100L, isVideo = true)
+        val mediaList = listOf(media1, media2)
         val trashCountBefore = 2
         val trashCountAfter = 3
 
-        coEvery { getActivePhotosUseCase() } returns Result.success(photos)
+        coEvery { getActiveMediaUseCase() } returns Result.success(mediaList)
         coEvery { getItemsInTrashCountUseCase() } returnsMany listOf(trashCountBefore, trashCountAfter)
-        coEvery { moveToTrashUseCase(photoId = 1L) } returns Unit
+        coEvery { moveToTrashUseCase(mediaId = 1L) } returns Unit
 
         // When & Then
         viewModel.uiState.test {
             assertEquals(MediaDetailsUiState.Loading, awaitItem())
 
             // Initial load
-            viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialPhotoId = 1L))
+            viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialMediaId = 1L))
             val initialContent = awaitItem() as MediaDetailsUiState.Content
-            assertEquals(photos, initialContent.photos)
+            assertEquals(mediaList, initialContent.mediaList)
             assertEquals(trashCountBefore, initialContent.trashCount)
 
             // Swipe up/Move to trash
-            viewModel.dispatchEvent(MediaDetailsUiEvent.SwipeUp(photoId = 1L))
+            viewModel.dispatchEvent(MediaDetailsUiEvent.SwipeUp(mediaId = 1L))
 
             val updatedContent = awaitItem() as MediaDetailsUiState.Content
-            assertEquals(listOf(photo2), updatedContent.photos)
+            assertEquals(listOf(media2), updatedContent.mediaList)
             assertEquals(trashCountAfter, updatedContent.trashCount)
 
-            coVerify(exactly = 1) { moveToTrashUseCase(photoId = 1L) }
+            coVerify(exactly = 1) { moveToTrashUseCase(mediaId = 1L) }
             coVerify(exactly = 2) { getItemsInTrashCountUseCase() }
         }
     }
 
     @Test
-    fun `dispatchEvent SwipeUp should move photo to trash and send NavigateBack effect when no photos remain`() = runTest {
+    fun `dispatchEvent SwipeUp should move media to trash and send NavigateBack effect when no media remain`() = runTest {
         // Given
         val mockUri = mockk<Uri>()
-        val photo1 = Photo(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L)
-        val photos = listOf(photo1)
+        val media1 = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false)
+        val mediaList = listOf(media1)
         val trashCount = 2
 
-        coEvery { getActivePhotosUseCase() } returns Result.success(photos)
+        coEvery { getActiveMediaUseCase() } returns Result.success(mediaList)
         coEvery { getItemsInTrashCountUseCase() } returns trashCount
-        coEvery { moveToTrashUseCase(photoId = 1L) } returns Unit
+        coEvery { moveToTrashUseCase(mediaId = 1L) } returns Unit
 
         // When & Then
         viewModel.uiState.test {
             assertEquals(MediaDetailsUiState.Loading, awaitItem())
 
             // Initial load
-            viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialPhotoId = 1L))
+            viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialMediaId = 1L))
             val initialContent = awaitItem() as MediaDetailsUiState.Content
-            assertEquals(photos, initialContent.photos)
+            assertEquals(mediaList, initialContent.mediaList)
 
             viewModel.uiEffect.test {
-                viewModel.dispatchEvent(MediaDetailsUiEvent.SwipeUp(photoId = 1L))
+                viewModel.dispatchEvent(MediaDetailsUiEvent.SwipeUp(mediaId = 1L))
 
                 assertEquals(MediaDetailsUiEffect.NavigateBack, awaitItem())
             }
 
-            coVerify(exactly = 1) { moveToTrashUseCase(photoId = 1L) }
+            coVerify(exactly = 1) { moveToTrashUseCase(mediaId = 1L) }
         }
     }
 
@@ -210,14 +210,14 @@ class MediaDetailsViewModelTest {
     }
 
     @Test
-    fun `dispatchEvent ToggleFavorite should add photo to favorite set if not favorited`() = runTest {
+    fun `dispatchEvent ToggleFavorite should add media to favorite set if not favorited`() = runTest {
         // Given
         val mockUri = mockk<Uri>()
-        val photo1 = Photo(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L)
-        val photos = listOf(photo1)
+        val media1 = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false)
+        val mediaList = listOf(media1)
         val trashCount = 2
 
-        coEvery { getActivePhotosUseCase() } returns Result.success(photos)
+        coEvery { getActiveMediaUseCase() } returns Result.success(mediaList)
         coEvery { getItemsInTrashCountUseCase() } returns trashCount
 
         // When & Then
@@ -225,19 +225,19 @@ class MediaDetailsViewModelTest {
             assertEquals(MediaDetailsUiState.Loading, awaitItem())
 
             // Initial load
-            viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialPhotoId = 1L))
+            viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialMediaId = 1L))
             val initialContent = awaitItem() as MediaDetailsUiState.Content
-            assertEquals(emptySet<Long>(), initialContent.favoritePhotoIds)
+            assertEquals(emptySet<Long>(), initialContent.favoriteMediaIds)
 
             // Toggle favorite ON
-            viewModel.dispatchEvent(MediaDetailsUiEvent.ToggleFavorite(photoId = 1L))
+            viewModel.dispatchEvent(MediaDetailsUiEvent.ToggleFavorite(mediaId = 1L))
             val favoritedContent = awaitItem() as MediaDetailsUiState.Content
-            assertEquals(setOf(1L), favoritedContent.favoritePhotoIds)
+            assertEquals(setOf(1L), favoritedContent.favoriteMediaIds)
 
             // Toggle favorite OFF
-            viewModel.dispatchEvent(MediaDetailsUiEvent.ToggleFavorite(photoId = 1L))
+            viewModel.dispatchEvent(MediaDetailsUiEvent.ToggleFavorite(mediaId = 1L))
             val unfavoritedContent = awaitItem() as MediaDetailsUiState.Content
-            assertEquals(emptySet<Long>(), unfavoritedContent.favoritePhotoIds)
+            assertEquals(emptySet<Long>(), unfavoritedContent.favoriteMediaIds)
         }
     }
 }

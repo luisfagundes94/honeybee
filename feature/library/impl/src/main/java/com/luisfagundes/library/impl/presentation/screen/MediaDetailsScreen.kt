@@ -73,8 +73,9 @@ import com.luisfagundes.designsystem.components.HoneybeeLoadingTemplate
 import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.designsystem.theme.spacing
 import com.luisfagundes.library.impl.R
-import com.luisfagundes.library.impl.domain.model.Photo
+import com.luisfagundes.library.impl.domain.model.Media
 import com.luisfagundes.library.impl.presentation.components.TrashBadgedBox
+import com.luisfagundes.library.impl.presentation.components.VideoPlayer
 import com.luisfagundes.library.impl.presentation.effect.MediaDetailsUiEffect
 import com.luisfagundes.library.impl.presentation.event.MediaDetailsUiEvent
 import com.luisfagundes.library.impl.presentation.state.MediaDetailsUiState
@@ -86,7 +87,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 internal fun MediaDetailsScreen(
-    initialPhotoId: Long,
+    initialMediaId: Long,
     onNavigateBack: () -> Unit,
     onNavigateToTrash: () -> Unit,
     viewModel: MediaDetailsViewModel = hiltViewModel()
@@ -100,8 +101,8 @@ internal fun MediaDetailsScreen(
         }
     }
 
-    LaunchedEffect(initialPhotoId) {
-        viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialPhotoId))
+    LaunchedEffect(initialMediaId) {
+        viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialMediaId))
     }
 
     MediaDetailsContent(
@@ -145,17 +146,15 @@ private fun MediaPager(
     onEvent: (MediaDetailsUiEvent) -> Unit,
     onBackClick: () -> Unit
 ) {
-    val photos = content.photos
-    val totalCount = photos.size
+    val mediaList = content.mediaList
+    val totalCount = mediaList.size
     val initialPage = content.initialIndex.coerceIn(0, (totalCount - 1).coerceAtLeast(0))
 
     val pagerState = rememberPagerState(initialPage = initialPage) { totalCount }
 
-    // Calculate current visible photo based on swiping direction logic:
-    // Swiping right-to-left shows next photo, left-to-right shows previous photo.
     val currentPage = pagerState.currentPage
-    val currentPhotoIndex = currentPage.coerceIn(0, (totalCount - 1).coerceAtLeast(0))
-    val currentPhoto = photos.getOrNull(currentPhotoIndex)
+    val currentMediaIndex = currentPage.coerceIn(0, (totalCount - 1).coerceAtLeast(0))
+    val currentMedia = mediaList.getOrNull(currentMediaIndex)
 
     val percent =
         if (totalCount > 0) (content.trashCount * 100) / (totalCount + content.trashCount) else 0
@@ -164,7 +163,7 @@ private fun MediaPager(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             MediaDetailsTopAppBar(
-                currentPhotoIndex = currentPhotoIndex,
+                currentMediaIndex = currentMediaIndex,
                 totalCount = totalCount,
                 percent = percent,
                 trashCount = content.trashCount,
@@ -173,8 +172,8 @@ private fun MediaPager(
             )
         },
         bottomBar = {
-            currentPhoto?.let { photo ->
-                MediaDetailsBottomBar(photo = photo)
+            currentMedia?.let { media ->
+                MediaDetailsBottomBar(media = media)
             }
         }
     ) { innerPadding ->
@@ -184,12 +183,14 @@ private fun MediaPager(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) { page ->
-            val pagePhotoIndex = page.coerceIn(0, (totalCount - 1).coerceAtLeast(0))
-            photos.getOrNull(pagePhotoIndex)?.let { photo ->
-                val isFavorite = content.favoritePhotoIds.contains(photo.id)
+            val pageMediaIndex = page.coerceIn(0, (totalCount - 1).coerceAtLeast(0))
+            mediaList.getOrNull(pageMediaIndex)?.let { media ->
+                val isFavorite = content.favoriteMediaIds.contains(media.id)
+                val isPageSelected = page == pagerState.currentPage
                 MediaPagerItem(
-                    photo = photo,
+                    media = media,
                     isFavorite = isFavorite,
+                    isPageSelected = isPageSelected,
                     onEvent = onEvent
                 )
             }
@@ -200,7 +201,7 @@ private fun MediaPager(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MediaDetailsTopAppBar(
-    currentPhotoIndex: Int,
+    currentMediaIndex: Int,
     totalCount: Int,
     percent: Int,
     trashCount: Int,
@@ -223,7 +224,7 @@ private fun MediaDetailsTopAppBar(
                 Text(
                     text = stringResource(
                         R.string.media_details_progress_format,
-                        currentPhotoIndex + 1,
+                        currentMediaIndex + 1,
                         totalCount,
                         percent
                     ),
@@ -252,7 +253,7 @@ private fun MediaDetailsTopAppBar(
 
 @Composable
 private fun MediaDetailsBottomBar(
-    photo: Photo,
+    media: Media,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -262,8 +263,8 @@ private fun MediaDetailsBottomBar(
             .navigationBarsPadding()
             .padding(vertical = MaterialTheme.spacing.default)
     ) {
-        val formattedDate = formatPhotoDate(photo.dateAdded)
-        val formattedSize = formatPhotoSize(photo.size)
+        val formattedDate = formatPhotoDate(media.dateAdded)
+        val formattedSize = formatPhotoSize(media.size)
         Text(
             text = stringResource(
                 R.string.media_details_info_format,
@@ -279,14 +280,21 @@ private fun MediaDetailsBottomBar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MediaPagerItem(
-    photo: Photo,
+    media: Media,
     isFavorite: Boolean,
+    isPageSelected: Boolean,
     onEvent: (MediaDetailsUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val coroutineScope = rememberCoroutineScope()
-    var aspectRatio by remember(photo.id) { mutableStateOf<Float?>(null) }
-    val swipeOffset = remember(photo.id) { Animatable(0f) }
+    var aspectRatio by remember(media.id) {
+        mutableStateOf(
+            if (media.width > 0 && media.height > 0) {
+                media.width.toFloat() / media.height.toFloat()
+            } else null
+        )
+    }
+    val swipeOffset = remember(media.id) { Animatable(0f) }
     val swipeLimit = -350f
     var showBottomSheet by remember { mutableStateOf(false) }
 
@@ -294,13 +302,13 @@ private fun MediaPagerItem(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .fillMaxSize()
-            .pointerInput(photo.id) {
+            .pointerInput(media.id) {
                 detectVerticalDragGestures(
                     onDragEnd = {
                         if (swipeOffset.value < swipeLimit) {
                             coroutineScope.launch {
                                 swipeOffset.animateTo(-1500f, tween(300))
-                                onEvent(MediaDetailsUiEvent.SwipeUp(photo.id))
+                                onEvent(MediaDetailsUiEvent.SwipeUp(media.id))
                             }
                         } else {
                             coroutineScope.launch {
@@ -338,23 +346,34 @@ private fun MediaPagerItem(
                         clip = true
                     }
             ) {
-                AsyncImage(
-                    model = photo.uri,
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    onSuccess = { state ->
-                        val size = state.painter.intrinsicSize
-                        if (size.width > 0 && size.height > 0) {
-                            aspectRatio = size.width / size.height
+                if (media.isVideo) {
+                    VideoPlayer(
+                        videoUri = media.uri,
+                        isPageSelected = isPageSelected,
+                        modifier = Modifier.fillMaxSize(),
+                        onVideoSizeChanged = { ratio ->
+                            aspectRatio = ratio
                         }
-                    },
-                    modifier = Modifier.fillMaxSize()
-                )
+                    )
+                } else {
+                    AsyncImage(
+                        model = media.uri,
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
+                        onSuccess = { state ->
+                            val size = state.painter.intrinsicSize
+                            if (size.width > 0 && size.height > 0) {
+                                aspectRatio = size.width / size.height
+                            }
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
             }
         }
 
         MediaPagerItemActionsColumn(
-            photo = photo,
+            media = media,
             isFavorite = isFavorite,
             onEvent = onEvent,
             onInfoClick = { showBottomSheet = true },
@@ -365,8 +384,8 @@ private fun MediaPagerItem(
         )
 
         if (showBottomSheet) {
-            PhotoInfoBottomSheet(
-                photo = photo,
+            MediaInfoBottomSheet(
+                media = media,
                 onDismissRequest = { showBottomSheet = false }
             )
         }
@@ -375,7 +394,7 @@ private fun MediaPagerItem(
 
 @Composable
 private fun MediaPagerItemActionsColumn(
-    photo: Photo,
+    media: Media,
     isFavorite: Boolean,
     onEvent: (MediaDetailsUiEvent) -> Unit,
     onInfoClick: () -> Unit,
@@ -386,7 +405,7 @@ private fun MediaPagerItemActionsColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
     ) {
-        val sharePhotoTitle = stringResource(R.string.share_photo)
+        val shareMediaTitle = stringResource(R.string.share_photo)
 
         IconButton(
             onClick = onInfoClick
@@ -400,14 +419,14 @@ private fun MediaPagerItemActionsColumn(
         IconButton(
             onClick = {
                 val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                    type = "image/*"
-                    putExtra(Intent.EXTRA_STREAM, photo.uri)
+                    type = if (media.isVideo) "video/*" else "image/*"
+                    putExtra(Intent.EXTRA_STREAM, media.uri)
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
                 context.startActivity(
                     Intent.createChooser(
                         shareIntent,
-                        sharePhotoTitle
+                        shareMediaTitle
                     )
                 )
             }
@@ -418,22 +437,13 @@ private fun MediaPagerItemActionsColumn(
                 tint = Color.White
             )
         }
-//        IconButton(
-//            onClick = { onEvent(MediaDetailsUiEvent.ToggleFavorite(photo.id)) }
-//        ) {
-//            Icon(
-//                imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-//                contentDescription = stringResource(R.string.favorite),
-//                tint = if (isFavorite) Color.Red else Color.White
-//            )
-//        }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PhotoInfoBottomSheet(
-    photo: Photo,
+private fun MediaInfoBottomSheet(
+    media: Media,
     onDismissRequest: () -> Unit
 ) {
     val sheetState = rememberBottomSheetState(
@@ -443,20 +453,20 @@ private fun PhotoInfoBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState
     ) {
-        PhotoInfoBottomSheetContent(photo = photo)
+        MediaInfoBottomSheetContent(media = media)
     }
 }
 
 @Composable
-private fun PhotoInfoBottomSheetContent(
-    photo: Photo,
+private fun MediaInfoBottomSheetContent(
+    media: Media,
     modifier: Modifier = Modifier
 ) {
-    val formattedDate = formatPhotoDate(photo.dateAdded)
-    val formattedSize = formatPhotoSize(photo.size)
-    val fileType = getFriendlyFileType(photo.mimeType)
-    val dimensions = if (photo.width > 0 && photo.height > 0) {
-        "${photo.width} x ${photo.height}"
+    val formattedDate = formatPhotoDate(media.dateAdded)
+    val formattedSize = formatPhotoSize(media.size)
+    val fileType = getFriendlyFileType(media.mimeType)
+    val dimensions = if (media.width > 0 && media.height > 0) {
+        "${media.width} x ${media.height}"
     } else {
         "Unknown"
     }
@@ -544,14 +554,14 @@ private fun InfoRow(
 private fun MediaPagerPreview() {
     MediaPager(
         content = MediaDetailsUiState.Content(
-            photos = listOf(
-                Photo(id = 1L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L),
-                Photo(id = 2L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L),
-                Photo(id = 3L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L)
+            mediaList = listOf(
+                Media(id = 1L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L, isVideo = false),
+                Media(id = 2L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L, isVideo = true),
+                Media(id = 3L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L, isVideo = false)
             ),
             initialIndex = 0,
             trashCount = 2,
-            favoritePhotoIds = setOf()
+            favoriteMediaIds = setOf()
         ),
         onEvent = {},
         onBackClick = {}

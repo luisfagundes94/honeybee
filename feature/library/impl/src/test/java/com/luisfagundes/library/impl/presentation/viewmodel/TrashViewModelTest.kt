@@ -7,9 +7,9 @@ import app.cash.turbine.test
 import com.luisfagundes.core.common.presentation.tools.ResourceProvider
 import com.luisfagundes.core.testing.MainDispatcherRule
 import com.luisfagundes.library.impl.R
-import com.luisfagundes.library.impl.domain.model.Photo
+import com.luisfagundes.library.impl.domain.model.Media
 import com.luisfagundes.library.impl.domain.usecase.CreateDeleteRequestUseCase
-import com.luisfagundes.library.impl.domain.usecase.GetTrashPhotosUseCase
+import com.luisfagundes.library.impl.domain.usecase.GetTrashMediaUseCase
 import com.luisfagundes.library.impl.domain.usecase.PermanentlyDeleteUseCase
 import com.luisfagundes.library.impl.domain.usecase.RestoreFromTrashUseCase
 import com.luisfagundes.library.impl.presentation.effect.TrashUiEffect
@@ -33,7 +33,7 @@ class TrashViewModelTest {
     @RegisterExtension
     val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
 
-    private val getTrashPhotosUseCase: GetTrashPhotosUseCase = mockk()
+    private val getTrashMediaUseCase: GetTrashMediaUseCase = mockk()
     private val restoreFromTrashUseCase: RestoreFromTrashUseCase = mockk()
     private val permanentlyDeleteUseCase: PermanentlyDeleteUseCase = mockk()
     private val createDeleteRequestUseCase: CreateDeleteRequestUseCase = mockk()
@@ -44,7 +44,7 @@ class TrashViewModelTest {
     @BeforeEach
     fun setUp() {
         viewModel = TrashViewModel(
-            getTrashPhotosUseCase = getTrashPhotosUseCase,
+            getTrashMediaUseCase = getTrashMediaUseCase,
             restoreFromTrashUseCase = restoreFromTrashUseCase,
             permanentlyDeleteUseCase = permanentlyDeleteUseCase,
             createDeleteRequestUseCase = createDeleteRequestUseCase,
@@ -62,10 +62,10 @@ class TrashViewModelTest {
     fun `dispatchEvent LoadTrash success should set Content state`() = runTest {
         // Given
         val mockUri = mockk<Uri>()
-        val photo = Photo(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L)
-        val photos = listOf(photo)
+        val media = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false)
+        val mediaList = listOf(media)
 
-        coEvery { getTrashPhotosUseCase() } returns Result.success(photos)
+        coEvery { getTrashMediaUseCase() } returns Result.success(mediaList)
 
         // When & Then
         viewModel.uiState.test {
@@ -74,19 +74,19 @@ class TrashViewModelTest {
             viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
 
             val contentState = awaitItem() as TrashUiState.Content
-            assertEquals(photos, contentState.photosToBeDeleted)
+            assertEquals(mediaList, contentState.mediaToBeDeleted)
 
-            coVerify(exactly = 1) { getTrashPhotosUseCase() }
+            coVerify(exactly = 1) { getTrashMediaUseCase() }
         }
     }
 
     @Test
     fun `dispatchEvent LoadTrash failure should set Error state`() = runTest {
         // Given
-        val errorMessage = "Failed to load trash photos"
-        val exception = Exception("Failed to load trash photos")
+        val errorMessage = "Failed to load trash media"
+        val exception = Exception("Failed to load trash media")
 
-        coEvery { getTrashPhotosUseCase() } returns Result.failure(exception)
+        coEvery { getTrashMediaUseCase() } returns Result.failure(exception)
         every { resourceProvider.getString(R.string.failed_to_load_trash_photos) } returns errorMessage
 
         // When & Then
@@ -98,20 +98,20 @@ class TrashViewModelTest {
             val errorState = awaitItem() as TrashUiState.Error
             assertEquals(errorMessage, errorState.message)
 
-            coVerify(exactly = 1) { getTrashPhotosUseCase() }
+            coVerify(exactly = 1) { getTrashMediaUseCase() }
             coVerify(exactly = 1) { resourceProvider.getString(R.string.failed_to_load_trash_photos) }
         }
     }
 
     @Test
-    fun `dispatchEvent RestorePhoto should restore photo and update Content state`() = runTest {
+    fun `dispatchEvent RestoreMedia should restore media and update Content state`() = runTest {
         // Given
         val mockUri = mockk<Uri>()
-        val photo1 = Photo(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L)
-        val photo2 = Photo(id = 2L, uri = mockUri, dateAdded = 1100L, size = 3000L)
-        val photos = listOf(photo1, photo2)
+        val media1 = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false)
+        val media2 = Media(id = 2L, uri = mockUri, dateAdded = 1100L, size = 3000L, isVideo = true)
+        val mediaList = listOf(media1, media2)
 
-        coEvery { getTrashPhotosUseCase() } returns Result.success(photos)
+        coEvery { getTrashMediaUseCase() } returns Result.success(mediaList)
         coEvery { restoreFromTrashUseCase(listOf(1L)) } returns Unit
 
         // When & Then
@@ -120,11 +120,11 @@ class TrashViewModelTest {
 
             viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
             val initialContent = awaitItem() as TrashUiState.Content
-            assertEquals(photos, initialContent.photosToBeDeleted)
+            assertEquals(mediaList, initialContent.mediaToBeDeleted)
 
-            viewModel.dispatchEvent(TrashUiEvent.RestorePhoto(photoId = 1L))
+            viewModel.dispatchEvent(TrashUiEvent.RestoreMedia(mediaId = 1L))
             val updatedContent = awaitItem() as TrashUiState.Content
-            assertEquals(listOf(photo2), updatedContent.photosToBeDeleted)
+            assertEquals(listOf(media2), updatedContent.mediaToBeDeleted)
 
             coVerify(exactly = 1) { restoreFromTrashUseCase(listOf(1L)) }
         }
@@ -133,7 +133,7 @@ class TrashViewModelTest {
     @Test
     fun `dispatchEvent ConfirmDeletion with empty list should do nothing`() = runTest {
         // Given
-        coEvery { getTrashPhotosUseCase() } returns Result.success(emptyList())
+        coEvery { getTrashMediaUseCase() } returns Result.success(emptyList())
 
         // When & Then
         viewModel.uiState.test {
@@ -141,7 +141,7 @@ class TrashViewModelTest {
 
             viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
             val initialContent = awaitItem() as TrashUiState.Content
-            assertEquals(emptyList<Photo>(), initialContent.photosToBeDeleted)
+            assertEquals(emptyList<Media>(), initialContent.mediaToBeDeleted)
 
             viewModel.dispatchEvent(TrashUiEvent.ConfirmDeletion)
 
@@ -154,13 +154,13 @@ class TrashViewModelTest {
     fun `dispatchEvent ConfirmDeletion with pending intent should show delete confirmation effect`() = runTest {
         // Given
         val mockUri = mockk<Uri>()
-        val photo1 = Photo(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L)
-        val photos = listOf(photo1)
+        val media1 = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false)
+        val mediaList = listOf(media1)
         val mockPendingIntent = mockk<PendingIntent>()
         val mockIntentSender = mockk<IntentSender>()
 
-        coEvery { getTrashPhotosUseCase() } returns Result.success(photos)
-        every { createDeleteRequestUseCase(listOf(1L)) } returns mockPendingIntent
+        coEvery { getTrashMediaUseCase() } returns Result.success(mediaList)
+        coEvery { createDeleteRequestUseCase(listOf(1L)) } returns mockPendingIntent
         every { mockPendingIntent.intentSender } returns mockIntentSender
 
         // When & Then
@@ -183,15 +183,15 @@ class TrashViewModelTest {
     }
 
     @Test
-    fun `dispatchEvent ConfirmDeletion without pending intent should permanently delete photos and navigate to congratulations`() = runTest {
+    fun `dispatchEvent ConfirmDeletion without pending intent should permanently delete media and navigate to congratulations`() = runTest {
         // Given
         val mockUri = mockk<Uri>()
-        val photo1 = Photo(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L)
-        val photo2 = Photo(id = 2L, uri = mockUri, dateAdded = 1100L, size = 3000L)
-        val photos = listOf(photo1, photo2)
+        val media1 = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false)
+        val media2 = Media(id = 2L, uri = mockUri, dateAdded = 1100L, size = 3000L, isVideo = true)
+        val mediaList = listOf(media1, media2)
 
-        coEvery { getTrashPhotosUseCase() } returns Result.success(photos)
-        every { createDeleteRequestUseCase(listOf(1L, 2L)) } returns null
+        coEvery { getTrashMediaUseCase() } returns Result.success(mediaList)
+        coEvery { createDeleteRequestUseCase(listOf(1L, 2L)) } returns null
         coEvery { permanentlyDeleteUseCase(listOf(1L, 2L)) } returns Unit
 
         // When & Then
@@ -215,14 +215,14 @@ class TrashViewModelTest {
     }
 
     @Test
-    fun `dispatchEvent ApproveDeletion should permanently delete photos and navigate to congratulations`() = runTest {
+    fun `dispatchEvent ApproveDeletion should permanently delete media and navigate to congratulations`() = runTest {
         // Given
         val mockUri = mockk<Uri>()
-        val photo1 = Photo(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L)
-        val photo2 = Photo(id = 2L, uri = mockUri, dateAdded = 1100L, size = 3000L)
-        val photos = listOf(photo1, photo2)
+        val media1 = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false)
+        val media2 = Media(id = 2L, uri = mockUri, dateAdded = 1100L, size = 3000L, isVideo = true)
+        val mediaList = listOf(media1, media2)
 
-        coEvery { getTrashPhotosUseCase() } returns Result.success(photos)
+        coEvery { getTrashMediaUseCase() } returns Result.success(mediaList)
         coEvery { permanentlyDeleteUseCase(listOf(1L, 2L)) } returns Unit
 
         // When & Then

@@ -20,6 +20,17 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    flavorDimensions += "tier"
+
+    productFlavors {
+        create("free") {
+            dimension = "tier"
+        }
+        create("paid") {
+            dimension = "tier"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -73,6 +84,8 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.firebase.messaging)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.video)
 
     // Hilt
     implementation(libs.hilt.android)

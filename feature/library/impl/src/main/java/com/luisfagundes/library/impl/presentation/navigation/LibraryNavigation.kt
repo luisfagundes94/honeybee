@@ -16,8 +16,8 @@ internal fun EntryProviderScope<NavKey>.libraryEntries() {
     entry<LibraryRoute> {
         val backStack = LocalNavBackStack.current
         LibraryScreen(
-            onNavigateToPhotoDetail = { photoId ->
-                backStack?.add(MediaDetailsRoute(photoId))
+            onNavigateToMediaDetail = { mediaId ->
+                backStack?.add(MediaDetailsRoute(mediaId))
             },
             onNavigateToTrash = {
                 backStack?.add(TrashRoute)
@@ -27,7 +27,7 @@ internal fun EntryProviderScope<NavKey>.libraryEntries() {
     entry<MediaDetailsRoute> { route ->
         val backStack = LocalNavBackStack.current
         MediaDetailsScreen(
-            initialPhotoId = route.initialPhotoId,
+            initialMediaId = route.initialPhotoId,
             onNavigateBack = {
                 backStack?.removeLastOrNull()
             },

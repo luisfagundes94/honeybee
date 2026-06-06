@@ -7,5 +7,5 @@ import javax.inject.Inject
 internal class CreateDeleteRequestUseCase @Inject constructor(
     private val repository: LibraryRepository
 ) {
-    operator fun invoke(photoIds: List<Long>): PendingIntent? = repository.createDeleteRequest(photoIds)
+    suspend operator fun invoke(mediaIds: List<Long>): PendingIntent? = repository.createDeleteRequest(mediaIds)
 }

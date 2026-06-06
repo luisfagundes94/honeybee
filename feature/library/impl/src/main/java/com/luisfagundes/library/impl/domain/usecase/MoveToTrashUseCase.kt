@@ -6,5 +6,5 @@ import javax.inject.Inject
 internal class MoveToTrashUseCase @Inject constructor(
     private val repository: LibraryRepository
 ) {
-    suspend operator fun invoke(photoId: Long) = repository.moveToTrash(photoId)
+    suspend operator fun invoke(mediaId: Long) = repository.moveToTrash(mediaId)
 }

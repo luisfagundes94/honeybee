@@ -2,7 +2,7 @@ package com.luisfagundes.library.impl.domain.model
 
 import java.time.YearMonth
 
-internal data class PhotoSection(
+internal data class MediaSection(
     val yearMonth: YearMonth,
-    val photos: List<Photo>
+    val mediaList: List<Media>
 )

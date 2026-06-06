@@ -5,20 +5,20 @@ import com.luisfagundes.core.common.presentation.arch.viewmodel.ViewModel
 import com.luisfagundes.core.common.presentation.tools.ResourceProvider
 import com.luisfagundes.library.impl.R.string.failed_to_load_trash_photos
 import com.luisfagundes.library.impl.domain.usecase.CreateDeleteRequestUseCase
-import com.luisfagundes.library.impl.domain.usecase.GetTrashPhotosUseCase
+import com.luisfagundes.library.impl.domain.usecase.GetTrashMediaUseCase
 import com.luisfagundes.library.impl.domain.usecase.PermanentlyDeleteUseCase
 import com.luisfagundes.library.impl.domain.usecase.RestoreFromTrashUseCase
 import com.luisfagundes.library.impl.presentation.effect.TrashUiEffect
 import com.luisfagundes.library.impl.presentation.event.TrashUiEvent
 import com.luisfagundes.library.impl.presentation.state.TrashUiState
-import com.luisfagundes.library.impl.domain.model.Photo
+import com.luisfagundes.library.impl.domain.model.Media
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 internal class TrashViewModel @Inject constructor(
-    private val getTrashPhotosUseCase: GetTrashPhotosUseCase,
+    private val getTrashMediaUseCase: GetTrashMediaUseCase,
     private val restoreFromTrashUseCase: RestoreFromTrashUseCase,
     private val permanentlyDeleteUseCase: PermanentlyDeleteUseCase,
     private val createDeleteRequestUseCase: CreateDeleteRequestUseCase,
@@ -29,7 +29,7 @@ internal class TrashViewModel @Inject constructor(
     override fun dispatchEvent(event: TrashUiEvent) {
         when (event) {
             is TrashUiEvent.LoadTrash -> loadTrash()
-            is TrashUiEvent.RestorePhoto -> restorePhoto(event.photoId)
+            is TrashUiEvent.RestoreMedia -> restoreMedia(event.mediaId)
             is TrashUiEvent.ConfirmDeletion -> confirmDeletion()
             is TrashUiEvent.ApproveDeletion -> approveDeletion()
         }
@@ -37,9 +37,9 @@ internal class TrashViewModel @Inject constructor(
 
     private fun loadTrash() = viewModelScope.launch {
         setState { TrashUiState.Loading }
-        getTrashPhotosUseCase().fold(
-            onSuccess = { photos ->
-                setState { TrashUiState.Content(photosToBeDeleted = photos) }
+        getTrashMediaUseCase().fold(
+            onSuccess = { mediaList ->
+                setState { TrashUiState.Content(mediaToBeDeleted = mediaList) }
             },
             onFailure = {
                 val errorMessage = resourceProvider.getString(failed_to_load_trash_photos)
@@ -48,40 +48,42 @@ internal class TrashViewModel @Inject constructor(
         )
     }
 
-    private fun restorePhoto(photoId: Long) = viewModelScope.launch {
-        restoreFromTrashUseCase(listOf(photoId))
+    private fun restoreMedia(mediaId: Long) = viewModelScope.launch {
+        restoreFromTrashUseCase(listOf(mediaId))
         setStateOf<TrashUiState.Content> { currentState ->
-            val updatedList = currentState.photosToBeDeleted.filterNot { it.id == photoId }
-            currentState.copy(photosToBeDeleted = updatedList)
+            val updatedList = currentState.mediaToBeDeleted.filterNot { it.id == mediaId }
+            currentState.copy(mediaToBeDeleted = updatedList)
         }
     }
 
     private fun confirmDeletion() {
         runIfStateIs<TrashUiState.Content> { currentState ->
-            val photos = currentState.photosToBeDeleted
-            if (photos.isEmpty()) return@runIfStateIs
+            val mediaList = currentState.mediaToBeDeleted
+            if (mediaList.isEmpty()) return@runIfStateIs
 
-            val deleteIds = photos.map { it.id }
-            val pendingIntent = createDeleteRequestUseCase(deleteIds)
-            if (pendingIntent != null) {
-                sendEffect { TrashUiEffect.ShowDeleteConfirmation(pendingIntent.intentSender) }
-            } else {
-                deletePhotosPermanently(photos)
+            viewModelScope.launch {
+                val deleteIds = mediaList.map { it.id }
+                val pendingIntent = createDeleteRequestUseCase(deleteIds)
+                if (pendingIntent != null) {
+                    sendEffect { TrashUiEffect.ShowDeleteConfirmation(pendingIntent.intentSender) }
+                } else {
+                    deleteMediaPermanently(mediaList)
+                }
             }
         }
     }
 
     private fun approveDeletion() {
         runIfStateIs<TrashUiState.Content> { currentState ->
-            val photos = currentState.photosToBeDeleted
-            if (photos.isNotEmpty()) deletePhotosPermanently(photos)
+            val mediaList = currentState.mediaToBeDeleted
+            if (mediaList.isNotEmpty()) deleteMediaPermanently(mediaList)
         }
     }
 
-    private fun deletePhotosPermanently(photos: List<Photo>) = viewModelScope.launch {
-        val deleteIds = photos.map { it.id }
-        val count = photos.size
-        val size = photos.sumOf { it.size }
+    private fun deleteMediaPermanently(mediaList: List<Media>) = viewModelScope.launch {
+        val deleteIds = mediaList.map { it.id }
+        val count = mediaList.size
+        val size = mediaList.sumOf { it.size }
         permanentlyDeleteUseCase(deleteIds)
         sendEffect { TrashUiEffect.NavigateToCongratulations(count, size) }
     }

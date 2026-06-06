@@ -5,10 +5,10 @@ import app.cash.turbine.test
 import com.luisfagundes.core.common.presentation.tools.ResourceProvider
 import com.luisfagundes.core.testing.MainDispatcherRule
 import com.luisfagundes.library.impl.R
-import com.luisfagundes.library.impl.domain.model.Photo
-import com.luisfagundes.library.impl.domain.model.PhotoSection
+import com.luisfagundes.library.impl.domain.model.Media
+import com.luisfagundes.library.impl.domain.model.MediaSection
 import com.luisfagundes.library.impl.domain.usecase.GetItemsInTrashCountUseCase
-import com.luisfagundes.library.impl.domain.usecase.GetPhotosByMonthUseCase
+import com.luisfagundes.library.impl.domain.usecase.GetMediaByMonthUseCase
 import com.luisfagundes.library.impl.presentation.effect.LibraryUiEffect
 import com.luisfagundes.library.impl.presentation.event.LibraryUiEvent
 import com.luisfagundes.library.impl.presentation.state.LibraryUiState
@@ -31,7 +31,7 @@ class LibraryViewModelTest {
     @RegisterExtension
     val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
 
-    private val getPhotosByMonthUseCase: GetPhotosByMonthUseCase = mockk()
+    private val getMediaByMonthUseCase: GetMediaByMonthUseCase = mockk()
     private val getItemsInTrashCountUseCase: GetItemsInTrashCountUseCase = mockk()
     private val resourceProvider: ResourceProvider = mockk()
 
@@ -40,7 +40,7 @@ class LibraryViewModelTest {
     @BeforeEach
     fun setUp() {
         viewModel = LibraryViewModel(
-            getPhotosByMonthUseCase = getPhotosByMonthUseCase,
+            getMediaByMonthUseCase = getMediaByMonthUseCase,
             getItemsInTrashCountUseCase = getItemsInTrashCountUseCase,
             resourceProvider = resourceProvider
         )
@@ -53,62 +53,63 @@ class LibraryViewModelTest {
     }
 
     @Test
-    fun `dispatchEvent LoadPhotos success should set Content state`() = runTest {
+    fun `dispatchEvent LoadMedia success should set Content state`() = runTest {
         // Given
         val mockUri = mockk<Uri>()
-        val photo = Photo(
+        val media = Media(
             id = 1L,
             uri = mockUri,
             dateAdded = 1000L,
-            size = 2000L
+            size = 2000L,
+            isVideo = false
         )
-        val photoSections = listOf(
-            PhotoSection(
+        val mediaSections = listOf(
+            MediaSection(
                 yearMonth = YearMonth.of(2026, 6),
-                photos = listOf(photo)
+                mediaList = listOf(media)
             )
         )
         val trashCount = 5
 
         coEvery { getItemsInTrashCountUseCase() } returns trashCount
-        coEvery { getPhotosByMonthUseCase() } returns Result.success(photoSections)
+        coEvery { getMediaByMonthUseCase() } returns Result.success(mediaSections)
 
         // When & Then
         viewModel.uiState.test {
             assertEquals(LibraryUiState.Loading, awaitItem())
 
-            viewModel.dispatchEvent(LibraryUiEvent.LoadPhotos)
+            viewModel.dispatchEvent(LibraryUiEvent.LoadMedia)
 
             val contentState = awaitItem() as LibraryUiState.Content
-            assertEquals(photoSections, contentState.photoSectionList)
+            assertEquals(mediaSections, contentState.mediaSectionList)
             assertEquals(trashCount, contentState.itemsInTrash)
 
             coVerify(exactly = 1) { getItemsInTrashCountUseCase() }
-            coVerify(exactly = 1) { getPhotosByMonthUseCase() }
+            coVerify(exactly = 1) { getMediaByMonthUseCase() }
         }
     }
 
     @Test
-    fun `dispatchEvent LoadPhotos failure should set Error state`() = runTest {
+    fun `dispatchEvent LoadMedia failure should set Error state`() = runTest {
         // Given
-        val errorMessage = "Failed to load photos"
+        val errorMessage = "Failed to load media"
         val exception = Exception("Network error")
 
         coEvery { getItemsInTrashCountUseCase() } returns 2
-        coEvery { getPhotosByMonthUseCase() } returns Result.failure(exception)
+        coEvery { getMediaByMonthUseCase() } returns Result.failure(exception)
         every { resourceProvider.getString(R.string.error_loading_photos_message) } returns errorMessage
 
         // When & Then
         viewModel.uiState.test {
             assertEquals(LibraryUiState.Loading, awaitItem())
 
-            viewModel.dispatchEvent(LibraryUiEvent.LoadPhotos)
+            viewModel.dispatchEvent(LibraryUiEvent.LoadMedia)
 
             val errorState = awaitItem() as LibraryUiState.Error
             assertEquals(errorMessage, errorState.message)
 
             coVerify(exactly = 1) { getItemsInTrashCountUseCase() }
-            coVerify(exactly = 1) { getPhotosByMonthUseCase() }
+            coVerify(exactly = 1) { getMediaByMonthUseCase() }
             coVerify(exactly = 1) { resourceProvider.getString(R.string.error_loading_photos_message) }
         }
     }
@@ -124,15 +125,15 @@ class LibraryViewModelTest {
     }
 
     @Test
-    fun `dispatchEvent PhotoClick should emit NavigateToPhotoDetail effect`() = runTest {
+    fun `dispatchEvent MediaClick should emit NavigateToMediaDetail effect`() = runTest {
         // Given
-        val photoId = 123L
+        val mediaId = 123L
 
         // When & Then
         viewModel.uiEffect.test {
-            viewModel.dispatchEvent(LibraryUiEvent.PhotoClick(photoId))
+            viewModel.dispatchEvent(LibraryUiEvent.MediaClick(mediaId))
 
-            assertEquals(LibraryUiEffect.NavigateToPhotoDetail(photoId), awaitItem())
+            assertEquals(LibraryUiEffect.NavigateToMediaDetail(mediaId), awaitItem())
         }
     }
 }
