@@ -69,6 +69,10 @@ You can find the Hilt custom annotations at core/common/src/main/java/com/luisfa
 - Unsplash API key: `secrets-gradle-plugin` reads `UNSPLASH_ACCESS_KEY` from `secrets.properties` (not committed) and exposes it via `BuildConfig.UNSPLASH_ACCESS_KEY`
 - Repositories return `Result<T>`; ViewModels fold on success/failure
 
+### Presentation Layer
+
+- Extension or helper functions related to UI should be put in a presentation/tools folder. If it's used in more than one module, put it in :core:common:presentation:tools
+
 ### Testing
 
 JUnit 5 + MockK + Turbine (Flow assertions)
