@@ -19,6 +19,7 @@ Use conventional commits. The commit message should be structured as follows:
 
 - Use Design Patterns when applicable
 - Follow SOLID principles
+- Follow clean architecture principles
 - Follow the KISS principle (Keep It Simple, Stupid)
 - Avoid repeating too much code
 
