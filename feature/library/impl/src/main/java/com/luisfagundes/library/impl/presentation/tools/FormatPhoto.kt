@@ -18,3 +18,16 @@ internal fun formatPhotoSize(bytes: Long): String {
     val (value, unit) = formatSize(bytes)
     return "$value $unit"
 }
+
+internal fun getFriendlyFileType(mimeType: String?): String {
+    if (mimeType == null) return "??"
+    val subtype = mimeType.substringAfter('/')
+    return when (subtype.lowercase()) {
+        "jpeg", "jpg" -> "JPEG"
+        "png" -> "PNG"
+        "webp" -> "WEBP"
+        "gif" -> "GIF"
+        "heic", "heif" -> "HEIC"
+        else -> subtype.uppercase()
+    }
+}

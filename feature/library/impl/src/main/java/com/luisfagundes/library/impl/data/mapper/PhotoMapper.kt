@@ -11,7 +11,10 @@ internal class PhotoMapper @Inject constructor() {
             id = source.id,
             uri = source.uri,
             dateAdded = source.dateAdded,
-            size = source.size
+            size = source.size,
+            mimeType = source.mimeType,
+            width = source.width,
+            height = source.height
         )
     }
 }

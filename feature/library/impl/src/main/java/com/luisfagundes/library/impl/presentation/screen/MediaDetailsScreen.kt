@@ -27,9 +27,9 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.outlined.AspectRatio
 import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -77,6 +77,7 @@ import com.luisfagundes.library.impl.domain.model.Photo
 import com.luisfagundes.library.impl.presentation.viewmodel.MediaDetailsViewModel
 import com.luisfagundes.library.impl.presentation.tools.formatPhotoDate
 import com.luisfagundes.library.impl.presentation.tools.formatPhotoSize
+import com.luisfagundes.library.impl.presentation.tools.getFriendlyFileType
 import kotlinx.coroutines.launch
 import android.content.res.Configuration
 import android.net.Uri
@@ -451,7 +452,12 @@ private fun PhotoInfoBottomSheetContent(
 ) {
     val formattedDate = formatPhotoDate(photo.dateAdded)
     val formattedSize = formatPhotoSize(photo.size)
-    val photoUriString = photo.uri.toString()
+    val fileType = getFriendlyFileType(photo.mimeType)
+    val dimensions = if (photo.width > 0 && photo.height > 0) {
+        "${photo.width} x ${photo.height}"
+    } else {
+        "Unknown"
+    }
 
     Column(
         modifier = modifier
@@ -467,12 +473,6 @@ private fun PhotoInfoBottomSheetContent(
         )
 
         InfoRow(
-            icon = Icons.Outlined.Info,
-            label = "ID",
-            value = photo.id.toString()
-        )
-
-        InfoRow(
             icon = Icons.Outlined.CalendarToday,
             label = "Date added",
             value = formattedDate
@@ -485,9 +485,15 @@ private fun PhotoInfoBottomSheetContent(
         )
 
         InfoRow(
-            icon = Icons.Outlined.Link,
-            label = "URI",
-            value = photoUriString
+            icon = Icons.Outlined.Info,
+            label = "File type",
+            value = fileType
+        )
+
+        InfoRow(
+            icon = Icons.Outlined.AspectRatio,
+            label = "Dimensions",
+            value = dimensions
         )
     }
 }

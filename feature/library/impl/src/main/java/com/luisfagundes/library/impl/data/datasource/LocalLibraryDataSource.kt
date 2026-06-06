@@ -18,7 +18,10 @@ internal class LocalLibraryDataSource @Inject constructor(
     private val photoProjection = arrayOf(
         MediaStore.Images.Media._ID,
         MediaStore.Images.Media.DATE_ADDED,
-        MediaStore.Images.Media.SIZE
+        MediaStore.Images.Media.SIZE,
+        MediaStore.Images.Media.MIME_TYPE,
+        MediaStore.Images.Media.WIDTH,
+        MediaStore.Images.Media.HEIGHT
     )
     private val sortOrder = "${MediaStore.MediaColumns.DATE_ADDED} DESC"
 
@@ -39,11 +42,17 @@ internal class LocalLibraryDataSource @Inject constructor(
                 val dateAddedColumn =
                     cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED)
                 val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)
+                val mimeTypeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.MIME_TYPE)
+                val widthColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH)
+                val heightColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.HEIGHT)
 
                 while (cursor.moveToNext()) {
                     val id = cursor.getLong(idColumn)
                     val dateAdded = cursor.getLong(dateAddedColumn)
                     val size = cursor.getLong(sizeColumn)
+                    val mimeType = cursor.getString(mimeTypeColumn)
+                    val width = cursor.getInt(widthColumn)
+                    val height = cursor.getInt(heightColumn)
                     val photoUri = ContentUris.withAppendedId(
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                         id
@@ -53,7 +62,10 @@ internal class LocalLibraryDataSource @Inject constructor(
                             id = id,
                             uri = photoUri,
                             dateAdded = dateAdded,
-                            size = size
+                            size = size,
+                            mimeType = mimeType,
+                            width = width,
+                            height = height
                         )
                     )
                 }
