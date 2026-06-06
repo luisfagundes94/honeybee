@@ -30,7 +30,7 @@ internal fun VideoPlayer(
         ExoPlayer.Builder(context).build().apply {
             setMediaItem(MediaItem.fromUri(videoUri))
             prepare()
-            playWhenReady = false
+            playWhenReady = true
             
             addListener(object : Player.Listener {
                 override fun onVideoSizeChanged(videoSize: VideoSize) {
@@ -52,7 +52,9 @@ internal fun VideoPlayer(
     }
 
     LaunchedEffect(isPageSelected) {
-        if (!isPageSelected) {
+        if (isPageSelected) {
+            exoPlayer.play()
+        } else {
             exoPlayer.pause()
         }
     }
@@ -62,6 +64,8 @@ internal fun VideoPlayer(
             PlayerView(ctx).apply {
                 player = exoPlayer
                 useController = true
+                controllerAutoShow = false
+                hideController()
             }
         },
         modifier = modifier.fillMaxSize()
