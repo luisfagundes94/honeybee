@@ -418,15 +418,15 @@ private fun MediaPagerItemActionsColumn(
                 tint = Color.White
             )
         }
-        IconButton(
-            onClick = { onEvent(MediaDetailsUiEvent.ToggleFavorite(photo.id)) }
-        ) {
-            Icon(
-                imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                contentDescription = stringResource(R.string.favorite),
-                tint = if (isFavorite) Color.Red else Color.White
-            )
-        }
+//        IconButton(
+//            onClick = { onEvent(MediaDetailsUiEvent.ToggleFavorite(photo.id)) }
+//        ) {
+//            Icon(
+//                imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+//                contentDescription = stringResource(R.string.favorite),
+//                tint = if (isFavorite) Color.Red else Color.White
+//            )
+//        }
     }
 }
 
