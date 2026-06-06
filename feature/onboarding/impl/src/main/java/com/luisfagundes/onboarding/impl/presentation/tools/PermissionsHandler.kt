@@ -21,29 +21,34 @@ internal fun rememberPermissionsHandler(
 ): () -> Unit {
     val context = LocalContext.current
 
-    val permissions = remember {
-        buildList {
+    val (requiredPermissions, allPermissions) = remember {
+        val required = buildList {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 add(Manifest.permission.READ_MEDIA_IMAGES)
                 add(Manifest.permission.READ_MEDIA_VIDEO)
-                add(Manifest.permission.POST_NOTIFICATIONS)
             } else {
                 add(Manifest.permission.READ_EXTERNAL_STORAGE)
             }
-        }.toTypedArray()
+        }
+        val optional = buildList {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                add(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+        required.toTypedArray() to (required + optional).toTypedArray()
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { results ->
-        val allGranted = results.values.all { it }
-        if (allGranted) {
+        val allRequiredGranted = requiredPermissions.all { results[it] == true }
+        if (allRequiredGranted) {
             onPermissionsGranted()
         } else {
-            val deniedPermissions = results.filter { !it.value }.keys
+            val deniedRequiredPermissions = requiredPermissions.filter { results[it] != true }
             val activity = context.findActivity()
             val shouldShowRationale = activity?.let { act ->
-                deniedPermissions.any { permission ->
+                deniedRequiredPermissions.any { permission ->
                     ActivityCompat.shouldShowRequestPermissionRationale(act, permission)
                 }
             } ?: false
@@ -52,13 +57,13 @@ internal fun rememberPermissionsHandler(
     }
 
     return {
-        val allGranted = permissions.all {
+        val allRequiredGranted = requiredPermissions.all {
             ContextCompat.checkSelfPermission(context, it) == PERMISSION_GRANTED
         }
-        if (allGranted) {
+        if (allRequiredGranted) {
             onPermissionsGranted()
         } else {
-            permissionLauncher.launch(permissions)
+            permissionLauncher.launch(allPermissions)
         }
     }
 }
