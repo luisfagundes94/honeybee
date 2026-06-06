@@ -55,6 +55,12 @@ import coil.compose.AsyncImage
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.designsystem.components.HoneybeeLoadingTemplate
+import android.content.res.Configuration.UI_MODE_NIGHT_NO
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.net.Uri
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewWrapper
+import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.designsystem.theme.spacing
 import com.luisfagundes.library.impl.domain.model.Photo
 import com.luisfagundes.library.impl.presentation.effect.TrashUiEffect
@@ -283,4 +289,20 @@ private fun TrashPhotoItem(
             )
         }
     }
+}
+
+@Preview(uiMode = UI_MODE_NIGHT_YES)
+@Preview(uiMode = UI_MODE_NIGHT_NO)
+@PreviewWrapper(wrapper = HoneybeeThemeWrapper::class)
+@Composable
+private fun TrashPreview() {
+    Trash(
+        photosToBeDeleted = listOf(
+            Photo(id = 1L, uri = Uri.EMPTY, dateAdded = 0L, size = 1024L),
+            Photo(id = 2L, uri = Uri.EMPTY, dateAdded = 0L, size = 2048L),
+            Photo(id = 3L, uri = Uri.EMPTY, dateAdded = 0L, size = 4096L),
+        ),
+        onEvent = {},
+        onBackClick = {}
+    )
 }
