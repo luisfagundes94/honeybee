@@ -11,6 +11,8 @@ Use Android CLI Skills or gradlew commands if necessary
 Use conventional commits. The commit message should be structured as follows:
 <type>[optional scope]: <description>
 
+**DO NOT COMMIT CHANGES** before I approve it or explicitly tell you to commit.
+
 ## Architecture Overview
 
 **Pattern**: Clean Architecture + MVI (Model-View-Intent)
