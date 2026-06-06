@@ -383,8 +383,7 @@ private fun MediaPagerItemActionsColumn(
         ) {
             Icon(
                 imageVector = Icons.Default.Info,
-                contentDescription = stringResource(R.string.info),
-                tint = Color.White
+                contentDescription = stringResource(R.string.info)
             )
         }
         IconButton(
@@ -405,7 +404,6 @@ private fun MediaPagerItemActionsColumn(
             Icon(
                 imageVector = Icons.Default.Share,
                 contentDescription = stringResource(R.string.share),
-                tint = Color.White
             )
         }
         IconButton(
@@ -414,7 +412,7 @@ private fun MediaPagerItemActionsColumn(
             Icon(
                 imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                 contentDescription = stringResource(R.string.favorite),
-                tint = if (isFavorite) Color.Red else Color.White
+                tint = if (isFavorite) Color.Red else MaterialTheme.colorScheme.onSurface
             )
         }
     }
