@@ -5,19 +5,14 @@ import com.luisfagundes.core.common.presentation.arch.viewmodel.EffectViewModel
 import com.luisfagundes.onboarding.impl.domain.usecase.CompleteOnboardingUseCase
 import com.luisfagundes.onboarding.impl.presentation.effect.PermissionUiEffect
 import com.luisfagundes.onboarding.impl.presentation.event.PermissionUiEvent
-import com.luisfagundes.core.common.provider.SubscriptionProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 internal class PermissionViewModel @Inject constructor(
-    private val completeOnboardingUseCase: CompleteOnboardingUseCase,
-    private val subscriptionProvider: SubscriptionProvider
+    private val completeOnboardingUseCase: CompleteOnboardingUseCase
 ) : EffectViewModel<PermissionUiEffect, PermissionUiEvent>() {
-    val isPremium: Boolean
-        get() = subscriptionProvider.isPremium()
-
     override fun dispatchEvent(event: PermissionUiEvent) {
         when (event) {
             is PermissionUiEvent.PermissionsGranted -> completeOnboarding()

@@ -16,17 +16,16 @@ import androidx.core.content.ContextCompat
 
 @Composable
 internal fun rememberPermissionsHandler(
-    isPremium: Boolean,
     onPermissionsGranted: () -> Unit,
     onPermissionsDenied: (shouldShowRationale: Boolean) -> Unit
 ): () -> Unit {
     val context = LocalContext.current
 
-    val permissions = remember(isPremium) {
+    val permissions = remember {
         buildList {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 add(Manifest.permission.READ_MEDIA_IMAGES)
-                if (isPremium) add(Manifest.permission.READ_MEDIA_VIDEO)
+                add(Manifest.permission.READ_MEDIA_VIDEO)
                 add(Manifest.permission.POST_NOTIFICATIONS)
             } else {
                 add(Manifest.permission.READ_EXTERNAL_STORAGE)

@@ -64,7 +64,6 @@ internal fun PermissionScreen(
     val permissionsDeniedMessage = stringResource(R.string.permissions_denied_message)
     val (showSettingsDialog, setShowSettingsDialog) = remember { mutableStateOf(false) }
     val requestPermissions = rememberPermissionsHandler(
-        isPremium = viewModel.isPremium,
         onPermissionsGranted = {
             viewModel.dispatchEvent(PermissionUiEvent.PermissionsGranted)
         },
