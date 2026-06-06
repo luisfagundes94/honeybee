@@ -39,8 +39,7 @@ fun HoneybeeButton(
         contentPadding = contentPadding,
         interactionSource = interactionSource,
         content = content,
-        modifier = Modifier
+        modifier = modifier
             .heightIn(buttonSize)
-            .then(modifier)
     )
 }
