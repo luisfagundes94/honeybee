@@ -3,8 +3,8 @@ package com.luisfagundes.library.impl.presentation.screen
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -118,7 +118,6 @@ private fun Library(
             CenterAlignedTopAppBar(
                 scrollBehavior = scrollBehavior,
                 title = { Text(text = stringResource(R.string.library)) },
-                windowInsets = WindowInsets(),
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background
@@ -136,8 +135,15 @@ private fun Library(
     ) { innerPadding ->
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize = 100.dp),
-            modifier = Modifier.padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = MaterialTheme.spacing.default),
+            modifier = Modifier
+                .fillMaxSize()
+                .consumeWindowInsets(innerPadding),
+            contentPadding = PaddingValues(
+                top = innerPadding.calculateTopPadding(),
+                bottom = innerPadding.calculateBottomPadding(),
+                start = MaterialTheme.spacing.default,
+                end = MaterialTheme.spacing.default
+            ),
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall),
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall)
         ) {

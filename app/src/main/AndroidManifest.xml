@@ -19,7 +19,8 @@
         <activity
             android:name=".presentation.activity.MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.Honeybee">
+            android:theme="@style/Theme.Honeybee"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

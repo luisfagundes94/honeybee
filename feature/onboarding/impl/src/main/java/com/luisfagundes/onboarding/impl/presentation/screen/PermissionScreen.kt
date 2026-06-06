@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -85,7 +86,7 @@ internal fun PermissionScreen(
 
     PermissionContent(
         onAllowAccessClick = requestPermissions,
-        modifier = Modifier.fillMaxSize().padding(MaterialTheme.spacing.default)
+        modifier = Modifier.fillMaxSize()
     )
 
     if (showSettingsDialog) {
@@ -113,7 +114,10 @@ private fun PermissionContent(
             Column(
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.default),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(MaterialTheme.spacing.default)
             ) {
                 PermissionAlertCard(
                     modifier = Modifier.fillMaxWidth()
@@ -132,7 +136,10 @@ private fun PermissionContent(
         Column(
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.default),
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth().padding(innerPadding)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(innerPadding)
+                .padding(horizontal = MaterialTheme.spacing.default)
         ) {
             Image(
                 painter = painterResource(honeybee_low_res),
@@ -234,6 +241,6 @@ private fun PermissionCardItem(
 private fun PermissionContentPreview() {
     PermissionContent(
         onAllowAccessClick = {},
-        modifier = Modifier.fillMaxSize().padding(MaterialTheme.spacing.default)
+        modifier = Modifier.fillMaxSize()
     )
 }

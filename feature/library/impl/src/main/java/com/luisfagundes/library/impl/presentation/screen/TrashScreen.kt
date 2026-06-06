@@ -7,9 +7,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -173,8 +175,15 @@ private fun Trash(
         } else {
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 100.dp),
-                modifier = Modifier.padding(innerPadding),
-                contentPadding = PaddingValues(horizontal = MaterialTheme.spacing.default),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .consumeWindowInsets(innerPadding),
+                contentPadding = PaddingValues(
+                    top = innerPadding.calculateTopPadding(),
+                    bottom = innerPadding.calculateBottomPadding(),
+                    start = MaterialTheme.spacing.default,
+                    end = MaterialTheme.spacing.default
+                ),
                 horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall),
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall)
             ) {
@@ -222,34 +231,30 @@ private fun TrashBottomBar(
     modifier: Modifier = Modifier
 ) {
     if (deleteCount > 0) {
-        Box(
+        Button(
+            onClick = onConfirmDeletion,
+            shape = RoundedCornerShape(24.dp),
             modifier = modifier
                 .fillMaxWidth()
+                .navigationBarsPadding()
                 .padding(MaterialTheme.spacing.default)
+                .height(56.dp)
         ) {
-            Button(
-                onClick = onConfirmDeletion,
-                shape = RoundedCornerShape(24.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(MaterialTheme.spacing.small))
-                Text(
-                    text = pluralStringResource(
-                        id = R.plurals.delete_photos_format,
-                        count = deleteCount,
-                        deleteCount
-                    ),
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.titleMedium
-                )
-            }
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(MaterialTheme.spacing.small))
+            Text(
+                text = pluralStringResource(
+                    id = R.plurals.delete_photos_format,
+                    count = deleteCount,
+                    deleteCount
+                ),
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleMedium
+            )
         }
     }
 }

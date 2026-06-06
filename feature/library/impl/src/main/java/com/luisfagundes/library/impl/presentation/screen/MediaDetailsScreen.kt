@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
@@ -258,7 +259,8 @@ private fun MediaDetailsBottomBar(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = MaterialTheme.spacing.large)
+            .navigationBarsPadding()
+            .padding(vertical = MaterialTheme.spacing.default)
     ) {
         val formattedDate = formatPhotoDate(photo.dateAdded)
         val formattedSize = formatPhotoSize(photo.size)

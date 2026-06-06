@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -36,9 +37,7 @@ internal fun OnboardingScreen(
 ) {
     OnboardingContent(
         onGetStartedClick = onGetStartedClick,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(MaterialTheme.spacing.default)
+        modifier = Modifier.fillMaxSize()
     )
 }
 
@@ -51,7 +50,10 @@ private fun OnboardingContent(
         bottomBar = {
             HoneybeeButton(
                 onClick = onGetStartedClick,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(MaterialTheme.spacing.default)
             ) {
                 Text(
                     text = stringResource(R.string.get_started)
@@ -66,6 +68,7 @@ private fun OnboardingContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .padding(horizontal = MaterialTheme.spacing.default)
         ) {
             Image(
                 painter = painterResource(honeybee_low_res),
@@ -101,8 +104,6 @@ private fun OnboardingContent(
 private fun OnboardingPreview() {
     OnboardingContent(
         onGetStartedClick = {},
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(MaterialTheme.spacing.default)
+        modifier = Modifier.fillMaxSize()
     )
 }

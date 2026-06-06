@@ -5,9 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -46,17 +44,13 @@ class MainActivity : ComponentActivity() {
                 val backStack = rememberNavBackStack(startRoute)
 
                 CompositionLocalProvider(LocalNavBackStack provides backStack) {
-                    Scaffold { innerPadding ->
-                        AppNavDisplay(
-                            backStack = backStack,
-                            entryProvider = entryProvider {
-                                entryBuilders.forEach { it(this) }
-                            },
-                            modifier = Modifier
-                                .padding(innerPadding)
-                                .consumeWindowInsets(innerPadding)
-                        )
-                    }
+                    AppNavDisplay(
+                        backStack = backStack,
+                        entryProvider = entryProvider {
+                            entryBuilders.forEach { it(this) }
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
             }
         }
