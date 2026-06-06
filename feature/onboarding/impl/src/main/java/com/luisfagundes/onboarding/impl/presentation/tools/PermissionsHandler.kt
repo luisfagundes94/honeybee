@@ -23,17 +23,15 @@ internal fun rememberPermissionsHandler(
     val context = LocalContext.current
 
     val permissions = remember(isPremium) {
-        val list = mutableListOf<String>()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            list.add(Manifest.permission.READ_MEDIA_IMAGES)
-            if (isPremium) {
-                list.add(Manifest.permission.READ_MEDIA_VIDEO)
+        buildList {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                add(Manifest.permission.READ_MEDIA_IMAGES)
+                if (isPremium) add(Manifest.permission.READ_MEDIA_VIDEO)
+                add(Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                add(Manifest.permission.READ_EXTERNAL_STORAGE)
             }
-            list.add(Manifest.permission.POST_NOTIFICATIONS)
-        } else {
-            list.add(Manifest.permission.READ_EXTERNAL_STORAGE)
-        }
-        list.toTypedArray()
+        }.toTypedArray()
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
