@@ -15,6 +15,8 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import com.luisfagundes.core.common.presentation.navigation.LocalNavBackStack
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import com.luisfagundes.designsystem.theme.HoneybeeTheme
 import com.luisfagundes.honeybee.presentation.navigation.AppNavDisplay
 import com.luisfagundes.honeybee.presentation.viewmodel.MainViewModel
@@ -44,13 +46,18 @@ class MainActivity : ComponentActivity() {
                 val backStack = rememberNavBackStack(startRoute)
 
                 CompositionLocalProvider(LocalNavBackStack provides backStack) {
-                    AppNavDisplay(
-                        backStack = backStack,
-                        entryProvider = entryProvider {
-                            entryBuilders.forEach { it(this) }
-                        },
-                        modifier = Modifier.fillMaxSize()
-                    )
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        AppNavDisplay(
+                            backStack = backStack,
+                            entryProvider = entryProvider {
+                                entryBuilders.forEach { it(this) }
+                            },
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                 }
             }
         }
