@@ -10,10 +10,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -25,6 +27,10 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.outlined.CalendarToday
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Link
+import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -33,8 +39,10 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,6 +54,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -266,6 +275,7 @@ private fun MediaDetailsBottomBar(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MediaPagerItem(
     photo: Photo,
@@ -277,6 +287,7 @@ private fun MediaPagerItem(
     var aspectRatio by remember(photo.id) { mutableStateOf<Float?>(null) }
     val swipeOffset = remember(photo.id) { Animatable(0f) }
     val swipeLimit = -350f
+    var showBottomSheet by remember { mutableStateOf(false) }
 
     Box(
         contentAlignment = Alignment.Center,
@@ -345,8 +356,16 @@ private fun MediaPagerItem(
             photo = photo,
             isFavorite = isFavorite,
             onEvent = onEvent,
+            onInfoClick = { showBottomSheet = true },
             modifier = Modifier.align(Alignment.BottomEnd)
         )
+
+        if (showBottomSheet) {
+            PhotoInfoBottomSheet(
+                photo = photo,
+                onDismissRequest = { showBottomSheet = false }
+            )
+        }
     }
 }
 
@@ -355,6 +374,7 @@ private fun MediaPagerItemActionsColumn(
     photo: Photo,
     isFavorite: Boolean,
     onEvent: (MediaDetailsUiEvent) -> Unit,
+    onInfoClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -365,25 +385,15 @@ private fun MediaPagerItemActionsColumn(
             .background(Color.Black.copy(alpha = 0.3f), CircleShape)
             .padding(MaterialTheme.spacing.verySmall)
     ) {
-        val toastMessage = stringResource(
-            R.string.media_details_toast_info,
-            formatPhotoSize(photo.size),
-            formatPhotoDate(photo.dateAdded)
-        )
         val sharePhotoTitle = stringResource(R.string.share_photo)
 
         IconButton(
-            onClick = {
-                Toast.makeText(
-                    context,
-                    toastMessage,
-                    Toast.LENGTH_LONG
-                ).show()
-            }
+            onClick = onInfoClick
         ) {
             Icon(
                 imageVector = Icons.Default.Info,
-                contentDescription = stringResource(R.string.info)
+                contentDescription = stringResource(R.string.info),
+                tint = Color.White
             )
         }
         IconButton(
@@ -404,6 +414,7 @@ private fun MediaPagerItemActionsColumn(
             Icon(
                 imageVector = Icons.Default.Share,
                 contentDescription = stringResource(R.string.share),
+                tint = Color.White
             )
         }
         IconButton(
@@ -412,7 +423,107 @@ private fun MediaPagerItemActionsColumn(
             Icon(
                 imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                 contentDescription = stringResource(R.string.favorite),
-                tint = if (isFavorite) Color.Red else MaterialTheme.colorScheme.onSurface
+                tint = if (isFavorite) Color.Red else Color.White
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PhotoInfoBottomSheet(
+    photo: Photo,
+    onDismissRequest: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState()
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        sheetState = sheetState
+    ) {
+        PhotoInfoBottomSheetContent(photo = photo)
+    }
+}
+
+@Composable
+private fun PhotoInfoBottomSheetContent(
+    photo: Photo,
+    modifier: Modifier = Modifier
+) {
+    val formattedDate = formatPhotoDate(photo.dateAdded)
+    val formattedSize = formatPhotoSize(photo.size)
+    val photoUriString = photo.uri.toString()
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = MaterialTheme.spacing.default)
+            .padding(bottom = MaterialTheme.spacing.large)
+    ) {
+        Text(
+            text = stringResource(R.string.info),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = MaterialTheme.spacing.default)
+        )
+
+        InfoRow(
+            icon = Icons.Outlined.Info,
+            label = "ID",
+            value = photo.id.toString()
+        )
+
+        InfoRow(
+            icon = Icons.Outlined.CalendarToday,
+            label = "Date added",
+            value = formattedDate
+        )
+
+        InfoRow(
+            icon = Icons.Outlined.Storage,
+            label = "File size",
+            value = formattedSize
+        )
+
+        InfoRow(
+            icon = Icons.Outlined.Link,
+            label = "URI",
+            value = photoUriString
+        )
+    }
+}
+
+@Composable
+private fun InfoRow(
+    icon: ImageVector,
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = MaterialTheme.spacing.small)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier
+                .padding(end = MaterialTheme.spacing.default)
+                .size(24.dp)
+        )
+        Column {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }
