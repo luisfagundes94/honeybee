@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -46,6 +44,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -127,7 +126,7 @@ private fun TrashContent(
         )
 
         is TrashUiState.Content -> Trash(
-            content = uiState,
+            photosToBeDeleted = uiState.photosToBeDeleted,
             onEvent = onEvent,
             onBackClick = onBackClick
         )
@@ -136,12 +135,10 @@ private fun TrashContent(
 
 @Composable
 private fun Trash(
-    content: TrashUiState.Content,
+    photosToBeDeleted: List<Photo>,
     onEvent: (TrashUiEvent) -> Unit,
     onBackClick: () -> Unit
 ) {
-    val deleteCount = content.deletePhotos.size
-
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -149,12 +146,12 @@ private fun Trash(
         },
         bottomBar = {
             TrashBottomBar(
-                deleteCount = deleteCount,
+                deleteCount = photosToBeDeleted.size,
                 onConfirmDeletion = { onEvent(TrashUiEvent.ConfirmDeletion) }
             )
         }
     ) { innerPadding ->
-        if (deleteCount == 0) {
+        if (photosToBeDeleted.isEmpty()) {
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
@@ -175,7 +172,7 @@ private fun Trash(
                 horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall),
                 verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall)
             ) {
-                items(content.deletePhotos) { photo ->
+                items(photosToBeDeleted) { photo ->
                     TrashPhotoItem(
                         photo = photo,
                         onItemClick = { onEvent(TrashUiEvent.RestorePhoto(photo.id)) }

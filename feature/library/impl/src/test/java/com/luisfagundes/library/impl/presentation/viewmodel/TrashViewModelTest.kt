@@ -74,7 +74,7 @@ class TrashViewModelTest {
             viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
 
             val contentState = awaitItem() as TrashUiState.Content
-            assertEquals(photos, contentState.deletePhotos)
+            assertEquals(photos, contentState.photosToBeDeleted)
 
             coVerify(exactly = 1) { getTrashPhotosUseCase() }
         }
@@ -120,11 +120,11 @@ class TrashViewModelTest {
 
             viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
             val initialContent = awaitItem() as TrashUiState.Content
-            assertEquals(photos, initialContent.deletePhotos)
+            assertEquals(photos, initialContent.photosToBeDeleted)
 
             viewModel.dispatchEvent(TrashUiEvent.RestorePhoto(photoId = 1L))
             val updatedContent = awaitItem() as TrashUiState.Content
-            assertEquals(listOf(photo2), updatedContent.deletePhotos)
+            assertEquals(listOf(photo2), updatedContent.photosToBeDeleted)
 
             coVerify(exactly = 1) { restoreFromTrashUseCase(listOf(1L)) }
         }
@@ -141,7 +141,7 @@ class TrashViewModelTest {
 
             viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
             val initialContent = awaitItem() as TrashUiState.Content
-            assertEquals(emptyList<Photo>(), initialContent.deletePhotos)
+            assertEquals(emptyList<Photo>(), initialContent.photosToBeDeleted)
 
             viewModel.dispatchEvent(TrashUiEvent.ConfirmDeletion)
 

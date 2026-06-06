@@ -39,7 +39,7 @@ internal class TrashViewModel @Inject constructor(
         setState { TrashUiState.Loading }
         getTrashPhotosUseCase().fold(
             onSuccess = { photos ->
-                setState { TrashUiState.Content(deletePhotos = photos) }
+                setState { TrashUiState.Content(photosToBeDeleted = photos) }
             },
             onFailure = {
                 val errorMessage = resourceProvider.getString(failed_to_load_trash_photos)
@@ -51,14 +51,14 @@ internal class TrashViewModel @Inject constructor(
     private fun restorePhoto(photoId: Long) = viewModelScope.launch {
         restoreFromTrashUseCase(listOf(photoId))
         setStateOf<TrashUiState.Content> { currentState ->
-            val updatedList = currentState.deletePhotos.filterNot { it.id == photoId }
-            currentState.copy(deletePhotos = updatedList)
+            val updatedList = currentState.photosToBeDeleted.filterNot { it.id == photoId }
+            currentState.copy(photosToBeDeleted = updatedList)
         }
     }
 
     private fun confirmDeletion() {
         runIfStateIs<TrashUiState.Content> { currentState ->
-            val photos = currentState.deletePhotos
+            val photos = currentState.photosToBeDeleted
             if (photos.isEmpty()) return@runIfStateIs
 
             val deleteIds = photos.map { it.id }
@@ -73,7 +73,7 @@ internal class TrashViewModel @Inject constructor(
 
     private fun approveDeletion() {
         runIfStateIs<TrashUiState.Content> { currentState ->
-            val photos = currentState.deletePhotos
+            val photos = currentState.photosToBeDeleted
             if (photos.isNotEmpty()) deletePhotosPermanently(photos)
         }
     }
