@@ -24,7 +24,4 @@
         <item quantity="one">Delete (%1$d File)</item>
         <item quantity="other">Delete (%1$d Files)</item>
     </plurals>
-    <string name="video_permission_banner_title">Unlock your videos!</string>
-    <string name="video_permission_banner_description">Since you are premium, Honeybee can show your video library. Grant video permission to view them.</string>
-    <string name="grant_access">Grant Access</string>
 </resources>

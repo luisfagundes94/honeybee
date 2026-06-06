@@ -34,25 +34,17 @@ internal fun rememberPermissionsHandler(
         }.toTypedArray()
     }
 
-    val requiredPermissions = remember {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            listOf(Manifest.permission.READ_MEDIA_IMAGES)
-        } else {
-            listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
-        }
-    }
-
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { results ->
-        val requiredGranted = requiredPermissions.all { results[it] == true }
-        if (requiredGranted) {
+        val allGranted = results.values.all { it }
+        if (allGranted) {
             onPermissionsGranted()
         } else {
-            val deniedRequiredPermissions = requiredPermissions.filter { results[it] != true }
+            val deniedPermissions = results.filter { !it.value }.keys
             val activity = context.findActivity()
             val shouldShowRationale = activity?.let { act ->
-                deniedRequiredPermissions.any { permission ->
+                deniedPermissions.any { permission ->
                     ActivityCompat.shouldShowRequestPermissionRationale(act, permission)
                 }
             } ?: false
@@ -61,10 +53,10 @@ internal fun rememberPermissionsHandler(
     }
 
     return {
-        val requiredGranted = requiredPermissions.all {
+        val allGranted = permissions.all {
             ContextCompat.checkSelfPermission(context, it) == PERMISSION_GRANTED
         }
-        if (requiredGranted) {
+        if (allGranted) {
             onPermissionsGranted()
         } else {
             permissionLauncher.launch(permissions)

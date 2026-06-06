@@ -47,25 +47,10 @@ import com.luisfagundes.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.designsystem.components.HoneybeeLoadingTemplate
 import com.luisfagundes.designsystem.theme.spacing
 import com.luisfagundes.library.impl.R
-import android.Manifest
-import android.content.pm.PackageManager
-import android.os.Build
 import android.content.res.Configuration
 import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewWrapper
-import androidx.core.content.ContextCompat
-import com.luisfagundes.designsystem.components.HoneybeeButton
 import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.library.impl.domain.model.Media
 import com.luisfagundes.library.impl.domain.model.MediaSection
@@ -83,31 +68,6 @@ internal fun LibraryScreen(
     viewModel: LibraryViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
-
-    var hasVideoPermission by remember {
-        mutableStateOf(
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.READ_MEDIA_VIDEO
-                ) == PackageManager.PERMISSION_GRANTED
-            } else {
-                true
-            }
-        )
-    }
-
-    val showVideoPermissionBanner = viewModel.isPremium && !hasVideoPermission
-
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        hasVideoPermission = isGranted
-        if (isGranted) {
-            viewModel.dispatchEvent(LibraryUiEvent.LoadMedia)
-        }
-    }
 
     CollectUiEffects(viewModel.uiEffect) { effect ->
         when (effect) {
@@ -122,12 +82,6 @@ internal fun LibraryScreen(
 
     LibraryContent(
         uiState = uiState,
-        showVideoPermissionBanner = showVideoPermissionBanner,
-        onRequestVideoPermission = {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                launcher.launch(Manifest.permission.READ_MEDIA_VIDEO)
-            }
-        },
         onEvent = viewModel::dispatchEvent
     )
 }
@@ -136,8 +90,6 @@ internal fun LibraryScreen(
 @Composable
 private fun LibraryContent(
     uiState: LibraryUiState,
-    showVideoPermissionBanner: Boolean,
-    onRequestVideoPermission: () -> Unit,
     onEvent: (LibraryUiEvent) -> Unit
 ) {
     when (uiState) {
@@ -153,8 +105,6 @@ private fun LibraryContent(
         is LibraryUiState.Content -> Library(
             mediaSectionList = uiState.mediaSectionList,
             itemsInTrash = uiState.itemsInTrash,
-            showVideoPermissionBanner = showVideoPermissionBanner,
-            onRequestVideoPermission = onRequestVideoPermission,
             onEvent = onEvent,
             modifier = Modifier.fillMaxWidth()
         )
@@ -166,8 +116,6 @@ private fun LibraryContent(
 private fun Library(
     mediaSectionList: List<MediaSection>,
     itemsInTrash: Int,
-    showVideoPermissionBanner: Boolean,
-    onRequestVideoPermission: () -> Unit,
     onEvent: (LibraryUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -208,14 +156,6 @@ private fun Library(
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall),
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall)
         ) {
-            if (showVideoPermissionBanner) {
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    VideoPermissionBanner(
-                        onRequestPermission = onRequestVideoPermission,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            }
             mediaSectionList.forEach { mediaSection ->
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     val month = mediaSection.yearMonth.getFormattedMonthName()
@@ -265,46 +205,6 @@ private fun Library(
     }
 }
 
-@Composable
-private fun VideoPermissionBanner(
-    onRequestPermission: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        ),
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(bottom = MaterialTheme.spacing.small)
-    ) {
-        Column(
-            modifier = Modifier.padding(MaterialTheme.spacing.default),
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
-        ) {
-            Text(
-                text = stringResource(R.string.video_permission_banner_title),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-            Text(
-                text = stringResource(R.string.video_permission_banner_description),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-            )
-            Button(
-                onClick = onRequestPermission,
-                modifier = Modifier.align(Alignment.End)
-            ) {
-                Text(
-                    text = stringResource(R.string.grant_access)
-                )
-            }
-        }
-    }
-}
-
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
@@ -330,8 +230,6 @@ private fun LibraryContentPreview() {
             )
         ),
         itemsInTrash = 3,
-        showVideoPermissionBanner = true,
-        onRequestVideoPermission = {},
         onEvent = {},
         modifier = Modifier.fillMaxWidth()
     )
