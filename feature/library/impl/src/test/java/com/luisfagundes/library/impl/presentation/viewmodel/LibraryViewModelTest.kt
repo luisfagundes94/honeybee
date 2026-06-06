@@ -2,6 +2,7 @@ package com.luisfagundes.library.impl.presentation.viewmodel
 
 import android.net.Uri
 import app.cash.turbine.test
+import com.luisfagundes.core.common.provider.SubscriptionProvider
 import com.luisfagundes.core.common.presentation.tools.ResourceProvider
 import com.luisfagundes.core.testing.MainDispatcherRule
 import com.luisfagundes.library.impl.R
@@ -33,6 +34,7 @@ class LibraryViewModelTest {
 
     private val getMediaByMonthUseCase: GetMediaByMonthUseCase = mockk()
     private val getItemsInTrashCountUseCase: GetItemsInTrashCountUseCase = mockk()
+    private val subscriptionProvider: SubscriptionProvider = mockk()
     private val resourceProvider: ResourceProvider = mockk()
 
     private lateinit var viewModel: LibraryViewModel
@@ -42,6 +44,7 @@ class LibraryViewModelTest {
         viewModel = LibraryViewModel(
             getMediaByMonthUseCase = getMediaByMonthUseCase,
             getItemsInTrashCountUseCase = getItemsInTrashCountUseCase,
+            subscriptionProvider = subscriptionProvider,
             resourceProvider = resourceProvider
         )
     }
@@ -135,5 +138,29 @@ class LibraryViewModelTest {
 
             assertEquals(LibraryUiEffect.NavigateToMediaDetail(mediaId), awaitItem())
         }
+    }
+
+    @Test
+    fun `isPremium should return true when subscription provider returns true`() {
+        // Given
+        every { subscriptionProvider.isPremium() } returns true
+
+        // When
+        val result = viewModel.isPremium
+
+        // Then
+        assertEquals(true, result)
+    }
+
+    @Test
+    fun `isPremium should return false when subscription provider returns false`() {
+        // Given
+        every { subscriptionProvider.isPremium() } returns false
+
+        // When
+        val result = viewModel.isPremium
+
+        // Then
+        assertEquals(false, result)
     }
 }
