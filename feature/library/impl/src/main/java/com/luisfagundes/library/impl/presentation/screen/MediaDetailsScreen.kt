@@ -339,14 +339,14 @@ private fun MediaPagerItem(
                     modifier = Modifier.fillMaxSize()
                 )
             }
-
-            MediaPagerItemActionsColumn(
-                photo = photo,
-                isFavorite = isFavorite,
-                onEvent = onEvent,
-                modifier = Modifier.align(Alignment.BottomEnd)
-            )
         }
+
+        MediaPagerItemActionsColumn(
+            photo = photo,
+            isFavorite = isFavorite,
+            onEvent = onEvent,
+            modifier = Modifier.align(Alignment.BottomEnd)
+        )
     }
 }
 
