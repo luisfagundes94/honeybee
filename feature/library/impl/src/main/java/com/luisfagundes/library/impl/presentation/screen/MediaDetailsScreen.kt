@@ -72,8 +72,11 @@ import com.luisfagundes.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.designsystem.components.HoneybeeLoadingTemplate
 import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.designsystem.theme.spacing
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import com.luisfagundes.library.impl.R
 import com.luisfagundes.library.impl.domain.model.Media
+import com.luisfagundes.library.impl.presentation.components.FullscreenPhotoViewer
 import com.luisfagundes.library.impl.presentation.components.TrashBadgedBox
 import com.luisfagundes.library.impl.presentation.components.VideoPlayer
 import com.luisfagundes.library.impl.presentation.effect.MediaDetailsUiEffect
@@ -297,6 +300,7 @@ private fun MediaPagerItem(
     val swipeOffset = remember(media.id) { Animatable(0f) }
     val swipeLimit = -350f
     var showBottomSheet by remember { mutableStateOf(false) }
+    var showFullscreenPhoto by remember { mutableStateOf(false) }
 
     Box(
         contentAlignment = Alignment.Center,
@@ -366,7 +370,14 @@ private fun MediaPagerItem(
                                 aspectRatio = size.width / size.height
                             }
                         },
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                showFullscreenPhoto = true
+                            }
                     )
                 }
             }
@@ -387,6 +398,13 @@ private fun MediaPagerItem(
             MediaInfoBottomSheet(
                 media = media,
                 onDismissRequest = { showBottomSheet = false }
+            )
+        }
+
+        if (showFullscreenPhoto) {
+            FullscreenPhotoViewer(
+                photoUri = media.uri,
+                onDismissRequest = { showFullscreenPhoto = false }
             )
         }
     }
