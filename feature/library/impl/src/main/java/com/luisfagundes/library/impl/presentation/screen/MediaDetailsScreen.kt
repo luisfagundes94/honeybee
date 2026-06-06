@@ -358,7 +358,10 @@ private fun MediaPagerItem(
             isFavorite = isFavorite,
             onEvent = onEvent,
             onInfoClick = { showBottomSheet = true },
-            modifier = Modifier.align(Alignment.BottomEnd)
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(MaterialTheme.spacing.default)
+                .background(Color.Black.copy(alpha = 0.3f), CircleShape)
         )
 
         if (showBottomSheet) {
@@ -382,9 +385,6 @@ private fun MediaPagerItemActionsColumn(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
-            .padding(MaterialTheme.spacing.default)
-            .background(Color.Black.copy(alpha = 0.3f), CircleShape)
-            .padding(MaterialTheme.spacing.verySmall)
     ) {
         val sharePhotoTitle = stringResource(R.string.share_photo)
 
