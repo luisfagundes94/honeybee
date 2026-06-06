@@ -7,6 +7,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import android.view.LayoutInflater
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
@@ -15,6 +16,7 @@ import androidx.media3.common.VideoSize
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import com.luisfagundes.library.impl.R
 
 @OptIn(UnstableApi::class)
 @Composable
@@ -61,12 +63,14 @@ internal fun VideoPlayer(
 
     AndroidView(
         factory = { ctx ->
-            PlayerView(ctx).apply {
-                player = exoPlayer
+            (LayoutInflater.from(ctx).inflate(R.layout.view_video_player, null) as PlayerView).apply {
                 useController = true
                 controllerAutoShow = false
                 hideController()
             }
+        },
+        update = { playerView ->
+            playerView.player = exoPlayer
         },
         modifier = modifier.fillMaxSize()
     )
