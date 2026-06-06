@@ -72,6 +72,9 @@ You can find the Hilt custom annotations at core/common/src/main/java/com/luisfa
 ### Presentation Layer
 
 - Extension or helper functions related to UI should be put in a presentation/tools folder. If it's used in more than one module, put it in :core:common:presentation:tools
+- Don't use hardcoded strings for texts and content descriptions. Use strings.xml
+- Don't use hardcoded colors. Use MaterialTheme.colorScheme. 
+- Don't use hardcoded dimensions. Use MaterialTheme.spacing. If MaterialTheme.spacing.* does not have a specific value, you can use `dp` values.
 
 ### Testing
 
