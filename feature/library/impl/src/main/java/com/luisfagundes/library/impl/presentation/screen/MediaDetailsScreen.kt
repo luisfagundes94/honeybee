@@ -10,6 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -37,8 +38,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -271,6 +274,7 @@ private fun MediaPagerItem(
     modifier: Modifier = Modifier
 ) {
     val coroutineScope = rememberCoroutineScope()
+    var aspectRatio by remember(photo.id) { mutableStateOf<Float?>(null) }
 
     Box(
         contentAlignment = Alignment.Center,
@@ -280,13 +284,17 @@ private fun MediaPagerItem(
         val swipeLimit = -350f
 
         Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default)
         ) {
             Card(
                 shape = RoundedCornerShape(24.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-                modifier = Modifier
-                    .fillMaxSize()
+                modifier = (if (aspectRatio != null) {
+                    Modifier.aspectRatio(aspectRatio!!)
+                } else {
+                    Modifier.fillMaxSize()
+                })
                     .graphicsLayer {
                         translationY = swipeOffset.value
                         alpha = (1f + (swipeOffset.value / 1200f)).coerceIn(0.2f, 1f)
@@ -321,7 +329,13 @@ private fun MediaPagerItem(
                 AsyncImage(
                     model = photo.uri,
                     contentDescription = null,
-                    contentScale = ContentScale.Crop,
+                    contentScale = ContentScale.Fit,
+                    onSuccess = { state ->
+                        val size = state.painter.intrinsicSize
+                        if (size.width > 0 && size.height > 0) {
+                            aspectRatio = size.width / size.height
+                        }
+                    },
                     modifier = Modifier.fillMaxSize()
                 )
             }
