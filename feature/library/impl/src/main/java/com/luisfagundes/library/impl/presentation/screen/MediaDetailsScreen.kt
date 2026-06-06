@@ -275,14 +275,38 @@ private fun MediaPagerItem(
 ) {
     val coroutineScope = rememberCoroutineScope()
     var aspectRatio by remember(photo.id) { mutableStateOf<Float?>(null) }
+    val swipeOffset = remember(photo.id) { Animatable(0f) }
+    val swipeLimit = -350f
 
     Box(
         contentAlignment = Alignment.Center,
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
+            .pointerInput(photo.id) {
+                detectVerticalDragGestures(
+                    onDragEnd = {
+                        if (swipeOffset.value < swipeLimit) {
+                            coroutineScope.launch {
+                                swipeOffset.animateTo(-1500f, tween(300))
+                                onEvent(MediaDetailsUiEvent.SwipeUp(photo.id))
+                            }
+                        } else {
+                            coroutineScope.launch {
+                                swipeOffset.animateTo(0f, spring())
+                            }
+                        }
+                    },
+                    onVerticalDrag = { change, dragAmount ->
+                        if (dragAmount < 0 || swipeOffset.value < 0) {
+                            change.consume()
+                            coroutineScope.launch {
+                                swipeOffset.snapTo(swipeOffset.value + dragAmount)
+                            }
+                        }
+                    }
+                )
+            }
     ) {
-        val swipeOffset = remember(photo.id) { Animatable(0f) }
-        val swipeLimit = -350f
-
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default)
@@ -300,30 +324,6 @@ private fun MediaPagerItem(
                         alpha = (1f + (swipeOffset.value / 1200f)).coerceIn(0.2f, 1f)
                         shape = RoundedCornerShape(24.dp)
                         clip = true
-                    }
-                    .pointerInput(photo.id) {
-                        detectVerticalDragGestures(
-                            onDragEnd = {
-                                if (swipeOffset.value < swipeLimit) {
-                                    coroutineScope.launch {
-                                        swipeOffset.animateTo(-1500f, tween(300))
-                                        onEvent(MediaDetailsUiEvent.SwipeUp(photo.id))
-                                    }
-                                } else {
-                                    coroutineScope.launch {
-                                        swipeOffset.animateTo(0f, spring())
-                                    }
-                                }
-                            },
-                            onVerticalDrag = { change, dragAmount ->
-                                if (dragAmount < 0 || swipeOffset.value < 0) {
-                                    change.consume()
-                                    coroutineScope.launch {
-                                        swipeOffset.snapTo(swipeOffset.value + dragAmount)
-                                    }
-                                }
-                            }
-                        )
                     }
             ) {
                 AsyncImage(
