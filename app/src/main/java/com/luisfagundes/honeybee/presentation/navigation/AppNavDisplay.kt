@@ -1,9 +1,5 @@
 package com.luisfagundes.honeybee.presentation.navigation
 
-import androidx.compose.animation.ContentTransform
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -27,17 +23,6 @@ fun AppNavDisplay(
             rememberViewModelStoreNavEntryDecorator(),
         ),
         entryProvider = entryProvider,
-        transitionSpec = { slideForward() },
-        popTransitionSpec = { slideBackward() },
-        predictivePopTransitionSpec = { slideBackward() },
         modifier = modifier
     )
 }
-
-private fun slideForward(): ContentTransform =
-    slideInHorizontally(initialOffsetX = { it }) togetherWith
-            slideOutHorizontally(targetOffsetX = { -it })
-
-private fun slideBackward(): ContentTransform =
-    slideInHorizontally(initialOffsetX = { -it }) togetherWith
-            slideOutHorizontally(targetOffsetX = { it })
