@@ -16,6 +16,12 @@
             <option value="$PROJECT_DIR$/core/designsystem" />
             <option value="$PROJECT_DIR$/core/testing" />
             <option value="$PROJECT_DIR$/feature" />
+            <option value="$PROJECT_DIR$/feature/albums" />
+            <option value="$PROJECT_DIR$/feature/albums/api" />
+            <option value="$PROJECT_DIR$/feature/albums/impl" />
+            <option value="$PROJECT_DIR$/feature/config" />
+            <option value="$PROJECT_DIR$/feature/config/api" />
+            <option value="$PROJECT_DIR$/feature/config/impl" />
             <option value="$PROJECT_DIR$/feature/library" />
             <option value="$PROJECT_DIR$/feature/library/api" />
             <option value="$PROJECT_DIR$/feature/library/impl" />
