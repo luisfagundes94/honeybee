@@ -15,8 +15,10 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.material3.adaptive.navigationsuite.rememberNavigationSuiteScaffoldState
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,6 +31,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -64,100 +67,124 @@ class MainActivity : ComponentActivity() {
                 val startRoute = if (onboardingCompleted == true) LibraryRoute else OnboardingRoute
                 val backStack = rememberNavBackStack(startRoute)
 
-                CompositionLocalProvider(LocalNavBackStack provides backStack) {
-                    Surface(
-                        modifier = Modifier.fillMaxSize(),
-                        color = MaterialTheme.colorScheme.background
-                    ) {
-                        val currentRoute = backStack.lastOrNull()
-                        val topLevelRoutes = remember {
-                            setOf(LibraryRoute, AlbumsRoute, ConfigRoute)
-                        }
-                        val shouldShowNavBar = currentRoute in topLevelRoutes
-
-                        var isScrolledVisible by remember { mutableStateOf(true) }
-                        LaunchedEffect(currentRoute) {
-                            isScrolledVisible = true
-                        }
-
-                        val adaptiveInfo = currentWindowAdaptiveInfo()
-                        val layoutType = NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(adaptiveInfo)
-                        val isBottomBar = layoutType == NavigationSuiteType.NavigationBar
-
-                        val nestedScrollConnection = remember(isBottomBar, currentRoute) {
-                            object : NestedScrollConnection {
-                                override fun onPreScroll(
-                                    available: Offset,
-                                    source: NestedScrollSource
-                                ): Offset {
-                                    if (isBottomBar && currentRoute == LibraryRoute) {
-                                        if (available.y < -5f) {
-                                            isScrolledVisible = false
-                                        } else if (available.y > 5f) {
-                                            isScrolledVisible = true
-                                        }
-                                    }
-                                    return Offset.Zero
-                                }
-                            }
-                        }
-
-                        LaunchedEffect(isBottomBar) {
-                            if (!isBottomBar) {
-                                isScrolledVisible = true
-                            }
-                        }
-
-                        val isNavBarVisible = shouldShowNavBar && (currentRoute != LibraryRoute || isScrolledVisible)
-                        val scaffoldVisibilityState = rememberNavigationSuiteScaffoldState()
-
-                        LaunchedEffect(isNavBarVisible) {
-                            if (isNavBarVisible) {
-                                scaffoldVisibilityState.show()
-                            } else {
-                                scaffoldVisibilityState.hide()
-                            }
-                        }
-
-                        NavigationSuiteScaffold(
-                            state = scaffoldVisibilityState,
-                            navigationSuiteItems = {
-                                TopLevelDestination.entries.forEach { destination ->
-                                    item(
-                                        selected = currentRoute == destination.route,
-                                        onClick = {
-                                            if (currentRoute != destination.route) {
-                                                backStack.clear()
-                                                backStack.add(destination.route)
-                                            }
-                                        },
-                                        icon = {
-                                            Icon(
-                                                imageVector = destination.icon,
-                                                contentDescription = stringResource(destination.labelRes)
-                                            )
-                                        },
-                                        label = {
-                                            Text(text = stringResource(destination.labelRes))
-                                        }
-                                    )
-                                }
-                            },
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .nestedScroll(nestedScrollConnection)
-                        ) {
-                            AppNavDisplay(
-                                backStack = backStack,
-                                entryProvider = entryProvider {
-                                    entryBuilders.forEach { it(this) }
-                                },
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        }
-                    }
-                }
+                MainContent(
+                    backStack = backStack,
+                    entryBuilders = entryBuilders
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun MainContent(
+    backStack: NavBackStack<NavKey>,
+    entryBuilders: Set<(EntryProviderScope<NavKey>) -> Unit>,
+    modifier: Modifier = Modifier,
+) {
+    CompositionLocalProvider(LocalNavBackStack provides backStack) {
+        Surface(
+            modifier = modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            val currentRoute = backStack.lastOrNull()
+            val topLevelRoutes = remember {
+                setOf(LibraryRoute, AlbumsRoute, ConfigRoute)
+            }
+            val shouldShowNavBar = currentRoute in topLevelRoutes
+
+            val adaptiveInfo = currentWindowAdaptiveInfo()
+            val layoutType = NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(adaptiveInfo)
+            val isBottomBar = layoutType == NavigationSuiteType.NavigationBar
+
+            val scrollState = rememberScaffoldScrollState(
+                currentRoute = currentRoute,
+                isBottomBar = isBottomBar,
+            )
+
+            val isScrollVisible = currentRoute != LibraryRoute || scrollState.isScrolledVisible
+            val isNavBarVisible = shouldShowNavBar && isScrollVisible
+            val scaffoldVisibilityState = rememberNavigationSuiteScaffoldState()
+
+            LaunchedEffect(isNavBarVisible) {
+                if (isNavBarVisible) {
+                    scaffoldVisibilityState.show()
+                } else {
+                    scaffoldVisibilityState.hide()
+                }
+            }
+
+            NavigationSuiteScaffold(
+                state = scaffoldVisibilityState,
+                navigationSuiteItems = {
+                    TopLevelDestination.entries.forEach { destination ->
+                        item(
+                            selected = currentRoute == destination.route,
+                            onClick = {
+                                if (currentRoute != destination.route) {
+                                    backStack.clear()
+                                    backStack.add(destination.route)
+                                }
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = destination.icon,
+                                    contentDescription = stringResource(destination.labelRes)
+                                )
+                            },
+                            label = {
+                                Text(text = stringResource(destination.labelRes))
+                            }
+                        )
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .nestedScroll(scrollState.nestedScrollConnection)
+            ) {
+                AppNavDisplay(
+                    backStack = backStack,
+                    entryProvider = entryProvider {
+                        entryBuilders.forEach { it(this) }
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+    }
+}
+
+@Stable
+private class ScaffoldScrollState(
+    isBottomBar: Boolean,
+    currentRoute: NavKey?,
+) {
+    var isScrolledVisible by mutableStateOf(true)
+        private set
+
+    val nestedScrollConnection = object : NestedScrollConnection {
+        override fun onPreScroll(
+            available: Offset,
+            source: NestedScrollSource
+        ): Offset {
+            if (isBottomBar && currentRoute == LibraryRoute) {
+                if (available.y < -5f) {
+                    isScrolledVisible = false
+                } else if (available.y > 5f) {
+                    isScrolledVisible = true
+                }
+            }
+            return Offset.Zero
+        }
+    }
+}
+
+@Composable
+private fun rememberScaffoldScrollState(
+    currentRoute: NavKey?,
+    isBottomBar: Boolean,
+): ScaffoldScrollState {
+    return remember(isBottomBar, currentRoute) {
+        ScaffoldScrollState(isBottomBar, currentRoute)
     }
 }
