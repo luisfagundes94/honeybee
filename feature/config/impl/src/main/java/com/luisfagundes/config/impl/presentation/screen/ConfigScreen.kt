@@ -27,6 +27,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import com.luisfagundes.designsystem.theme.spacing
 import com.luisfagundes.config.impl.R
 
@@ -42,7 +44,12 @@ internal fun ConfigScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(text = stringResource(R.string.config)) },
+                title = {
+                    Text(
+                        text = stringResource(R.string.config),
+                        modifier = Modifier.semantics { heading() }
+                    )
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 )
@@ -59,10 +66,12 @@ internal fun ConfigScreen(
                 text = "Preferences",
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(
-                    horizontal = MaterialTheme.spacing.default,
-                    vertical = MaterialTheme.spacing.small
-                )
+                modifier = Modifier
+                    .padding(
+                        horizontal = MaterialTheme.spacing.default,
+                        vertical = MaterialTheme.spacing.small
+                    )
+                    .semantics { heading() }
             )
 
             ConfigToggleItem(
@@ -85,10 +94,12 @@ internal fun ConfigScreen(
                 text = "About",
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(
-                    horizontal = MaterialTheme.spacing.default,
-                    vertical = MaterialTheme.spacing.small
-                )
+                modifier = Modifier
+                    .padding(
+                        horizontal = MaterialTheme.spacing.default,
+                        vertical = MaterialTheme.spacing.small
+                    )
+                    .semantics { heading() }
             )
 
             ListItem(

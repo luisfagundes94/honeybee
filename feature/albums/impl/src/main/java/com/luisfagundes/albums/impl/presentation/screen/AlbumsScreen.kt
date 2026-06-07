@@ -34,6 +34,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.luisfagundes.designsystem.theme.spacing
@@ -48,7 +50,12 @@ internal fun AlbumsScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(text = stringResource(R.string.albums)) },
+                title = {
+                    Text(
+                        text = stringResource(R.string.albums),
+                        modifier = Modifier.semantics { heading() }
+                    )
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 )
@@ -56,12 +63,42 @@ internal fun AlbumsScreen(
         }
     ) { innerPadding ->
         val albums = listOf(
-            AlbumItem("Camera", 1240, Icons.Default.Camera, Brush.linearGradient(listOf(Color(0xFFFF8A80), Color(0xFFFF5252)))),
-            AlbumItem("Favorites", 245, Icons.Default.Favorite, Brush.linearGradient(listOf(Color(0xFFFF80AB), Color(0xFFFF4081)))),
-            AlbumItem("Screenshots", 87, Icons.Default.Image, Brush.linearGradient(listOf(Color(0xFF82B1FF), Color(0xFF448AFF)))),
-            AlbumItem("Videos", 312, Icons.Default.VideoLibrary, Brush.linearGradient(listOf(Color(0xFFB388FF), Color(0xFF7C4DFF)))),
-            AlbumItem("Downloads", 143, Icons.Default.Folder, Brush.linearGradient(listOf(Color(0xFF84FFFF), Color(0xFF18FFFF)))),
-            AlbumItem("WhatsApp", 622, Icons.Default.Folder, Brush.linearGradient(listOf(Color(0xFFB9F6CA), Color(0xFF69F0AE))))
+            AlbumItem(
+                "Camera",
+                1240,
+                Icons.Default.Camera,
+                Brush.linearGradient(listOf(Color(0xFFFF8A80), Color(0xFFFF5252)))
+            ),
+            AlbumItem(
+                "Favorites",
+                245,
+                Icons.Default.Favorite,
+                Brush.linearGradient(listOf(Color(0xFFFF80AB), Color(0xFFFF4081)))
+            ),
+            AlbumItem(
+                "Screenshots",
+                87,
+                Icons.Default.Image,
+                Brush.linearGradient(listOf(Color(0xFF82B1FF), Color(0xFF448AFF)))
+            ),
+            AlbumItem(
+                "Videos",
+                312,
+                Icons.Default.VideoLibrary,
+                Brush.linearGradient(listOf(Color(0xFFB388FF), Color(0xFF7C4DFF)))
+            ),
+            AlbumItem(
+                "Downloads",
+                143,
+                Icons.Default.Folder,
+                Brush.linearGradient(listOf(Color(0xFF84FFFF), Color(0xFF18FFFF)))
+            ),
+            AlbumItem(
+                "WhatsApp",
+                622,
+                Icons.Default.Folder,
+                Brush.linearGradient(listOf(Color(0xFFB9F6CA), Color(0xFF69F0AE)))
+            )
         )
 
         LazyVerticalGrid(

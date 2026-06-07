@@ -49,6 +49,8 @@ import com.luisfagundes.designsystem.theme.spacing
 import com.luisfagundes.library.impl.R
 import android.content.res.Configuration
 import android.net.Uri
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewWrapper
 import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
@@ -126,7 +128,12 @@ private fun Library(
         topBar = {
             CenterAlignedTopAppBar(
                 scrollBehavior = scrollBehavior,
-                title = { Text(text = stringResource(R.string.library)) },
+                title = {
+                    Text(
+                        text = stringResource(R.string.library),
+                        modifier = Modifier.semantics { heading() }
+                    )
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background
