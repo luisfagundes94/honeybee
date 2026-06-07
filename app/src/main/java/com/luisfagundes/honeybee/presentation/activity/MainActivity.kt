@@ -84,13 +84,13 @@ class MainActivity : ComponentActivity() {
                         val layoutType = NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(adaptiveInfo)
                         val isBottomBar = layoutType == NavigationSuiteType.NavigationBar
 
-                        val nestedScrollConnection = remember(isBottomBar) {
+                        val nestedScrollConnection = remember(isBottomBar, currentRoute) {
                             object : NestedScrollConnection {
                                 override fun onPreScroll(
                                     available: Offset,
                                     source: NestedScrollSource
                                 ): Offset {
-                                    if (isBottomBar) {
+                                    if (isBottomBar && currentRoute == LibraryRoute) {
                                         if (available.y < -5f) {
                                             isScrolledVisible = false
                                         } else if (available.y > 5f) {
@@ -108,7 +108,7 @@ class MainActivity : ComponentActivity() {
                             }
                         }
 
-                        val isNavBarVisible = shouldShowNavBar && isScrolledVisible
+                        val isNavBarVisible = shouldShowNavBar && (currentRoute != LibraryRoute || isScrolledVisible)
                         val scaffoldVisibilityState = rememberNavigationSuiteScaffoldState()
 
                         LaunchedEffect(isNavBarVisible) {
