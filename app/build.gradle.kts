@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
     alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.baselineprofile)
 }
 
 android {
@@ -91,12 +92,14 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.profileinstaller)
     implementation(libs.firebase.messaging)
     implementation(libs.coil.compose)
     implementation(libs.coil.video)
 
     // Hilt
     implementation(libs.hilt.android)
+    "baselineProfile"(project(":baselineProfile"))
     ksp(libs.hilt.compiler)
     ksp(libs.kotlinx.metadata.jvm)
 
