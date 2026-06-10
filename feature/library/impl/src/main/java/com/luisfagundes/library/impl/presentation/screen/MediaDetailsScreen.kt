@@ -108,7 +108,7 @@ internal fun MediaDetailsScreen(
         viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialMediaId))
     }
 
-    MediaDetailsContent(
+    MediaDetailsScreen(
         uiState = uiState,
         onEvent = viewModel::dispatchEvent,
         onBackClick = onNavigateBack
@@ -117,7 +117,7 @@ internal fun MediaDetailsScreen(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun MediaDetailsContent(
+private fun MediaDetailsScreen(
     uiState: MediaDetailsUiState,
     onEvent: (MediaDetailsUiEvent) -> Unit,
     onBackClick: () -> Unit
@@ -134,7 +134,7 @@ private fun MediaDetailsContent(
             onRetry = { /* Managed by key launch */ }
         )
 
-        is MediaDetailsUiState.Content -> MediaPager(
+        is MediaDetailsUiState.Content -> MediaDetailsContent(
             content = uiState,
             onEvent = onEvent,
             onBackClick = onBackClick
@@ -144,7 +144,7 @@ private fun MediaDetailsContent(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun MediaPager(
+private fun MediaDetailsContent(
     content: MediaDetailsUiState.Content,
     onEvent: (MediaDetailsUiEvent) -> Unit,
     onBackClick: () -> Unit
@@ -569,8 +569,8 @@ private fun InfoRow(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @PreviewWrapper(wrapper = HoneybeeThemeWrapper::class)
 @Composable
-private fun MediaPagerPreview() {
-    MediaPager(
+private fun MediaDetailsContentPreview() {
+    MediaDetailsContent(
         content = MediaDetailsUiState.Content(
             mediaList = listOf(
                 Media(id = 1L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L, isVideo = false),

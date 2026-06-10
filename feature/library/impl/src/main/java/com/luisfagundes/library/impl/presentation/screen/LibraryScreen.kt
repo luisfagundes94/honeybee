@@ -82,7 +82,7 @@ internal fun LibraryScreen(
         viewModel.dispatchEvent(LibraryUiEvent.LoadMedia)
     }
 
-    LibraryContent(
+    LibraryScreen(
         uiState = uiState,
         onEvent = viewModel::dispatchEvent
     )
@@ -90,7 +90,7 @@ internal fun LibraryScreen(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun LibraryContent(
+private fun LibraryScreen(
     uiState: LibraryUiState,
     onEvent: (LibraryUiEvent) -> Unit
 ) {
@@ -104,7 +104,7 @@ private fun LibraryContent(
             onRetry = { onEvent(LibraryUiEvent.LoadMedia) }
         )
 
-        is LibraryUiState.Content -> Library(
+        is LibraryUiState.Content -> LibraryContent(
             mediaSectionList = uiState.mediaSectionList,
             itemsInTrash = uiState.itemsInTrash,
             onEvent = onEvent,
@@ -115,7 +115,7 @@ private fun LibraryContent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun Library(
+private fun LibraryContent(
     mediaSectionList: List<MediaSection>,
     itemsInTrash: Int,
     onEvent: (LibraryUiEvent) -> Unit,
@@ -217,8 +217,8 @@ private fun Library(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @PreviewWrapper(wrapper = HoneybeeThemeWrapper::class)
 @Composable
-private fun LibraryContentPreview() {
-    Library(
+private fun LibraryContentContentPreview() {
+    LibraryContent(
         mediaSectionList = listOf(
             MediaSection(
                 yearMonth = YearMonth.of(2026, 6),

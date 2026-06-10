@@ -108,7 +108,7 @@ internal fun TrashScreen(
         viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
     }
 
-    TrashContent(
+    TrashScreen(
         uiState = uiState,
         onEvent = viewModel::dispatchEvent,
         onBackClick = onNavigateBack
@@ -117,7 +117,7 @@ internal fun TrashScreen(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun TrashContent(
+private fun TrashScreen(
     uiState: TrashUiState,
     onEvent: (TrashUiEvent) -> Unit,
     onBackClick: () -> Unit
@@ -134,7 +134,7 @@ private fun TrashContent(
             onRetry = { onEvent(TrashUiEvent.LoadTrash) }
         )
 
-        is TrashUiState.Content -> Trash(
+        is TrashUiState.Content -> TrashContent(
             mediaToBeDeleted = uiState.mediaToBeDeleted,
             onEvent = onEvent,
             onBackClick = onBackClick
@@ -143,7 +143,7 @@ private fun TrashContent(
 }
 
 @Composable
-private fun Trash(
+private fun TrashContent(
     mediaToBeDeleted: List<Media>,
     onEvent: (TrashUiEvent) -> Unit,
     onBackClick: () -> Unit
@@ -319,8 +319,8 @@ private fun TrashMediaItem(
 @Preview(uiMode = UI_MODE_NIGHT_NO)
 @PreviewWrapper(wrapper = HoneybeeThemeWrapper::class)
 @Composable
-private fun TrashPreview() {
-    Trash(
+private fun TrashContentPreview() {
+    TrashContent(
         mediaToBeDeleted = listOf(
             Media(id = 1L, uri = Uri.EMPTY, dateAdded = 0L, size = 1024L, isVideo = false),
             Media(id = 2L, uri = Uri.EMPTY, dateAdded = 0L, size = 2048L, isVideo = true),
