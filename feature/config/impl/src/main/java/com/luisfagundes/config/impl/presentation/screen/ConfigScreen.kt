@@ -111,7 +111,7 @@ internal fun ConfigScreen(
                         onClick = { /* TODO: Navigate to statistics */ }
                     )
                     HorizontalDivider(
-                        modifier = Modifier.padding(start = 56.dp),
+                        modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default),
                         color = MaterialTheme.colorScheme.outlineVariant
                     )
                     ConfigItem(
@@ -171,10 +171,6 @@ internal fun ConfigScreen(
                             )
                         },
                         onClick = { isNotificationsEnabled = !isNotificationsEnabled }
-                    )
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default),
-                        color = MaterialTheme.colorScheme.outlineVariant
                     )
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default),
