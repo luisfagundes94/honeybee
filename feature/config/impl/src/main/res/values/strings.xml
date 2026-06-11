@@ -9,7 +9,6 @@
     <string name="config_item_rate_app">Rate app</string>
     <string name="config_item_send_feedback">Send Feedback</string>
     <string name="config_item_share_with_friends">Share with Friends</string>
-    <string name="config_item_report_issue">Report Issue</string>
     <string name="feedback_title">How can we help you?</string>
     <string name="feedback_placeholder">Tell us more details…</string>
     <string name="feedback_submit">Submit</string>

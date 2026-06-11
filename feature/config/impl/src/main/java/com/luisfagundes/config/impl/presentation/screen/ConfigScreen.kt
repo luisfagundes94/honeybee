@@ -17,7 +17,6 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.BackHand
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.ReportProblem
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
@@ -180,15 +179,6 @@ internal fun ConfigScreen(
                     ConfigItem(
                         title = stringResource(R.string.config_item_rate_app),
                         icon = Icons.Default.StarBorder,
-                        onClick = { /* TODO: Trigger Rate App */ }
-                    )
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default),
-                        color = MaterialTheme.colorScheme.outlineVariant
-                    )
-                    ConfigItem(
-                        title = stringResource(R.string.config_item_report_issue),
-                        icon = Icons.Default.ReportProblem,
                         onClick = { /* TODO: Trigger Rate App */ }
                     )
                     HorizontalDivider(
