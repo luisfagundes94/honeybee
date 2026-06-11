@@ -1,6 +1,7 @@
 package com.luisfagundes.config.impl.presentation.screen
 
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -24,37 +24,65 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewWrapper
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.luisfagundes.config.impl.R
+import com.luisfagundes.config.impl.presentation.effect.FeedbackUiEffect
+import com.luisfagundes.config.impl.presentation.event.FeedbackUiEvent
+import com.luisfagundes.config.impl.presentation.state.FeedbackUiState
+import com.luisfagundes.config.impl.presentation.viewmodel.FeedbackViewModel
+import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.designsystem.components.HoneybeeButton
 import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.designsystem.theme.spacing
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun FeedbackScreen(
     onNavigateBack: () -> Unit,
-    onSubmitFeedback: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: FeedbackViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    CollectUiEffects(viewModel.uiEffect) { effect ->
+        when (effect) {
+            FeedbackUiEffect.NavigateBack -> onNavigateBack()
+            is FeedbackUiEffect.ShowToast -> {
+                Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    FeedbackScreen(
+        uiState = uiState,
+        onEvent = viewModel::dispatchEvent,
+        modifier = modifier
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FeedbackScreen(
+    uiState: FeedbackUiState,
+    onEvent: (FeedbackUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var feedbackText by remember { mutableStateOf("") }
-
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text(stringResource(R.string.feedback)) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = { onEvent(FeedbackUiEvent.BackClick) }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(
@@ -71,16 +99,12 @@ internal fun FeedbackScreen(
         },
         bottomBar = {
             HoneybeeButton(
-                onClick = { onSubmitFeedback(feedbackText) },
+                onClick = { onEvent(FeedbackUiEvent.SubmitFeedback) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .navigationBarsPadding()
                     .padding(MaterialTheme.spacing.default),
-                enabled = feedbackText.isNotBlank(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
+                enabled = uiState.isSubmitButtonEnabled
             ) {
                 Text(
                     text = stringResource(R.string.feedback_submit),
@@ -105,8 +129,8 @@ internal fun FeedbackScreen(
                 color = MaterialTheme.colorScheme.onBackground
             )
             TextField(
-                value = feedbackText,
-                onValueChange = { feedbackText = it },
+                value = uiState.feedbackText,
+                onValueChange = { onEvent(FeedbackUiEvent.UpdateFeedbackText(it)) },
                 placeholder = {
                     Text(
                         text = stringResource(R.string.feedback_placeholder),
@@ -140,7 +164,7 @@ internal fun FeedbackScreen(
 @Composable
 private fun FeedbackScreenPreview() {
     FeedbackScreen(
-        onNavigateBack = {},
-        onSubmitFeedback = {}
+        uiState = FeedbackUiState(feedbackText = "This is a feedback"),
+        onEvent = {}
     )
 }
