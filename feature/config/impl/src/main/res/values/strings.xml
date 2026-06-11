@@ -1,3 +1,13 @@
 <resources>
     <string name="config">Config</string>
+    <string name="config_category_my_data">My Data</string>
+    <string name="config_category_other">Other</string>
+    <string name="config_item_statistics">Statistics</string>
+    <string name="config_item_privacy">Privacy</string>
+    <string name="config_item_premium">Premium</string>
+    <string name="config_item_notifications">Notifications</string>
+    <string name="config_item_rate_app">Rate app</string>
+    <string name="config_item_send_feedback">Send Feedback</string>
+    <string name="config_item_share_with_friends">Share with Friends</string>
+    <string name="config_item_report_issue">Report Issue</string>
 </resources>

@@ -1,19 +1,39 @@
 package com.luisfagundes.config.impl.presentation.screen
 
+import android.content.res.Configuration
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.filled.BackHand
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.ReportProblem
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
+import androidx.compose.material.icons.filled.Vibration
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -24,25 +44,26 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import com.luisfagundes.designsystem.theme.spacing
-import com.luisfagundes.config.impl.R
-import android.content.res.Configuration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewWrapper
+import androidx.compose.ui.unit.dp
+import com.luisfagundes.config.impl.R
 import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
+import com.luisfagundes.designsystem.theme.spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ConfigScreen(
     modifier: Modifier = Modifier
 ) {
-    var isDarkModeEnabled by remember { mutableStateOf(true) }
-    var isStorageOptimizationEnabled by remember { mutableStateOf(false) }
+    var isNotificationsEnabled by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -66,8 +87,10 @@ internal fun ConfigScreen(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
         ) {
+            Spacer(modifier = Modifier.height(MaterialTheme.spacing.default))
+
             Text(
-                text = "Preferences",
+                text = stringResource(R.string.config_category_my_data),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
@@ -78,24 +101,37 @@ internal fun ConfigScreen(
                     .semantics { heading() }
             )
 
-            ConfigToggleItem(
-                title = "Dark Mode",
-                subtitle = "Use dark color scheme throughout the application",
-                icon = Icons.Default.Palette,
-                checked = isDarkModeEnabled,
-                onCheckedChange = { isDarkModeEnabled = it }
-            )
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = MaterialTheme.spacing.default)
+            ) {
+                Column {
+                    ConfigItem(
+                        title = stringResource(R.string.config_item_statistics),
+                        icon = Icons.AutoMirrored.Filled.TrendingUp,
+                        onClick = { /* TODO: Navigate to statistics */ }
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(start = 56.dp),
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
+                    ConfigItem(
+                        title = stringResource(R.string.config_item_privacy),
+                        icon = Icons.Default.BackHand,
+                        onClick = { /* TODO: Navigate to privacy */ }
+                    )
+                }
+            }
 
-            ConfigToggleItem(
-                title = "Smart Cleanup",
-                subtitle = "Auto-group similar photos for easier sorting",
-                icon = Icons.Default.Storage,
-                checked = isStorageOptimizationEnabled,
-                onCheckedChange = { isStorageOptimizationEnabled = it }
-            )
+            Spacer(modifier = Modifier.height(MaterialTheme.spacing.default))
 
             Text(
-                text = "About",
+                text = stringResource(R.string.config_category_other),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
@@ -106,56 +142,130 @@ internal fun ConfigScreen(
                     .semantics { heading() }
             )
 
-            ListItem(
-                headlineContent = { Text("Version") },
-                supportingContent = { Text("1.0.0 (Release)") },
-                leadingContent = {
-                    Icon(
-                        imageVector = Icons.Default.Info,
-                        contentDescription = null
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = MaterialTheme.spacing.default)
+            ) {
+                Column {
+                    ConfigItem(
+                        title = stringResource(R.string.config_item_premium),
+                        icon = Icons.Default.Star,
+                        iconContainer = {
+                            Icon(
+                                imageVector = Icons.Default.Star,
+                                contentDescription = null
+                            )
+                        },
+                        onClick = { /* TODO: Go to Premium screen */ }
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default),
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
+                    ConfigItem(
+                        title = stringResource(R.string.config_item_notifications),
+                        icon = Icons.Default.Notifications,
+                        trailingContent = {
+                            Switch(
+                                checked = isNotificationsEnabled,
+                                onCheckedChange = { isNotificationsEnabled = it }
+                            )
+                        },
+                        onClick = { isNotificationsEnabled = !isNotificationsEnabled }
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default),
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default),
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
+                    ConfigItem(
+                        title = stringResource(R.string.config_item_rate_app),
+                        icon = Icons.Default.StarBorder,
+                        onClick = { /* TODO: Trigger Rate App */ }
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default),
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
+                    ConfigItem(
+                        title = stringResource(R.string.config_item_report_issue),
+                        icon = Icons.Default.ReportProblem,
+                        onClick = { /* TODO: Trigger Rate App */ }
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default),
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
+                    ConfigItem(
+                        title = stringResource(R.string.config_item_send_feedback),
+                        icon = Icons.AutoMirrored.Filled.HelpOutline,
+                        onClick = { /* TODO: Navigate to Feedback screen */ }
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default),
+                        color = MaterialTheme.colorScheme.outlineVariant
+                    )
+                    ConfigItem(
+                        title = stringResource(R.string.config_item_share_with_friends),
+                        icon = Icons.Default.Share,
+                        onClick = { /* TODO: Share App */ }
                     )
                 }
-            )
+            }
 
-            ListItem(
-                headlineContent = { Text("Database Status") },
-                supportingContent = { Text("Healthy (SQLite Room)") },
-                leadingContent = {
-                    Icon(
-                        imageVector = Icons.Default.Storage,
-                        contentDescription = null
-                    )
-                }
-            )
+            Spacer(modifier = Modifier.height(MaterialTheme.spacing.default))
         }
     }
 }
 
 @Composable
-private fun ConfigToggleItem(
+private fun ConfigItem(
     title: String,
-    subtitle: String,
     icon: ImageVector,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    iconContainer: (@Composable () -> Unit)? = null,
+    trailingContent: (@Composable () -> Unit)? = null,
+    onClick: (() -> Unit)? = null
 ) {
     ListItem(
-        headlineContent = { Text(text = title) },
-        supportingContent = { Text(text = subtitle) },
+        headlineContent = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        },
         leadingContent = {
+            if (iconContainer != null) {
+                iconContainer()
+            } else {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        },
+        trailingContent = trailingContent ?: {
             Icon(
-                imageVector = icon,
-                contentDescription = null
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         },
-        trailingContent = {
-            Switch(
-                checked = checked,
-                onCheckedChange = onCheckedChange
-            )
-        },
-        modifier = modifier.clickable { onCheckedChange(!checked) }
+        colors = ListItemDefaults.colors(
+            containerColor = Color.Transparent
+        ),
+        modifier = modifier.let {
+            if (onClick != null) it.clickable(onClick = onClick) else it
+        }
     )
 }
 
