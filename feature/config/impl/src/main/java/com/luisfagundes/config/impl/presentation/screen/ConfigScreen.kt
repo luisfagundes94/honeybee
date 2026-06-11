@@ -55,6 +55,7 @@ import com.luisfagundes.designsystem.theme.spacing
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ConfigScreen(
+    onNavigateToFeedback: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var isNotificationsEnabled by remember { mutableStateOf(false) }
@@ -197,7 +198,7 @@ internal fun ConfigScreen(
                     ConfigItem(
                         title = stringResource(R.string.config_item_send_feedback),
                         icon = Icons.AutoMirrored.Filled.HelpOutline,
-                        onClick = { /* TODO: Navigate to Feedback screen */ }
+                        onClick = onNavigateToFeedback
                     )
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default),
@@ -264,5 +265,7 @@ private fun ConfigItem(
 @PreviewWrapper(wrapper = HoneybeeThemeWrapper::class)
 @Composable
 private fun ConfigScreenPreview() {
-    ConfigScreen()
+    ConfigScreen(
+        onNavigateToFeedback = {}
+    )
 }
