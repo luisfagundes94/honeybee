@@ -27,7 +27,7 @@ Use conventional commits. The commit message should be structured as follows:
 
 Each feature module must have its own `data/`, `domain/`, `presentation/`, and `di/` sub-packages.
 
-**Visibility convention**: All domain models, use cases, repositories, ViewModels, and DI modules are `internal`. Only navigation routes and the `tripSection()` extension are public. Default to `internal` for new types.
+**Visibility convention**: All domain models, use cases, repositories, ViewModels, and DI modules are `internal`. Only navigation routes are public. Default to `internal` for new types.
 
 ### ViewModel Hierarchy
 
@@ -96,7 +96,3 @@ class MyViewModelTest {
 
 - Use `MaterialTheme.spacing.*` (`verySmall=4dp`, `small=8dp`, `default=16dp`, `large=32dp`, `veryLarge=42dp`, `extraLarge=52dp`) instead of hardcoded `dp` values
 - Use Material3 always
-
-### New Module Checklist
-
-- Default types to `internal` visibility in feature modules
