@@ -1,11 +1,13 @@
 package com.luisfagundes.library.impl.data.repository
 
 import android.app.PendingIntent
-import android.os.Build
 import android.content.ContentUris
 import android.content.Context
+import android.net.Uri
+import android.os.Build
 import android.provider.MediaStore
 import com.luisfagundes.core.common.di.DefaultDispatcher
+import com.luisfagundes.core.common.tools.safeRunCatching
 import com.luisfagundes.library.impl.data.datasource.LibraryDataSource
 import com.luisfagundes.library.impl.data.datasource.LibraryPreferences
 import com.luisfagundes.library.impl.data.mapper.MediaMapper
@@ -19,11 +21,18 @@ import java.time.Instant
 import java.time.YearMonth
 import java.time.ZoneId
 import javax.inject.Inject
+import com.luisfagundes.library.api.domain.model.Statistics
+import com.luisfagundes.library.impl.data.database.dao.StatisticsDao
+import com.luisfagundes.library.impl.data.database.entity.StatisticsEntity
+import com.luisfagundes.library.impl.data.mapper.StatisticsMapper
+import com.luisfagundes.library.impl.data.model.MediaDto
 
 internal class LibraryRepositoryImpl @Inject constructor(
     private val dataSource: LibraryDataSource,
     private val mediaMapper: MediaMapper,
     private val preferences: LibraryPreferences,
+    private val statisticsDao: StatisticsDao,
+    private val statisticsMapper: StatisticsMapper,
     @param:ApplicationContext private val context: Context,
     @param:DefaultDispatcher private val dispatcher: CoroutineDispatcher
 ) : LibraryRepository {
@@ -57,7 +66,7 @@ internal class LibraryRepositoryImpl @Inject constructor(
             mediaList.filter { media ->
                 media.id !in trashedIds && media.id !in deletedIds
             }.map { mediaMapper.mapToDomain(it) }
-             .sortedByDescending { it.dateAdded }
+                .sortedByDescending { it.dateAdded }
         }
     }
 
@@ -89,7 +98,29 @@ internal class LibraryRepositoryImpl @Inject constructor(
         preferences.setTrashedPhotoIds(trashedIds)
     }
 
-    override suspend fun permanentlyDelete(mediaIds: List<Long>) = withContext(dispatcher) {
+    override suspend fun permanentlyDelete(mediaList: List<Media>) = withContext(dispatcher) {
+        val mediaIds = mediaList.map { it.id }
+        updatePreferencesForDeletion(mediaIds)
+
+        val videoIds = mediaList.filter { it.isVideo }.map { it.id }.toSet()
+
+        updateStatisticsForDeletedMedia(mediaList)
+        deleteFromMediaStore(mediaIds, videoIds)
+    }
+
+    override suspend fun createDeleteRequest(mediaIds: List<Long>): PendingIntent? =
+        withContext(dispatcher) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                val allMedia = dataSource.fetchMediaList().getOrNull() ?: emptyList()
+                val videoIds = allMedia.filter { it.isVideo }.map { it.id }.toSet()
+
+                val uris = mediaIds.map { getMediaUri(it, videoIds) }
+                return@withContext MediaStore.createDeleteRequest(context.contentResolver, uris)
+            }
+            return@withContext null
+        }
+
+    private fun updatePreferencesForDeletion(mediaIds: List<Long>) {
         val trashedIds = preferences.getTrashedPhotoIds().toMutableSet()
         trashedIds.removeAll(mediaIds.toSet())
         preferences.setTrashedPhotoIds(trashedIds)
@@ -97,18 +128,40 @@ internal class LibraryRepositoryImpl @Inject constructor(
         val deletedIds = preferences.getDeletedPhotoIds().toMutableSet()
         deletedIds.addAll(mediaIds)
         preferences.setDeletedPhotoIds(deletedIds)
+    }
 
-        // Query the dataSource to find which IDs correspond to videos
-        val allMedia = dataSource.fetchMediaList().getOrNull() ?: emptyList()
-        val videoIds = allMedia.filter { it.isVideo }.map { it.id }.toSet()
+    private fun updateStatisticsForDeletedMedia(mediaList: List<Media>) {
+        try {
+            if (mediaList.isEmpty()) return
 
+            val addedVideos = mediaList.count { it.isVideo }
+            val addedPhotos = mediaList.count { !it.isVideo }
+            val addedSize = mediaList.sumOf { it.size }
+            val addedTotal = mediaList.size
+
+            val currentStats = statisticsDao.getStatistics() ?: StatisticsEntity(
+                memoryCleared = 0L,
+                mediaDeleted = 0,
+                photosDeleted = 0,
+                videosDeleted = 0
+            )
+
+            val updatedStats = currentStats.copy(
+                memoryCleared = currentStats.memoryCleared + addedSize,
+                mediaDeleted = currentStats.mediaDeleted + addedTotal,
+                photosDeleted = currentStats.photosDeleted + addedPhotos,
+                videosDeleted = currentStats.videosDeleted + addedVideos
+            )
+            statisticsDao.insertOrUpdate(updatedStats)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun deleteFromMediaStore(mediaIds: List<Long>, videoIds: Set<Long>) {
         mediaIds.forEach { id ->
             try {
-                val isVideo = id in videoIds
-                val uri = ContentUris.withAppendedId(
-                    if (isVideo) MediaStore.Video.Media.EXTERNAL_CONTENT_URI else MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                    id
-                )
+                val uri = getMediaUri(id, videoIds)
                 context.contentResolver.delete(uri, null, null)
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -116,20 +169,19 @@ internal class LibraryRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun createDeleteRequest(mediaIds: List<Long>): PendingIntent? = withContext(dispatcher) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val allMedia = dataSource.fetchMediaList().getOrNull() ?: emptyList()
-            val videoIds = allMedia.filter { it.isVideo }.map { it.id }.toSet()
+    private fun getMediaUri(id: Long, videoIds: Set<Long>): Uri {
+        val isVideo = id in videoIds
+        return ContentUris.withAppendedId(
+            if (isVideo) MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+            else MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            id
+        )
+    }
 
-            val uris = mediaIds.map { id ->
-                val isVideo = id in videoIds
-                ContentUris.withAppendedId(
-                    if (isVideo) MediaStore.Video.Media.EXTERNAL_CONTENT_URI else MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                    id
-                )
-            }
-            return@withContext MediaStore.createDeleteRequest(context.contentResolver, uris)
+    override suspend fun getStatistics(): Result<Statistics> = withContext(dispatcher) {
+        safeRunCatching {
+            val entity = statisticsDao.getStatistics()
+            statisticsMapper.mapToDomain(entity)
         }
-        return@withContext null
     }
 }

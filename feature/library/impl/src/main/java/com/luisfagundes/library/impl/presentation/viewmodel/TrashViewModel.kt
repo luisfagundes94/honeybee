@@ -81,10 +81,9 @@ internal class TrashViewModel @Inject constructor(
     }
 
     private fun deleteMediaPermanently(mediaList: List<Media>) = viewModelScope.launch {
-        val deleteIds = mediaList.map { it.id }
         val count = mediaList.size
         val size = mediaList.sumOf { it.size }
-        permanentlyDeleteUseCase(deleteIds)
+        permanentlyDeleteUseCase(mediaList)
         sendEffect { TrashUiEffect.NavigateToCongratulations(count, size) }
     }
 }

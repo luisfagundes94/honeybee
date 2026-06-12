@@ -192,7 +192,7 @@ class TrashViewModelTest {
 
         coEvery { getTrashMediaUseCase() } returns Result.success(mediaList)
         coEvery { createDeleteRequestUseCase(listOf(1L, 2L)) } returns null
-        coEvery { permanentlyDeleteUseCase(listOf(1L, 2L)) } returns Unit
+        coEvery { permanentlyDeleteUseCase(mediaList) } returns Unit
 
         // When & Then
         viewModel.uiState.test {
@@ -210,7 +210,7 @@ class TrashViewModelTest {
             }
 
             coVerify(exactly = 1) { createDeleteRequestUseCase(listOf(1L, 2L)) }
-            coVerify(exactly = 1) { permanentlyDeleteUseCase(listOf(1L, 2L)) }
+            coVerify(exactly = 1) { permanentlyDeleteUseCase(mediaList) }
         }
     }
 
@@ -223,7 +223,7 @@ class TrashViewModelTest {
         val mediaList = listOf(media1, media2)
 
         coEvery { getTrashMediaUseCase() } returns Result.success(mediaList)
-        coEvery { permanentlyDeleteUseCase(listOf(1L, 2L)) } returns Unit
+        coEvery { permanentlyDeleteUseCase(mediaList) } returns Unit
 
         // When & Then
         viewModel.uiState.test {
@@ -240,7 +240,7 @@ class TrashViewModelTest {
                 assertEquals(5000L, effect.deletedSize)
             }
 
-            coVerify(exactly = 1) { permanentlyDeleteUseCase(listOf(1L, 2L)) }
+            coVerify(exactly = 1) { permanentlyDeleteUseCase(mediaList) }
         }
     }
 }

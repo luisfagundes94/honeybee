@@ -3,13 +3,19 @@ package com.luisfagundes.library.impl.data.repository
 import android.content.Context
 import android.net.Uri
 import com.luisfagundes.core.testing.MainDispatcherRule
+import com.luisfagundes.library.impl.data.database.dao.StatisticsDao
+import com.luisfagundes.library.impl.data.database.entity.StatisticsEntity
 import com.luisfagundes.library.impl.data.datasource.LibraryDataSource
 import com.luisfagundes.library.impl.data.datasource.LibraryPreferences
+import com.luisfagundes.library.impl.data.mapper.StatisticsMapper
 import com.luisfagundes.library.impl.data.mapper.MediaMapper
 import com.luisfagundes.library.impl.data.model.MediaDto
+import com.luisfagundes.library.impl.domain.model.Media
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -31,6 +37,8 @@ class LibraryRepositoryImplTest {
     private val mediaMapper = MediaMapper()
     private val preferences: LibraryPreferences = mockk()
     private val context: Context = mockk()
+    private val statisticsDao: StatisticsDao = mockk(relaxed = true)
+    private val statisticsMapper = StatisticsMapper()
 
     private lateinit var repository: LibraryRepositoryImpl
 
@@ -40,6 +48,8 @@ class LibraryRepositoryImplTest {
             dataSource = dataSource,
             mediaMapper = mediaMapper,
             preferences = preferences,
+            statisticsDao = statisticsDao,
+            statisticsMapper = statisticsMapper,
             context = context,
             dispatcher = dispatcherRule.testDispatcher
         )
@@ -84,5 +94,65 @@ class LibraryRepositoryImplTest {
         // Within May 2026, the most recent media (May 15th) must be first
         assertEquals(1L, sections[1].mediaList[0].id)
         assertEquals(3L, sections[1].mediaList[1].id)
+    }
+
+    @Test
+    fun `permanentlyDelete should update statistics and call content resolver`() = runTest {
+        // Given
+        val mediaId = 1L
+        val mockUri: Uri = mockk()
+        val mediaDto = MediaDto(id = mediaId, uri = mockUri, dateAdded = 0L, size = 100L, isVideo = false)
+        val media = Media(id = mediaId, uri = mockUri, dateAdded = 0L, size = 100L, isVideo = false)
+
+        coEvery { dataSource.fetchMediaList() } returns Result.success(listOf(mediaDto))
+        every { preferences.getTrashedPhotoIds() } returns setOf(mediaId)
+        every { preferences.getDeletedPhotoIds() } returns emptySet()
+        every { preferences.setTrashedPhotoIds(any()) } returns Unit
+        every { preferences.setDeletedPhotoIds(any()) } returns Unit
+
+        val mockContentResolver: android.content.ContentResolver = mockk(relaxed = true)
+        every { context.contentResolver } returns mockContentResolver
+        every { statisticsDao.getStatistics() } returns null
+        every { statisticsDao.insertOrUpdate(any()) } returns 1L
+
+        // When
+        repository.permanentlyDelete(listOf(media))
+
+        // Then
+        verify {
+            statisticsDao.insertOrUpdate(
+                StatisticsEntity(
+                    id = 1,
+                    memoryCleared = 100L,
+                    mediaDeleted = 1,
+                    photosDeleted = 1,
+                    videosDeleted = 0
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `getStatistics should return statistics successfully`() = runTest {
+        // Given
+        val expectedEntity = StatisticsEntity(
+            id = 1,
+            memoryCleared = 200L,
+            mediaDeleted = 2,
+            photosDeleted = 1,
+            videosDeleted = 1
+        )
+        coEvery { statisticsDao.getStatistics() } returns expectedEntity
+
+        // When
+        val result = repository.getStatistics()
+
+        // Then
+        assertTrue(result.isSuccess)
+        val stats = result.getOrNull()!!
+        assertEquals(200L, stats.memoryCleared)
+        assertEquals(2, stats.mediaDeleted)
+        assertEquals(1, stats.photosDeleted)
+        assertEquals(1, stats.videosDeleted)
     }
 }

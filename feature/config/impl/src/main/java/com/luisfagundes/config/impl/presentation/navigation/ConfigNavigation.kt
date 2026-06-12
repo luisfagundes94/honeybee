@@ -4,8 +4,10 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.luisfagundes.config.api.presentation.navigation.ConfigRoute
 import com.luisfagundes.config.api.presentation.navigation.FeedbackRoute
+import com.luisfagundes.config.api.presentation.navigation.StatisticsRoute
 import com.luisfagundes.config.impl.presentation.screen.ConfigScreen
 import com.luisfagundes.config.impl.presentation.screen.FeedbackScreen
+import com.luisfagundes.config.impl.presentation.screen.StatisticsScreen
 import com.luisfagundes.core.common.presentation.navigation.LocalNavBackStack
 
 internal fun EntryProviderScope<NavKey>.configEntries() {
@@ -14,6 +16,9 @@ internal fun EntryProviderScope<NavKey>.configEntries() {
         ConfigScreen(
             onNavigateToFeedback = {
                 backStack?.add(FeedbackRoute)
+            },
+            onNavigateToStatistics = {
+                backStack?.add(StatisticsRoute)
             }
         )
     }
@@ -21,6 +26,15 @@ internal fun EntryProviderScope<NavKey>.configEntries() {
     entry<FeedbackRoute> {
         val backStack = LocalNavBackStack.current
         FeedbackScreen(
+            onNavigateBack = {
+                backStack?.removeLastOrNull()
+            }
+        )
+    }
+
+    entry<StatisticsRoute> {
+        val backStack = LocalNavBackStack.current
+        StatisticsScreen(
             onNavigateBack = {
                 backStack?.removeLastOrNull()
             }

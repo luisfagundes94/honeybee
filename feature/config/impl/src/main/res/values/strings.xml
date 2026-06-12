@@ -17,4 +17,11 @@
     <string name="feedback">Feedback</string>
     <string name="feedback_email_subject">Honeybee App Feedback</string>
     <string name="feedback_email_chooser_title">Send email using…</string>
+    <string name="statistics_title">Statistics</string>
+    <string name="failed_to_load_statistics">Failed to load statistics</string>
+    <string name="memory_cleared">Memory Cleared</string>
+    <string name="media_deleted">Media Deleted</string>
+    <string name="photos_deleted">Photos Deleted</string>
+    <string name="videos_deleted">Videos Deleted</string>
+    <string name="statistics_back_button_content_description">Go back</string>
 </resources>

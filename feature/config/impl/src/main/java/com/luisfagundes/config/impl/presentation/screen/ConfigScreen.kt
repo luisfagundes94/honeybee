@@ -55,6 +55,7 @@ import com.luisfagundes.designsystem.theme.spacing
 @Composable
 internal fun ConfigScreen(
     onNavigateToFeedback: () -> Unit,
+    onNavigateToStatistics: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var isNotificationsEnabled by remember { mutableStateOf(false) }
@@ -108,7 +109,7 @@ internal fun ConfigScreen(
                     ConfigItem(
                         title = stringResource(R.string.config_item_statistics),
                         icon = Icons.AutoMirrored.Filled.TrendingUp,
-                        onClick = { /* TODO: Navigate to statistics */ }
+                        onClick = onNavigateToStatistics
                     )
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default),
@@ -256,6 +257,7 @@ private fun ConfigItem(
 @Composable
 private fun ConfigScreenPreview() {
     ConfigScreen(
-        onNavigateToFeedback = {}
+        onNavigateToFeedback = {},
+        onNavigateToStatistics = {}
     )
 }

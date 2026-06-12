@@ -63,6 +63,11 @@ dependencies {
     ksp(libs.hilt.compiler)
     ksp(libs.kotlinx.metadata.jvm)
 
+    // Room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
     // Navigation 3
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
