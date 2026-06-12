@@ -1,13 +1,15 @@
 package com.luisfagundes.config.impl.presentation.screen
 
 import android.content.res.Configuration
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.plus
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -15,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.Image
@@ -46,10 +47,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.luisfagundes.config.impl.R
-import com.luisfagundes.core.common.presentation.tools.formatSize
 import com.luisfagundes.config.impl.presentation.event.StatisticsUiEvent
 import com.luisfagundes.config.impl.presentation.state.StatisticsUiState
 import com.luisfagundes.config.impl.presentation.viewmodel.StatisticsViewModel
+import com.luisfagundes.core.common.presentation.tools.formatSize
 import com.luisfagundes.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.designsystem.components.HoneybeeLoadingTemplate
 import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
@@ -137,13 +138,12 @@ private fun StatisticsScreen(
                 }
 
                 Column(
+                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small),
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(innerPadding)
+                        .padding(innerPadding + PaddingValues(MaterialTheme.spacing.default))
                         .verticalScroll(rememberScrollState())
                 ) {
-                    Spacer(modifier = Modifier.height(MaterialTheme.spacing.default))
-
                     StatCard(
                         title = stringResource(R.string.memory_cleared),
                         value = memoryVal,
@@ -187,12 +187,7 @@ private fun StatCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
         ),
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = MaterialTheme.spacing.default,
-                vertical = MaterialTheme.spacing.small
-            )
+        modifier = modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
