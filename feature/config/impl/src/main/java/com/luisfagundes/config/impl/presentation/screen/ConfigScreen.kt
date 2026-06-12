@@ -46,7 +46,6 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewWrapper
-import androidx.compose.ui.unit.dp
 import com.luisfagundes.config.impl.R
 import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.designsystem.theme.spacing
@@ -97,7 +96,7 @@ internal fun ConfigScreen(
             )
 
             Card(
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(MaterialTheme.spacing.default),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer
                 ),
@@ -138,7 +137,7 @@ internal fun ConfigScreen(
             )
 
             Card(
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(MaterialTheme.spacing.default),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer
                 ),
