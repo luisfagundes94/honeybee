@@ -29,13 +29,10 @@ internal class FeedbackViewModel @Inject constructor(
     }
 
     private fun submitFeedback() {
-        if (getCurrentState().feedbackText.isBlank()) return
+        val feedbackText = getCurrentState().feedbackText
+        if (feedbackText.isBlank()) return
 
-        // TODO: Actually submit feedback to a repository
-
-        val successMessage = resourceProvider.getString(R.string.feedback_submitted_success)
-
-        sendEffect { FeedbackUiEffect.ShowToast(successMessage) }
+        sendEffect { FeedbackUiEffect.OpenEmailClient(feedbackText) }
         sendEffect { FeedbackUiEffect.NavigateBack }
     }
 }

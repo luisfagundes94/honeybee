@@ -15,4 +15,6 @@
     <string name="feedback_submitted_success">Feedback submitted successfully!</string>
     <string name="feedback_back_button_content_description">Go back</string>
     <string name="feedback">Feedback</string>
+    <string name="feedback_email_subject">Honeybee App Feedback</string>
+    <string name="feedback_email_chooser_title">Send email using…</string>
 </resources>
