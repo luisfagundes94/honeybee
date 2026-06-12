@@ -3,9 +3,7 @@ package com.luisfagundes.config.impl.presentation.viewmodel
 import app.cash.turbine.test
 import com.luisfagundes.config.impl.presentation.effect.FeedbackUiEffect
 import com.luisfagundes.config.impl.presentation.event.FeedbackUiEvent
-import com.luisfagundes.core.common.presentation.tools.ResourceProvider
 import com.luisfagundes.core.testing.MainDispatcherRule
-import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -22,14 +20,11 @@ class FeedbackViewModelTest {
     @RegisterExtension
     val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
 
-    private val resourceProvider: ResourceProvider = mockk()
     private lateinit var viewModel: FeedbackViewModel
 
     @BeforeEach
     fun setUp() {
-        viewModel = FeedbackViewModel(
-            resourceProvider = resourceProvider
-        )
+        viewModel = FeedbackViewModel()
     }
 
     @Test
