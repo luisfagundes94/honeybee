@@ -113,7 +113,6 @@ internal class LibraryRepositoryImpl @Inject constructor(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 val allMedia = dataSource.fetchMediaList().getOrNull() ?: emptyList()
                 val videoIds = allMedia.filter { it.isVideo }.map { it.id }.toSet()
-
                 val uris = mediaIds.map { getMediaUri(it, videoIds) }
                 return@withContext MediaStore.createDeleteRequest(context.contentResolver, uris)
             }
@@ -133,25 +132,8 @@ internal class LibraryRepositoryImpl @Inject constructor(
     private fun updateStatisticsForDeletedMedia(mediaList: List<Media>) {
         try {
             if (mediaList.isEmpty()) return
-
-            val addedVideos = mediaList.count { it.isVideo }
-            val addedPhotos = mediaList.count { !it.isVideo }
-            val addedSize = mediaList.sumOf { it.size }
-            val addedTotal = mediaList.size
-
-            val currentStats = statisticsDao.getStatistics() ?: StatisticsEntity(
-                memoryCleared = 0L,
-                mediaDeleted = 0,
-                photosDeleted = 0,
-                videosDeleted = 0
-            )
-
-            val updatedStats = currentStats.copy(
-                memoryCleared = currentStats.memoryCleared + addedSize,
-                mediaDeleted = currentStats.mediaDeleted + addedTotal,
-                photosDeleted = currentStats.photosDeleted + addedPhotos,
-                videosDeleted = currentStats.videosDeleted + addedVideos
-            )
+            val currentStats = statisticsDao.getStatistics()
+            val updatedStats = statisticsMapper.mapToUpdatedEntity(currentStats, mediaList)
             statisticsDao.insertOrUpdate(updatedStats)
         } catch (e: Exception) {
             e.printStackTrace()
