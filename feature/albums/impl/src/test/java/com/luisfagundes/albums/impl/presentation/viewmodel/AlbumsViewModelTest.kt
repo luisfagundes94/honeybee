@@ -52,8 +52,8 @@ class AlbumsViewModelTest {
         // Given
         val mockUri = mockk<Uri>()
         val albums = listOf(
-            Album(id = "1", name = "Camera", count = 10, coverUri = mockUri, isVideo = false),
-            Album(id = "2", name = "Screenshots", count = 5, coverUri = mockUri, isVideo = false)
+            Album.Physical(id = "1", name = "Camera", count = 10, coverUri = mockUri, isVideo = false),
+            Album.Physical(id = "2", name = "Screenshots", count = 5, coverUri = mockUri, isVideo = false)
         )
 
         coEvery { getAlbumsUseCase() } returns Result.success(albums)

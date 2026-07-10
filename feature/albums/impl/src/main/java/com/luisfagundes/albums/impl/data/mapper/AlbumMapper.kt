@@ -15,7 +15,7 @@ internal class AlbumMapper @Inject constructor() {
         physicalGroups.forEach { (bucketId, items) ->
             if (bucketId != null && items.isNotEmpty()) {
                 albumList.add(
-                    Album(
+                    Album.Physical(
                         id = bucketId,
                         name = items.first().bucketDisplayName ?: "Unknown",
                         count = items.size,
@@ -27,23 +27,39 @@ internal class AlbumMapper @Inject constructor() {
         }
 
         // 2. Add Virtual Albums
-        VirtualAlbum.entries.forEach { virtualAlbum ->
-            val items = activeMedia.filter(virtualAlbum.filter)
-            if (items.isNotEmpty()) {
-                albumList.add(
-                    Album(
-                        id = virtualAlbum.id,
-                        name = virtualAlbum.albumName,
-                        count = items.size,
-                        coverUri = items.first().uri,
-                        isVideo = virtualAlbum.isVideo(items.first())
-                    )
+        // Favorites
+        val favoritesItems = activeMedia.filter { it.isFavorite }
+        if (favoritesItems.isNotEmpty()) {
+            albumList.add(
+                Album.Virtual.Favorites(
+                    count = favoritesItems.size,
+                    coverUri = favoritesItems.first().uri,
+                    isVideo = favoritesItems.first().isVideo
                 )
-            }
+            )
+        }
+
+        // Videos
+        val videoItems = activeMedia.filter { it.isVideo }
+        if (videoItems.isNotEmpty()) {
+            albumList.add(
+                Album.Virtual.Videos(
+                    count = videoItems.size,
+                    coverUri = videoItems.first().uri,
+                    isVideo = true
+                )
+            )
         }
 
         // Sort albums alphabetically by name
-        return albumList.sortedBy { it.name.lowercase() }
+        return albumList.sortedBy { album ->
+            val sortName = when (album) {
+                is Album.Physical -> album.name
+                is Album.Virtual.Favorites -> "Favorites"
+                is Album.Virtual.Videos -> "Videos"
+            }
+            sortName.lowercase()
+        }
     }
 
     fun mapToAlbumMedia(media: Media): AlbumMedia {
@@ -53,19 +69,5 @@ internal class AlbumMapper @Inject constructor() {
             dateAdded = media.dateAdded,
             isVideo = media.isVideo
         )
-    }
-}
-
-internal enum class VirtualAlbum(
-    val id: String,
-    val albumName: String,
-    val filter: (Media) -> Boolean,
-    val isVideo: (Media) -> Boolean
-) {
-    FAVORITES("favorites", "Favorites", { it.isFavorite }, { it.isVideo }),
-    VIDEOS("videos", "Videos", { it.isVideo }, { true });
-
-    companion object {
-        fun fromId(id: String): VirtualAlbum? = entries.find { it.id == id }
     }
 }

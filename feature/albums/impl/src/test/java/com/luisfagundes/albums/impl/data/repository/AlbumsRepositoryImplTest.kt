@@ -5,11 +5,9 @@ import com.luisfagundes.core.testing.MainDispatcherRule
 import com.luisfagundes.albums.impl.data.mapper.AlbumMapper
 import com.luisfagundes.albums.impl.domain.model.Album
 import com.luisfagundes.albums.impl.domain.model.AlbumMedia
-import com.luisfagundes.albums.impl.domain.repository.AlbumsRepository
 import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.api.domain.repository.LibraryRepository
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -58,24 +56,30 @@ class AlbumsRepositoryImplTest {
         val albums = result.getOrNull()!!
 
         // Expected albums: "Camera" (cam, 2 items), "Favorites" (favorites, 1 item), "Videos" (videos, 1 item), "WhatsApp" (wa, 1 item)
-        // Sorted alphabetically: Camera -> Favorites -> Videos -> WhatsApp
+        // Sorted alphabetically by sort name: Camera -> Favorites -> Videos -> WhatsApp
         assertEquals(4, albums.size)
 
-        assertEquals("cam", albums[0].id)
-        assertEquals("Camera", albums[0].name)
-        assertEquals(2, albums[0].count)
+        assertTrue(albums[0] is Album.Physical)
+        val cameraAlbum = albums[0] as Album.Physical
+        assertEquals("cam", cameraAlbum.id)
+        assertEquals("Camera", cameraAlbum.name)
+        assertEquals(2, cameraAlbum.count)
 
-        assertEquals("favorites", albums[1].id)
-        assertEquals("Favorites", albums[1].name)
-        assertEquals(1, albums[1].count)
+        assertTrue(albums[1] is Album.Virtual.Favorites)
+        val favoritesAlbum = albums[1] as Album.Virtual.Favorites
+        assertEquals(Album.Virtual.Favorites.ID, favoritesAlbum.id)
+        assertEquals(1, favoritesAlbum.count)
 
-        assertEquals("videos", albums[2].id)
-        assertEquals("Videos", albums[2].name)
-        assertEquals(1, albums[2].count)
+        assertTrue(albums[2] is Album.Virtual.Videos)
+        val videosAlbum = albums[2] as Album.Virtual.Videos
+        assertEquals(Album.Virtual.Videos.ID, videosAlbum.id)
+        assertEquals(1, videosAlbum.count)
 
-        assertEquals("wa", albums[3].id)
-        assertEquals("WhatsApp", albums[3].name)
-        assertEquals(1, albums[3].count)
+        assertTrue(albums[3] is Album.Physical)
+        val waAlbum = albums[3] as Album.Physical
+        assertEquals("wa", waAlbum.id)
+        assertEquals("WhatsApp", waAlbum.name)
+        assertEquals(1, waAlbum.count)
     }
 
     @Test
@@ -97,14 +101,14 @@ class AlbumsRepositoryImplTest {
         assertEquals(3L, cameraMedia[1].id)
 
         // Test 2: Fetch "Favorites" virtual album
-        val favoritesMediaResult = repository.getAlbumMedia("favorites")
+        val favoritesMediaResult = repository.getAlbumMedia(Album.Virtual.Favorites.ID)
         assertTrue(favoritesMediaResult.isSuccess)
         val favoritesMedia = favoritesMediaResult.getOrNull()!!
         assertEquals(1, favoritesMedia.size)
         assertEquals(1L, favoritesMedia[0].id)
 
         // Test 3: Fetch "Videos" virtual album
-        val videosMediaResult = repository.getAlbumMedia("videos")
+        val videosMediaResult = repository.getAlbumMedia(Album.Virtual.Videos.ID)
         assertTrue(videosMediaResult.isSuccess)
         val videosMedia = videosMediaResult.getOrNull()!!
         assertEquals(1, videosMedia.size)

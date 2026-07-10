@@ -44,7 +44,9 @@ import com.luisfagundes.albums.impl.domain.model.Album
 import com.luisfagundes.albums.impl.presentation.effect.AlbumsUiEffect
 import com.luisfagundes.albums.impl.presentation.event.AlbumsUiEvent
 import com.luisfagundes.albums.impl.presentation.state.AlbumsUiState
-import com.luisfagundes.albums.impl.presentation.mapper.getAlbumStyle
+import com.luisfagundes.albums.impl.presentation.tools.getAlbumStyle
+import com.luisfagundes.albums.impl.presentation.tools.getDisplayName
+import com.luisfagundes.albums.impl.presentation.tools.getCountText
 import com.luisfagundes.albums.impl.presentation.viewmodel.AlbumsViewModel
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.designsystem.components.HoneybeeErrorTemplate
@@ -148,13 +150,15 @@ private fun AlbumsScreen(
                             .consumeWindowInsets(innerPadding)
                     ) {
                         items(uiState.albums, key = { it.id }) { album ->
+                            val favoritesName = stringResource(R.string.favorites)
+                            val videosName = stringResource(R.string.videos)
                             AlbumCard(
                                 album = album,
                                 onClick = {
-                                    val displayName = when (album.id) {
-                                        "favorites" -> "Favorites"
-                                        "videos" -> "Videos"
-                                        else -> album.name
+                                    val displayName = when (album) {
+                                        is Album.Physical -> album.name
+                                        is Album.Virtual.Favorites -> favoritesName
+                                        is Album.Virtual.Videos -> videosName
                                     }
                                     onEvent(AlbumsUiEvent.AlbumClick(album.id, displayName))
                                 }
@@ -173,18 +177,6 @@ private fun AlbumCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val style = getAlbumStyle(album.name)
-    val displayName = when (album.id) {
-        "favorites" -> stringResource(R.string.favorites)
-        "videos" -> stringResource(R.string.videos)
-        else -> album.name
-    }
-    val countText = when (album.count) {
-        0 -> stringResource(R.string.items_count_zero)
-        1 -> stringResource(R.string.items_count_one)
-        else -> stringResource(R.string.items_count_many, album.count)
-    }
-
     Card(
         shape = MaterialTheme.shapes.medium,
         modifier = modifier
@@ -202,7 +194,7 @@ private fun AlbumCard(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .background(style.gradient),
+                    .background(album.getAlbumStyle().gradient),
                 contentAlignment = Alignment.Center
             ) {
                 if (album.coverUri != null) {
@@ -214,7 +206,7 @@ private fun AlbumCard(
                     )
                 } else {
                     Icon(
-                        imageVector = style.icon,
+                        imageVector = album.getAlbumStyle().icon,
                         contentDescription = null,
                         tint = Color.White,
                         modifier = Modifier.padding(MaterialTheme.spacing.large)
@@ -227,13 +219,13 @@ private fun AlbumCard(
                     .padding(MaterialTheme.spacing.small)
             ) {
                 Text(
-                    text = displayName,
+                    text = album.getDisplayName(),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1
                 )
                 Text(
-                    text = countText,
+                    text = album.getCountText(),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

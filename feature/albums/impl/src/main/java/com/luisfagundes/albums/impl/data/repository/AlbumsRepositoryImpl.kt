@@ -1,7 +1,6 @@
 package com.luisfagundes.albums.impl.data.repository
 
 import com.luisfagundes.albums.impl.data.mapper.AlbumMapper
-import com.luisfagundes.albums.impl.data.mapper.VirtualAlbum
 import com.luisfagundes.albums.impl.domain.model.Album
 import com.luisfagundes.albums.impl.domain.model.AlbumMedia
 import com.luisfagundes.albums.impl.domain.repository.AlbumsRepository
@@ -25,15 +24,13 @@ internal class AlbumsRepositoryImpl @Inject constructor(
 
     override suspend fun getAlbumMedia(albumId: String): Result<List<AlbumMedia>> = withContext(dispatcher) {
         libraryRepository.getActiveMedia().map { activeMedia ->
-            val virtualAlbum = VirtualAlbum.fromId(albumId)
-            val filteredMedia = if (virtualAlbum != null) {
-                activeMedia.filter(virtualAlbum.filter)
-            } else {
-                activeMedia.filter { it.bucketId == albumId }
+            val filteredMedia = when (albumId) {
+                Album.Virtual.Favorites.ID -> activeMedia.filter { it.isFavorite }
+                Album.Virtual.Videos.ID -> activeMedia.filter { it.isVideo }
+                else -> activeMedia.filter { it.bucketId == albumId }
             }
 
             filteredMedia.map { albumMapper.mapToAlbumMedia(it) }
         }
     }
 }
-
