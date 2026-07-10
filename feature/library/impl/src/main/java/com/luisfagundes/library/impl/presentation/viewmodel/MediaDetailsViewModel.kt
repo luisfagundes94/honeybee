@@ -25,7 +25,7 @@ internal class MediaDetailsViewModel @Inject constructor(
 ) {
     override fun dispatchEvent(event: MediaDetailsUiEvent) {
         when (event) {
-            is MediaDetailsUiEvent.LoadDetails -> loadDetails(event.initialMediaId)
+            is MediaDetailsUiEvent.LoadDetails -> loadDetails(event.initialMediaId, event.albumId)
             is MediaDetailsUiEvent.SwipeUp -> moveToTrash(event.mediaId)
             is MediaDetailsUiEvent.TrashClick -> navigateToTrash()
             is MediaDetailsUiEvent.ToggleFavorite -> toggleFavorite(event.mediaId)
@@ -36,13 +36,19 @@ internal class MediaDetailsViewModel @Inject constructor(
         sendEffect { MediaDetailsUiEffect.NavigateToTrash }
     }
 
-    private fun loadDetails(initialMediaId: Long) = viewModelScope.launch {
+    private fun loadDetails(initialMediaId: Long, albumId: String?) = viewModelScope.launch {
         setState { MediaDetailsUiState.Loading }
         getActiveMediaUseCase().fold(
             onSuccess = { mediaList ->
-                val initialIndex = mediaList.indexOfFirst { it.id == initialMediaId }.coerceAtLeast(0)
+                val filteredList = when (albumId) {
+                    null -> mediaList
+                    "favorites" -> mediaList.filter { it.isFavorite }
+                    "videos" -> mediaList.filter { it.isVideo }
+                    else -> mediaList.filter { it.bucketId == albumId }
+                }
+                val initialIndex = filteredList.indexOfFirst { it.id == initialMediaId }.coerceAtLeast(0)
                 val trashCount = getItemsInTrashCountUseCase()
-                setState { MediaDetailsUiState.Content(mediaList, initialIndex, trashCount) }
+                setState { MediaDetailsUiState.Content(filteredList, initialIndex, trashCount) }
             },
             onFailure = {
                 val errorMessage = resourceProvider.getString(failed_to_load_photo_details)

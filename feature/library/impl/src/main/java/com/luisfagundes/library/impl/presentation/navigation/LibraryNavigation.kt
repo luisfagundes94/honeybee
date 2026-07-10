@@ -28,6 +28,7 @@ internal fun EntryProviderScope<NavKey>.libraryEntries() {
         val backStack = LocalNavBackStack.current
         MediaDetailsScreen(
             initialMediaId = route.initialPhotoId,
+            albumId = route.albumId,
             onNavigateBack = {
                 backStack?.removeLastOrNull()
             },

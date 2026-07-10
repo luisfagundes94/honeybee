@@ -7,7 +7,10 @@ import kotlinx.serialization.Serializable
 data object LibraryRoute : NavKey
 
 @Serializable
-data class MediaDetailsRoute(val initialPhotoId: Long) : NavKey
+data class MediaDetailsRoute(
+    val initialPhotoId: Long,
+    val albumId: String? = null
+) : NavKey
 
 @Serializable
 data object TrashRoute : NavKey

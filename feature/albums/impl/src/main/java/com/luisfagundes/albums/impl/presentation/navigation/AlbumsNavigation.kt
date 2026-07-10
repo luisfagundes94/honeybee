@@ -27,7 +27,7 @@ internal fun EntryProviderScope<NavKey>.albumsEntries() {
                 backStack?.removeLastOrNull()
             },
             onNavigateToMediaDetail = { mediaId ->
-                backStack?.add(MediaDetailsRoute(mediaId))
+                backStack?.add(MediaDetailsRoute(initialPhotoId = mediaId, albumId = route.albumId))
             }
         )
     }

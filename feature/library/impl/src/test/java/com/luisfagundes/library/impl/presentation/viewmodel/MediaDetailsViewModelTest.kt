@@ -240,4 +240,94 @@ class MediaDetailsViewModelTest {
             assertEquals(emptySet<Long>(), unfavoritedContent.favoriteMediaIds)
         }
     }
+
+    @Test
+    fun `dispatchEvent LoadDetails success with favorites albumId should scope to favorited media only`() = runTest {
+        // Given
+        val mockUri = mockk<Uri>()
+        val media1 = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false, isFavorite = true)
+        val media2 = Media(id = 2L, uri = mockUri, dateAdded = 1100L, size = 2100L, isVideo = true, isFavorite = false)
+        val mediaList = listOf(media1, media2)
+        val trashCount = 1
+
+        coEvery { getActiveMediaUseCase() } returns Result.success(mediaList)
+        coEvery { getItemsInTrashCountUseCase() } returns trashCount
+
+        // When & Then
+        viewModel.uiState.test {
+            assertEquals(MediaDetailsUiState.Loading, awaitItem())
+
+            viewModel.dispatchEvent(
+                MediaDetailsUiEvent.LoadDetails(
+                    initialMediaId = 1L,
+                    albumId = "favorites"
+                )
+            )
+
+            val contentState = awaitItem() as MediaDetailsUiState.Content
+            assertEquals(listOf(media1), contentState.mediaList)
+            assertEquals(0, contentState.initialIndex)
+            assertEquals(trashCount, contentState.trashCount)
+        }
+    }
+
+    @Test
+    fun `dispatchEvent LoadDetails success with videos albumId should scope to videos only`() = runTest {
+        // Given
+        val mockUri = mockk<Uri>()
+        val media1 = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false)
+        val media2 = Media(id = 2L, uri = mockUri, dateAdded = 1100L, size = 2100L, isVideo = true)
+        val mediaList = listOf(media1, media2)
+        val trashCount = 1
+
+        coEvery { getActiveMediaUseCase() } returns Result.success(mediaList)
+        coEvery { getItemsInTrashCountUseCase() } returns trashCount
+
+        // When & Then
+        viewModel.uiState.test {
+            assertEquals(MediaDetailsUiState.Loading, awaitItem())
+
+            viewModel.dispatchEvent(
+                MediaDetailsUiEvent.LoadDetails(
+                    initialMediaId = 2L,
+                    albumId = "videos"
+                )
+            )
+
+            val contentState = awaitItem() as MediaDetailsUiState.Content
+            assertEquals(listOf(media2), contentState.mediaList)
+            assertEquals(0, contentState.initialIndex)
+            assertEquals(trashCount, contentState.trashCount)
+        }
+    }
+
+    @Test
+    fun `dispatchEvent LoadDetails success with physical albumId should scope to that bucketId only`() = runTest {
+        // Given
+        val mockUri = mockk<Uri>()
+        val media1 = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false, bucketId = "downloads")
+        val media2 = Media(id = 2L, uri = mockUri, dateAdded = 1100L, size = 2100L, isVideo = false, bucketId = "camera")
+        val mediaList = listOf(media1, media2)
+        val trashCount = 1
+
+        coEvery { getActiveMediaUseCase() } returns Result.success(mediaList)
+        coEvery { getItemsInTrashCountUseCase() } returns trashCount
+
+        // When & Then
+        viewModel.uiState.test {
+            assertEquals(MediaDetailsUiState.Loading, awaitItem())
+
+            viewModel.dispatchEvent(
+                MediaDetailsUiEvent.LoadDetails(
+                    initialMediaId = 1L,
+                    albumId = "downloads"
+                )
+            )
+
+            val contentState = awaitItem() as MediaDetailsUiState.Content
+            assertEquals(listOf(media1), contentState.mediaList)
+            assertEquals(0, contentState.initialIndex)
+            assertEquals(trashCount, contentState.trashCount)
+        }
+    }
 }

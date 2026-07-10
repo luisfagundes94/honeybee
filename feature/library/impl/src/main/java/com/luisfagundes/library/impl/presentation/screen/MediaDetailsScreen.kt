@@ -91,6 +91,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun MediaDetailsScreen(
     initialMediaId: Long,
+    albumId: String? = null,
     onNavigateBack: () -> Unit,
     onNavigateToTrash: () -> Unit,
     viewModel: MediaDetailsViewModel = hiltViewModel()
@@ -104,8 +105,8 @@ internal fun MediaDetailsScreen(
         }
     }
 
-    LaunchedEffect(initialMediaId) {
-        viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialMediaId))
+    LaunchedEffect(initialMediaId, albumId) {
+        viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialMediaId, albumId))
     }
 
     MediaDetailsScreen(
