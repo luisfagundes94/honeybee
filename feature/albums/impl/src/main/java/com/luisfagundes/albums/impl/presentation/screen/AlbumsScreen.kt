@@ -14,12 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Camera
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -35,9 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
@@ -52,6 +44,7 @@ import com.luisfagundes.albums.impl.domain.model.Album
 import com.luisfagundes.albums.impl.presentation.effect.AlbumsUiEffect
 import com.luisfagundes.albums.impl.presentation.event.AlbumsUiEvent
 import com.luisfagundes.albums.impl.presentation.state.AlbumsUiState
+import com.luisfagundes.albums.impl.presentation.mapper.getAlbumStyle
 import com.luisfagundes.albums.impl.presentation.viewmodel.AlbumsViewModel
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.designsystem.components.HoneybeeErrorTemplate
@@ -246,44 +239,5 @@ private fun AlbumCard(
                 )
             }
         }
-    }
-}
-
-private data class AlbumStyle(
-    val icon: ImageVector,
-    val gradient: Brush
-)
-
-private fun getAlbumStyle(name: String): AlbumStyle {
-    val lowerName = name.lowercase()
-    return when {
-        lowerName.contains("camera") -> AlbumStyle(
-            icon = Icons.Default.Camera,
-            gradient = Brush.linearGradient(listOf(Color(0xFFFF8A80), Color(0xFFFF5252)))
-        )
-        lowerName.contains("favorite") -> AlbumStyle(
-            icon = Icons.Default.Favorite,
-            gradient = Brush.linearGradient(listOf(Color(0xFFFF80AB), Color(0xFFFF4081)))
-        )
-        lowerName.contains("screenshot") -> AlbumStyle(
-            icon = Icons.Default.Image,
-            gradient = Brush.linearGradient(listOf(Color(0xFF82B1FF), Color(0xFF448AFF)))
-        )
-        lowerName.contains("video") -> AlbumStyle(
-            icon = Icons.Default.VideoLibrary,
-            gradient = Brush.linearGradient(listOf(Color(0xFFB388FF), Color(0xFF7C4DFF)))
-        )
-        lowerName.contains("download") -> AlbumStyle(
-            icon = Icons.Default.Folder,
-            gradient = Brush.linearGradient(listOf(Color(0xFF84FFFF), Color(0xFF18FFFF)))
-        )
-        lowerName.contains("whatsapp") -> AlbumStyle(
-            icon = Icons.Default.Folder,
-            gradient = Brush.linearGradient(listOf(Color(0xFFB9F6CA), Color(0xFF69F0AE)))
-        )
-        else -> AlbumStyle(
-            icon = Icons.Default.Folder,
-            gradient = Brush.linearGradient(listOf(Color(0xFFCFD8DC), Color(0xFF90A4AE)))
-        )
     }
 }
