@@ -61,14 +61,16 @@ import com.luisfagundes.designsystem.theme.spacing
 @Composable
 internal fun AlbumsScreen(
     onNavigateToAlbumDetails: (String, String) -> Unit,
-    viewModel: AlbumsViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier
+    viewModel: AlbumsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     CollectUiEffects(viewModel.uiEffect) { effect ->
         when (effect) {
-            is AlbumsUiEffect.NavigateToAlbumDetails -> onNavigateToAlbumDetails(effect.albumId, effect.albumName)
+            is AlbumsUiEffect.NavigateToAlbumDetails -> onNavigateToAlbumDetails(
+                effect.albumId,
+                effect.albumName
+            )
         }
     }
 
@@ -79,7 +81,7 @@ internal fun AlbumsScreen(
     AlbumsScreen(
         uiState = uiState,
         onEvent = viewModel::dispatchEvent,
-        modifier = modifier
+        modifier = Modifier.fillMaxSize()
     )
 }
 
@@ -91,7 +93,7 @@ private fun AlbumsScreen(
     modifier: Modifier = Modifier
 ) {
     Scaffold(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier,
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
