@@ -1,8 +1,8 @@
-package com.luisfagundes.library.impl.domain.model
+package com.luisfagundes.library.api.domain.model
 
 import java.time.YearMonth
 
-internal data class MediaSection(
+data class MediaSection(
     val yearMonth: YearMonth,
     val mediaList: List<Media>
 )

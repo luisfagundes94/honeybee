@@ -54,8 +54,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewWrapper
 import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
-import com.luisfagundes.library.impl.domain.model.Media
-import com.luisfagundes.library.impl.domain.model.MediaSection
+import com.luisfagundes.library.api.domain.model.Media
+import com.luisfagundes.library.api.domain.model.MediaSection
 import com.luisfagundes.library.impl.presentation.effect.LibraryUiEffect
 import com.luisfagundes.library.impl.presentation.event.LibraryUiEvent
 import com.luisfagundes.library.impl.presentation.state.LibraryUiState

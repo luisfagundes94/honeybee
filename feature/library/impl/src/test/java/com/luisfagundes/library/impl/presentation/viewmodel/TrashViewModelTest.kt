@@ -7,7 +7,7 @@ import app.cash.turbine.test
 import com.luisfagundes.core.common.presentation.tools.ResourceProvider
 import com.luisfagundes.core.testing.MainDispatcherRule
 import com.luisfagundes.library.impl.R
-import com.luisfagundes.library.impl.domain.model.Media
+import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.impl.domain.usecase.CreateDeleteRequestUseCase
 import com.luisfagundes.library.impl.domain.usecase.GetTrashMediaUseCase
 import com.luisfagundes.library.impl.domain.usecase.PermanentlyDeleteUseCase

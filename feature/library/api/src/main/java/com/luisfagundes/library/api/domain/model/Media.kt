@@ -1,8 +1,8 @@
-package com.luisfagundes.library.impl.data.model
+package com.luisfagundes.library.api.domain.model
 
 import android.net.Uri
 
-internal data class MediaDto(
+data class Media(
     val id: Long,
     val uri: Uri,
     val dateAdded: Long,

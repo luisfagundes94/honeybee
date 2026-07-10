@@ -1,44 +1,21 @@
 package com.luisfagundes.albums.impl.data.repository
 
-import android.content.Context
-import com.luisfagundes.albums.impl.data.datasource.LocalAlbumsDataSource
 import com.luisfagundes.albums.impl.domain.model.Album
 import com.luisfagundes.albums.impl.domain.model.AlbumMedia
 import com.luisfagundes.albums.impl.domain.repository.AlbumsRepository
 import com.luisfagundes.core.common.di.DefaultDispatcher
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.luisfagundes.library.api.domain.repository.LibraryRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 internal class AlbumsRepositoryImpl @Inject constructor(
-    private val dataSource: LocalAlbumsDataSource,
-    @param:ApplicationContext private val context: Context,
+    private val libraryRepository: LibraryRepository,
     @param:DefaultDispatcher private val dispatcher: CoroutineDispatcher
 ) : AlbumsRepository {
 
-    private val prefs = context.getSharedPreferences("library_prefs", Context.MODE_PRIVATE)
-
-    private fun getTrashedPhotoIds(): Set<Long> {
-        return prefs.getStringSet("trashed_photo_ids", emptySet())
-            ?.mapNotNull { it.toLongOrNull() }
-            ?.toSet() ?: emptySet()
-    }
-
-    private fun getDeletedPhotoIds(): Set<Long> {
-        return prefs.getStringSet("deleted_photo_ids", emptySet())
-            ?.mapNotNull { it.toLongOrNull() }
-            ?.toSet() ?: emptySet()
-    }
-
     override suspend fun getAlbums(): Result<List<Album>> = withContext(dispatcher) {
-        dataSource.fetchMediaList().map { mediaList ->
-            val trashedIds = getTrashedPhotoIds()
-            val deletedIds = getDeletedPhotoIds()
-            
-            // Filter active media files
-            val activeMedia = mediaList.filter { it.id !in trashedIds && it.id !in deletedIds }
-
+        libraryRepository.getActiveMedia().map { activeMedia ->
             val albumList = mutableListOf<Album>()
 
             // 1. Group physical folders
@@ -91,13 +68,7 @@ internal class AlbumsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getAlbumMedia(albumId: String): Result<List<AlbumMedia>> = withContext(dispatcher) {
-        dataSource.fetchMediaList().map { mediaList ->
-            val trashedIds = getTrashedPhotoIds()
-            val deletedIds = getDeletedPhotoIds()
-            
-            // Filter active media files
-            val activeMedia = mediaList.filter { it.id !in trashedIds && it.id !in deletedIds }
-
+        libraryRepository.getActiveMedia().map { activeMedia ->
             val filteredMedia = when (albumId) {
                 "favorites" -> activeMedia.filter { it.isFavorite }
                 "videos" -> activeMedia.filter { it.isVideo }

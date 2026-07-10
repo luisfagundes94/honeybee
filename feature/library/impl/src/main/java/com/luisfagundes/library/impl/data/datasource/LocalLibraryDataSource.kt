@@ -2,6 +2,7 @@ package com.luisfagundes.library.impl.data.datasource
 
 import android.content.ContentUris
 import android.content.Context
+import android.os.Build
 import android.provider.MediaStore
 import com.luisfagundes.core.common.tools.safeRunCatching
 import com.luisfagundes.library.impl.data.model.MediaDto
@@ -17,15 +18,6 @@ internal class LocalLibraryDataSource @Inject constructor(
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher,
     private val subscriptionProvider: SubscriptionProvider
 ) : LibraryDataSource {
-    private val mediaProjection = arrayOf(
-        MediaStore.Files.FileColumns._ID,
-        MediaStore.Files.FileColumns.DATE_ADDED,
-        MediaStore.Files.FileColumns.SIZE,
-        MediaStore.Files.FileColumns.MIME_TYPE,
-        MediaStore.Files.FileColumns.WIDTH,
-        MediaStore.Files.FileColumns.HEIGHT,
-        MediaStore.Files.FileColumns.MEDIA_TYPE
-    )
     private val sortOrder = "${MediaStore.Files.FileColumns.DATE_ADDED} DESC"
 
     override suspend fun fetchMediaList(): Result<List<MediaDto>> = withContext(dispatcher) {
@@ -50,9 +42,25 @@ internal class LocalLibraryDataSource @Inject constructor(
             )
         }
 
+        val projection = mutableListOf(
+            MediaStore.Files.FileColumns._ID,
+            MediaStore.Files.FileColumns.DATE_ADDED,
+            MediaStore.Files.FileColumns.SIZE,
+            MediaStore.Files.FileColumns.MIME_TYPE,
+            MediaStore.Files.FileColumns.WIDTH,
+            MediaStore.Files.FileColumns.HEIGHT,
+            MediaStore.Files.FileColumns.MEDIA_TYPE,
+            "bucket_display_name",
+            "bucket_id"
+        ).apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                add(MediaStore.MediaColumns.IS_FAVORITE)
+            }
+        }.toTypedArray()
+
         val query = context.contentResolver.query(
             MediaStore.Files.getContentUri("external"),
-            mediaProjection,
+            projection,
             selection,
             selectionArgs,
             sortOrder
@@ -68,6 +76,13 @@ internal class LocalLibraryDataSource @Inject constructor(
                 val widthColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.WIDTH)
                 val heightColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.HEIGHT)
                 val mediaTypeColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE)
+                val bucketNameColumn = cursor.getColumnIndexOrThrow("bucket_display_name")
+                val bucketIdColumn = cursor.getColumnIndexOrThrow("bucket_id")
+                val isFavoriteColumn = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.IS_FAVORITE)
+                } else {
+                    -1
+                }
 
                 while (cursor.moveToNext()) {
                     val id = cursor.getLong(idColumn)
@@ -77,6 +92,13 @@ internal class LocalLibraryDataSource @Inject constructor(
                     val width = cursor.getInt(widthColumn)
                     val height = cursor.getInt(heightColumn)
                     val mediaType = cursor.getInt(mediaTypeColumn)
+                    val bucketDisplayName = cursor.getString(bucketNameColumn)
+                    val bucketId = cursor.getString(bucketIdColumn)
+                    val isFavorite = if (isFavoriteColumn != -1) {
+                        cursor.getInt(isFavoriteColumn) == 1
+                    } else {
+                        false
+                    }
 
                     val isVideo = mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
                     val mediaUri = ContentUris.withAppendedId(
@@ -93,7 +115,10 @@ internal class LocalLibraryDataSource @Inject constructor(
                             mimeType = mimeType,
                             width = width,
                             height = height,
-                            isVideo = isVideo
+                            isVideo = isVideo,
+                            bucketId = bucketId,
+                            bucketDisplayName = bucketDisplayName,
+                            isFavorite = isFavorite
                         )
                     )
                 }

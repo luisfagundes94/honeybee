@@ -10,7 +10,7 @@ import com.luisfagundes.library.impl.data.datasource.LibraryPreferences
 import com.luisfagundes.library.impl.data.mapper.StatisticsMapper
 import com.luisfagundes.library.impl.data.mapper.MediaMapper
 import com.luisfagundes.library.impl.data.model.MediaDto
-import com.luisfagundes.library.impl.domain.model.Media
+import com.luisfagundes.library.api.domain.model.Media
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every

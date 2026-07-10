@@ -11,9 +11,9 @@ import com.luisfagundes.core.common.tools.safeRunCatching
 import com.luisfagundes.library.impl.data.datasource.LibraryDataSource
 import com.luisfagundes.library.impl.data.datasource.LibraryPreferences
 import com.luisfagundes.library.impl.data.mapper.MediaMapper
-import com.luisfagundes.library.impl.domain.model.Media
-import com.luisfagundes.library.impl.domain.model.MediaSection
-import com.luisfagundes.library.impl.domain.repository.LibraryRepository
+import com.luisfagundes.library.api.domain.model.Media
+import com.luisfagundes.library.api.domain.model.MediaSection
+import com.luisfagundes.library.api.domain.repository.LibraryRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext

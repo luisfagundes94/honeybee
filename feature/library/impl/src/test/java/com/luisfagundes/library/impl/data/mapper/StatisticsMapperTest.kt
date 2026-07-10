@@ -2,7 +2,7 @@ package com.luisfagundes.library.impl.data.mapper
 
 import android.net.Uri
 import com.luisfagundes.library.impl.data.database.entity.StatisticsEntity
-import com.luisfagundes.library.impl.domain.model.Media
+import com.luisfagundes.library.api.domain.model.Media
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

@@ -1,11 +1,11 @@
-package com.luisfagundes.library.impl.domain.repository
+package com.luisfagundes.library.api.domain.repository
 
 import android.app.PendingIntent
+import com.luisfagundes.library.api.domain.model.Media
+import com.luisfagundes.library.api.domain.model.MediaSection
 import com.luisfagundes.library.api.domain.model.Statistics
-import com.luisfagundes.library.impl.domain.model.Media
-import com.luisfagundes.library.impl.domain.model.MediaSection
 
-internal interface LibraryRepository {
+interface LibraryRepository {
     suspend fun getMediaByMonth(): Result<List<MediaSection>>
     suspend fun getActiveMedia(): Result<List<Media>>
     suspend fun getTrashMedia(): Result<List<Media>>

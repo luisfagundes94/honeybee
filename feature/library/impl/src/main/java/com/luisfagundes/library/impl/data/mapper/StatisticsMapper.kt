@@ -2,7 +2,7 @@ package com.luisfagundes.library.impl.data.mapper
 
 import com.luisfagundes.library.api.domain.model.Statistics
 import com.luisfagundes.library.impl.data.database.entity.StatisticsEntity
-import com.luisfagundes.library.impl.domain.model.Media
+import com.luisfagundes.library.api.domain.model.Media
 import javax.inject.Inject
 
 internal class StatisticsMapper @Inject constructor() {

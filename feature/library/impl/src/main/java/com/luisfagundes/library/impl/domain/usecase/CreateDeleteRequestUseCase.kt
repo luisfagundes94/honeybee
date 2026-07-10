@@ -1,7 +1,7 @@
 package com.luisfagundes.library.impl.domain.usecase
 
 import android.app.PendingIntent
-import com.luisfagundes.library.impl.domain.repository.LibraryRepository
+import com.luisfagundes.library.api.domain.repository.LibraryRepository
 import javax.inject.Inject
 
 internal class CreateDeleteRequestUseCase @Inject constructor(

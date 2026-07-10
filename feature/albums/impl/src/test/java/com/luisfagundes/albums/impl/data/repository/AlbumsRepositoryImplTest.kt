@@ -1,14 +1,14 @@
 package com.luisfagundes.albums.impl.data.repository
 
-import android.content.Context
-import android.content.SharedPreferences
 import android.net.Uri
 import com.luisfagundes.core.testing.MainDispatcherRule
-import com.luisfagundes.albums.impl.data.datasource.LocalAlbumsDataSource
-import com.luisfagundes.albums.impl.data.model.AlbumMediaDto
+import com.luisfagundes.albums.impl.domain.model.Album
+import com.luisfagundes.albums.impl.domain.model.AlbumMedia
+import com.luisfagundes.albums.impl.domain.repository.AlbumsRepository
+import com.luisfagundes.library.api.domain.model.Media
+import com.luisfagundes.library.api.domain.repository.LibraryRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -25,36 +25,27 @@ class AlbumsRepositoryImplTest {
     @RegisterExtension
     val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
 
-    private val dataSource: LocalAlbumsDataSource = mockk()
-    private val context: Context = mockk()
-    private val sharedPrefs: SharedPreferences = mockk()
+    private val libraryRepository: LibraryRepository = mockk()
 
     private lateinit var repository: AlbumsRepositoryImpl
 
     @BeforeEach
     fun setUp() {
-        every { context.getSharedPreferences("library_prefs", Context.MODE_PRIVATE) } returns sharedPrefs
         repository = AlbumsRepositoryImpl(
-            dataSource = dataSource,
-            context = context,
+            libraryRepository = libraryRepository,
             dispatcher = dispatcherRule.testDispatcher
         )
     }
 
     @Test
-    fun `getAlbums should return mapped and grouped albums excluding trashed or deleted media`() = runTest {
+    fun `getAlbums should return mapped and grouped albums`() = runTest {
         // Given
         val mockUri: Uri = mockk()
-        val media1 = AlbumMediaDto(id = 1L, uri = mockUri, dateAdded = 1000L, isVideo = false, bucketDisplayName = "Camera", bucketId = "cam", isFavorite = true)
-        val media2 = AlbumMediaDto(id = 2L, uri = mockUri, dateAdded = 2000L, isVideo = true, bucketDisplayName = "WhatsApp", bucketId = "wa", isFavorite = false)
-        val media3 = AlbumMediaDto(id = 3L, uri = mockUri, dateAdded = 3000L, isVideo = false, bucketDisplayName = "Camera", bucketId = "cam", isFavorite = false)
-        val media4 = AlbumMediaDto(id = 4L, uri = mockUri, dateAdded = 4000L, isVideo = false, bucketDisplayName = "Trash", bucketId = "trash", isFavorite = false) // will be filtered
+        val media1 = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 100L, isVideo = false, bucketDisplayName = "Camera", bucketId = "cam", isFavorite = true)
+        val media2 = Media(id = 2L, uri = mockUri, dateAdded = 2000L, size = 200L, isVideo = true, bucketDisplayName = "WhatsApp", bucketId = "wa", isFavorite = false)
+        val media3 = Media(id = 3L, uri = mockUri, dateAdded = 3000L, size = 300L, isVideo = false, bucketDisplayName = "Camera", bucketId = "cam", isFavorite = false)
 
-        coEvery { dataSource.fetchMediaList() } returns Result.success(listOf(media1, media2, media3, media4))
-        
-        // Preferences mocking
-        every { sharedPrefs.getStringSet("trashed_photo_ids", emptySet()) } returns setOf("4")
-        every { sharedPrefs.getStringSet("deleted_photo_ids", emptySet()) } returns emptySet()
+        coEvery { libraryRepository.getActiveMedia() } returns Result.success(listOf(media1, media2, media3))
 
         // When
         val result = repository.getAlbums()
@@ -88,13 +79,11 @@ class AlbumsRepositoryImplTest {
     fun `getAlbumMedia should return specific album media items for physical and virtual albums`() = runTest {
         // Given
         val mockUri: Uri = mockk()
-        val media1 = AlbumMediaDto(id = 1L, uri = mockUri, dateAdded = 1000L, isVideo = false, bucketDisplayName = "Camera", bucketId = "cam", isFavorite = true)
-        val media2 = AlbumMediaDto(id = 2L, uri = mockUri, dateAdded = 2000L, isVideo = true, bucketDisplayName = "WhatsApp", bucketId = "wa", isFavorite = false)
-        val media3 = AlbumMediaDto(id = 3L, uri = mockUri, dateAdded = 3000L, isVideo = false, bucketDisplayName = "Camera", bucketId = "cam", isFavorite = false)
+        val media1 = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 100L, isVideo = false, bucketDisplayName = "Camera", bucketId = "cam", isFavorite = true)
+        val media2 = Media(id = 2L, uri = mockUri, dateAdded = 2000L, size = 200L, isVideo = true, bucketDisplayName = "WhatsApp", bucketId = "wa", isFavorite = false)
+        val media3 = Media(id = 3L, uri = mockUri, dateAdded = 3000L, size = 300L, isVideo = false, bucketDisplayName = "Camera", bucketId = "cam", isFavorite = false)
 
-        coEvery { dataSource.fetchMediaList() } returns Result.success(listOf(media1, media2, media3))
-        every { sharedPrefs.getStringSet("trashed_photo_ids", emptySet()) } returns emptySet()
-        every { sharedPrefs.getStringSet("deleted_photo_ids", emptySet()) } returns emptySet()
+        coEvery { libraryRepository.getActiveMedia() } returns Result.success(listOf(media1, media2, media3))
 
         // Test 1: Fetch "Camera" physical album
         val cameraMediaResult = repository.getAlbumMedia("cam")

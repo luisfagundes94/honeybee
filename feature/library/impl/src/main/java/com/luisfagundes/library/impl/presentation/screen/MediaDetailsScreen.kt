@@ -75,7 +75,7 @@ import com.luisfagundes.designsystem.theme.spacing
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import com.luisfagundes.library.impl.R
-import com.luisfagundes.library.impl.domain.model.Media
+import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.impl.presentation.components.FullscreenPhotoViewer
 import com.luisfagundes.library.impl.presentation.components.TrashBadgedBox
 import com.luisfagundes.library.impl.presentation.components.VideoPlayer
