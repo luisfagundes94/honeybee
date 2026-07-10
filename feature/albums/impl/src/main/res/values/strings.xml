@@ -1,3 +1,17 @@
 <resources>
     <string name="albums">Albums</string>
+    <string name="favorites">Favorites</string>
+    <string name="videos">Videos</string>
+    <string name="camera">Camera</string>
+    <string name="screenshots">Screenshots</string>
+    <string name="downloads">Downloads</string>
+    <string name="whatsapp">WhatsApp</string>
+    <string name="error_loading_albums">Failed to load albums.</string>
+    <string name="error_loading_album_media">Failed to load media for this album.</string>
+    <string name="no_media">No photos or videos found.</string>
+    <string name="no_albums">No albums found.</string>
+    <string name="items_count_zero">No items</string>
+    <string name="items_count_one">1 item</string>
+    <string name="items_count_many">%1$d items</string>
+    <string name="back">Back</string>
 </resources>

@@ -23,10 +23,19 @@ android {
     buildFeatures {
         compose = true
     }
+    testOptions {
+        unitTests {
+            isReturnDefaultValues = true
+            all {
+                it.useJUnitPlatform()
+            }
+        }
+    }
 }
 
 dependencies {
     implementation(project(":feature:albums:api"))
+    implementation(project(":feature:library:api"))
     implementation(project(":core:common"))
     implementation(project(":core:designsystem"))
 
@@ -53,4 +62,18 @@ dependencies {
     // Navigation 3
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
+
+    // Coil
+    implementation(libs.coil.compose)
+    implementation(libs.coil.video)
+
+    // Testing
+    testImplementation(project(":core:testing"))
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.junit5.jupiter.api)
+    testRuntimeOnly(libs.junit5.jupiter.engine)
+    testRuntimeOnly(libs.junit5.platform.launcher)
+    testImplementation(libs.mockk)
+    testImplementation(libs.turbine)
+    testImplementation(libs.junit)
 }

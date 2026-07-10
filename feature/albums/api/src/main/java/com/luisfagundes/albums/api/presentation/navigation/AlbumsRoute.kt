@@ -5,3 +5,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data object AlbumsRoute : NavKey
+
+@Serializable
+data class AlbumDetailsRoute(
+    val albumId: String,
+    val albumName: String
+) : NavKey
+
