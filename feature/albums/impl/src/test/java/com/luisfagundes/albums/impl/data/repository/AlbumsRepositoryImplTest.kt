@@ -2,6 +2,7 @@ package com.luisfagundes.albums.impl.data.repository
 
 import android.net.Uri
 import com.luisfagundes.core.testing.MainDispatcherRule
+import com.luisfagundes.albums.impl.data.mapper.AlbumMapper
 import com.luisfagundes.albums.impl.domain.model.Album
 import com.luisfagundes.albums.impl.domain.model.AlbumMedia
 import com.luisfagundes.albums.impl.domain.repository.AlbumsRepository
@@ -26,6 +27,7 @@ class AlbumsRepositoryImplTest {
     val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
 
     private val libraryRepository: LibraryRepository = mockk()
+    private val albumMapper = AlbumMapper()
 
     private lateinit var repository: AlbumsRepositoryImpl
 
@@ -33,6 +35,7 @@ class AlbumsRepositoryImplTest {
     fun setUp() {
         repository = AlbumsRepositoryImpl(
             libraryRepository = libraryRepository,
+            albumMapper = albumMapper,
             dispatcher = dispatcherRule.testDispatcher
         )
     }
