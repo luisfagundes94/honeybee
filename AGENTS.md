@@ -21,7 +21,11 @@ Use conventional commits. The commit message should be structured as follows:
 - Follow SOLID principles
 - Follow clean architecture principles
 - Follow the KISS principle (Keep It Simple, Stupid)
+
+## Coding Conventions
 - Avoid repeating code
+- Avoid magic numbers
+- Avoid too long methods, break them into smaller methods
 
 ### Feature Module Structure
 
