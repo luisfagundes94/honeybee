@@ -11,7 +11,9 @@
     <string name="no_media">No photos or videos found.</string>
     <string name="no_albums">No albums found.</string>
     <string name="items_count_zero">No items</string>
-    <string name="items_count_one">1 item</string>
-    <string name="items_count_many">%1$d items</string>
+    <plurals name="items_count">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d items</item>
+    </plurals>
     <string name="back">Back</string>
 </resources>

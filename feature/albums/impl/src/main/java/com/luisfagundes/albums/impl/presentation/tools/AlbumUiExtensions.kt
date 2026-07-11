@@ -24,8 +24,7 @@ internal fun Album.getDisplayName(): String = when (this) {
 @Composable
 internal fun Album.getCountText(): String = when (this.count) {
     0 -> stringResource(R.string.items_count_zero)
-    1 -> stringResource(R.string.items_count_one)
-    else -> stringResource(R.string.items_count_many, this.count)
+    else -> androidx.compose.ui.res.pluralStringResource(R.plurals.items_count, this.count, this.count)
 }
 
 internal fun Album.getAlbumStyle(): AlbumStyle {

@@ -18,6 +18,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import com.luisfagundes.library.impl.R
 
+@android.annotation.SuppressLint("InflateParams")
 @OptIn(UnstableApi::class)
 @Composable
 internal fun VideoPlayer(
