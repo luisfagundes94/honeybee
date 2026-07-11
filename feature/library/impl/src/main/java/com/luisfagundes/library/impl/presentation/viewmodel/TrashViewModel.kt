@@ -4,10 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.luisfagundes.core.common.presentation.arch.viewmodel.ViewModel
 import com.luisfagundes.core.common.presentation.tools.ResourceProvider
 import com.luisfagundes.library.impl.R.string.failed_to_load_trash_photos
-import com.luisfagundes.library.impl.domain.usecase.CreateDeleteRequestUseCase
-import com.luisfagundes.library.impl.domain.usecase.GetTrashMediaUseCase
-import com.luisfagundes.library.impl.domain.usecase.PermanentlyDeleteUseCase
-import com.luisfagundes.library.impl.domain.usecase.RestoreFromTrashUseCase
+import com.luisfagundes.library.api.domain.repository.LibraryRepository
 import com.luisfagundes.library.impl.presentation.effect.TrashUiEffect
 import com.luisfagundes.library.impl.presentation.event.TrashUiEvent
 import com.luisfagundes.library.impl.presentation.state.TrashUiState
@@ -18,10 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class TrashViewModel @Inject constructor(
-    private val getTrashMediaUseCase: GetTrashMediaUseCase,
-    private val restoreFromTrashUseCase: RestoreFromTrashUseCase,
-    private val permanentlyDeleteUseCase: PermanentlyDeleteUseCase,
-    private val createDeleteRequestUseCase: CreateDeleteRequestUseCase,
+    private val repository: LibraryRepository,
     private val resourceProvider: ResourceProvider
 ) : ViewModel<TrashUiState, TrashUiEvent, TrashUiEffect>(
     TrashUiState.Loading
@@ -37,7 +31,7 @@ internal class TrashViewModel @Inject constructor(
 
     private fun loadTrash() = viewModelScope.launch {
         setState { TrashUiState.Loading }
-        getTrashMediaUseCase().fold(
+        repository.getTrashMedia().fold(
             onSuccess = { mediaList ->
                 setState { TrashUiState.Content(mediaToBeDeleted = mediaList) }
             },
@@ -49,7 +43,7 @@ internal class TrashViewModel @Inject constructor(
     }
 
     private fun restoreMedia(mediaId: Long) = viewModelScope.launch {
-        restoreFromTrashUseCase(listOf(mediaId))
+        repository.restoreFromTrash(listOf(mediaId))
         setStateOf<TrashUiState.Content> { currentState ->
             val updatedList = currentState.mediaToBeDeleted.filterNot { it.id == mediaId }
             currentState.copy(mediaToBeDeleted = updatedList)
@@ -63,7 +57,7 @@ internal class TrashViewModel @Inject constructor(
 
             viewModelScope.launch {
                 val deleteIds = mediaList.map { it.id }
-                val pendingIntent = createDeleteRequestUseCase(deleteIds)
+                val pendingIntent = repository.createDeleteRequest(deleteIds)
                 if (pendingIntent != null) {
                     sendEffect { TrashUiEffect.ShowDeleteConfirmation(pendingIntent.intentSender) }
                 } else {
@@ -83,7 +77,7 @@ internal class TrashViewModel @Inject constructor(
     private fun deleteMediaPermanently(mediaList: List<Media>) = viewModelScope.launch {
         val count = mediaList.size
         val size = mediaList.sumOf { it.size }
-        permanentlyDeleteUseCase(mediaList)
+        repository.permanentlyDelete(mediaList)
         sendEffect { TrashUiEffect.NavigateToCongratulations(count, size) }
     }
 }

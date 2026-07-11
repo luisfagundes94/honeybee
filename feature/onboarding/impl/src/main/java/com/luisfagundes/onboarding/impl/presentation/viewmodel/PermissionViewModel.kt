@@ -2,7 +2,7 @@ package com.luisfagundes.onboarding.impl.presentation.viewmodel
 
 import androidx.lifecycle.viewModelScope
 import com.luisfagundes.core.common.presentation.arch.viewmodel.EffectViewModel
-import com.luisfagundes.onboarding.impl.domain.usecase.CompleteOnboardingUseCase
+import com.luisfagundes.onboarding.impl.domain.repository.OnboardingRepository
 import com.luisfagundes.onboarding.impl.presentation.effect.PermissionUiEffect
 import com.luisfagundes.onboarding.impl.presentation.event.PermissionUiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -11,7 +11,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class PermissionViewModel @Inject constructor(
-    private val completeOnboardingUseCase: CompleteOnboardingUseCase
+    private val repository: OnboardingRepository
 ) : EffectViewModel<PermissionUiEffect, PermissionUiEvent>() {
     override fun dispatchEvent(event: PermissionUiEvent) {
         when (event) {
@@ -21,7 +21,7 @@ internal class PermissionViewModel @Inject constructor(
     }
 
     private fun completeOnboarding() = viewModelScope.launch {
-        completeOnboardingUseCase()
+        repository.completeOnboarding()
         sendEffect { PermissionUiEffect.NavigateToLibrary }
     }
 

@@ -37,28 +37,6 @@ internal class LibraryRepositoryImpl @Inject constructor(
     @param:DefaultDispatcher private val dispatcher: CoroutineDispatcher
 ) : LibraryRepository {
 
-    override suspend fun getMediaByMonth(): Result<List<MediaSection>> = withContext(dispatcher) {
-        dataSource.fetchMediaList().map { mediaList ->
-            val trashedIds = preferences.getTrashedPhotoIds()
-            val deletedIds = preferences.getDeletedPhotoIds()
-            val filteredMedia = mediaList.filter { media ->
-                media.id !in trashedIds && media.id !in deletedIds
-            }
-            val mediaByMonth = filteredMedia.groupBy { media ->
-                val instant = Instant.ofEpochSecond(media.dateAdded)
-                YearMonth.from(instant.atZone(ZoneId.systemDefault()))
-            }
-            mediaByMonth.map { (month, list) ->
-                MediaSection(
-                    yearMonth = month,
-                    mediaList = list
-                        .map { mediaMapper.mapToDomain(it) }
-                        .sortedByDescending { it.dateAdded }
-                )
-            }.sortedByDescending { it.yearMonth }
-        }
-    }
-
     override suspend fun getActiveMedia(): Result<List<Media>> = withContext(dispatcher) {
         dataSource.fetchMediaList().map { mediaList ->
             val trashedIds = preferences.getTrashedPhotoIds()

@@ -25,7 +25,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.Instant
-import java.time.YearMonth
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class LibraryRepositoryImplTest {
@@ -56,7 +55,7 @@ class LibraryRepositoryImplTest {
     }
 
     @Test
-    fun `getMediaByMonth should return sorted media sections and sorted media`() = runTest {
+    fun `getActiveMedia should return active media`() = runTest {
         // Given
         val mockUri1: Uri = mockk()
         val mockUri2: Uri = mockk()
@@ -75,25 +74,15 @@ class LibraryRepositoryImplTest {
         every { preferences.getDeletedPhotoIds() } returns emptySet()
 
         // When
-        val result = repository.getMediaByMonth()
+        val result = repository.getActiveMedia()
 
         // Then
         assertTrue(result.isSuccess)
-        val sections = result.getOrNull()!!
-        assertEquals(2, sections.size)
-
-        // The most recent month (June 2026) must be first
-        assertEquals(YearMonth.of(2026, 6), sections[0].yearMonth)
-        assertEquals(1, sections[0].mediaList.size)
-        assertEquals(2L, sections[0].mediaList[0].id)
-
-        // The older month (May 2026) must be second
-        assertEquals(YearMonth.of(2026, 5), sections[1].yearMonth)
-        assertEquals(2, sections[1].mediaList.size)
-
-        // Within May 2026, the most recent media (May 15th) must be first
-        assertEquals(1L, sections[1].mediaList[0].id)
-        assertEquals(3L, sections[1].mediaList[1].id)
+        val mediaList = result.getOrNull()!!
+        assertEquals(3, mediaList.size)
+        assertEquals(2L, mediaList[0].id)
+        assertEquals(1L, mediaList[1].id)
+        assertEquals(3L, mediaList[2].id)
     }
 
     @Test

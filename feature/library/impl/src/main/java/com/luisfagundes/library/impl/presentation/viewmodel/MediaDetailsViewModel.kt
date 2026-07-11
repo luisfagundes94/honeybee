@@ -4,9 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.luisfagundes.core.common.presentation.arch.viewmodel.ViewModel
 import com.luisfagundes.core.common.presentation.tools.ResourceProvider
 import com.luisfagundes.library.impl.R.string.failed_to_load_photo_details
-import com.luisfagundes.library.impl.domain.usecase.GetActiveMediaUseCase
-import com.luisfagundes.library.impl.domain.usecase.GetItemsInTrashCountUseCase
-import com.luisfagundes.library.impl.domain.usecase.MoveToTrashUseCase
+import com.luisfagundes.library.api.domain.repository.LibraryRepository
 import com.luisfagundes.library.impl.presentation.effect.MediaDetailsUiEffect
 import com.luisfagundes.library.impl.presentation.event.MediaDetailsUiEvent
 import com.luisfagundes.library.impl.presentation.state.MediaDetailsUiState
@@ -16,9 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class MediaDetailsViewModel @Inject constructor(
-    private val getActiveMediaUseCase: GetActiveMediaUseCase,
-    private val moveToTrashUseCase: MoveToTrashUseCase,
-    private val getItemsInTrashCountUseCase: GetItemsInTrashCountUseCase,
+    private val repository: LibraryRepository,
     private val resourceProvider: ResourceProvider
 ) : ViewModel<MediaDetailsUiState, MediaDetailsUiEvent, MediaDetailsUiEffect>(
     MediaDetailsUiState.Loading
@@ -38,7 +34,7 @@ internal class MediaDetailsViewModel @Inject constructor(
 
     private fun loadDetails(initialMediaId: Long, albumId: String?) = viewModelScope.launch {
         setState { MediaDetailsUiState.Loading }
-        getActiveMediaUseCase().fold(
+        repository.getActiveMedia().fold(
             onSuccess = { mediaList ->
                 val filteredList = when (albumId) {
                     null -> mediaList
@@ -47,7 +43,7 @@ internal class MediaDetailsViewModel @Inject constructor(
                     else -> mediaList.filter { it.bucketId == albumId }
                 }
                 val initialIndex = filteredList.indexOfFirst { it.id == initialMediaId }.coerceAtLeast(0)
-                val trashCount = getItemsInTrashCountUseCase()
+                val trashCount = repository.getItemsInTrashCount()
                 setState { MediaDetailsUiState.Content(filteredList, initialIndex, trashCount) }
             },
             onFailure = {
@@ -58,13 +54,13 @@ internal class MediaDetailsViewModel @Inject constructor(
     }
 
     private fun moveToTrash(mediaId: Long) = viewModelScope.launch {
-        moveToTrashUseCase(mediaId)
+        repository.moveToTrash(mediaId)
         runIfStateIs<MediaDetailsUiState.Content> { currentState ->
             val updatedMedia = currentState.mediaList.filterNot { it.id == mediaId }
             if (updatedMedia.isEmpty()) {
                 sendEffect { MediaDetailsUiEffect.NavigateBack }
             } else {
-                val trashCount = getItemsInTrashCountUseCase()
+                val trashCount = repository.getItemsInTrashCount()
                 setState {
                     currentState.copy(
                         mediaList = updatedMedia,

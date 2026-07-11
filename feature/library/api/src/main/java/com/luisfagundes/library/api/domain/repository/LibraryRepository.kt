@@ -2,11 +2,9 @@ package com.luisfagundes.library.api.domain.repository
 
 import android.app.PendingIntent
 import com.luisfagundes.library.api.domain.model.Media
-import com.luisfagundes.library.api.domain.model.MediaSection
 import com.luisfagundes.library.api.domain.model.Statistics
 
 interface LibraryRepository {
-    suspend fun getMediaByMonth(): Result<List<MediaSection>>
     suspend fun getActiveMedia(): Result<List<Media>>
     suspend fun getTrashMedia(): Result<List<Media>>
     suspend fun getItemsInTrashCount(): Int

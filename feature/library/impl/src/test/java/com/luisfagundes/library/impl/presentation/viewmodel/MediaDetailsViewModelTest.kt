@@ -6,9 +6,7 @@ import com.luisfagundes.core.common.presentation.tools.ResourceProvider
 import com.luisfagundes.core.testing.MainDispatcherRule
 import com.luisfagundes.library.impl.R
 import com.luisfagundes.library.api.domain.model.Media
-import com.luisfagundes.library.impl.domain.usecase.GetActiveMediaUseCase
-import com.luisfagundes.library.impl.domain.usecase.GetItemsInTrashCountUseCase
-import com.luisfagundes.library.impl.domain.usecase.MoveToTrashUseCase
+import com.luisfagundes.library.api.domain.repository.LibraryRepository
 import com.luisfagundes.library.impl.presentation.effect.MediaDetailsUiEffect
 import com.luisfagundes.library.impl.presentation.event.MediaDetailsUiEvent
 import com.luisfagundes.library.impl.presentation.state.MediaDetailsUiState
@@ -30,9 +28,7 @@ class MediaDetailsViewModelTest {
     @RegisterExtension
     val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
 
-    private val getActiveMediaUseCase: GetActiveMediaUseCase = mockk()
-    private val moveToTrashUseCase: MoveToTrashUseCase = mockk()
-    private val getItemsInTrashCountUseCase: GetItemsInTrashCountUseCase = mockk()
+    private val repository: LibraryRepository = mockk()
     private val resourceProvider: ResourceProvider = mockk()
 
     private lateinit var viewModel: MediaDetailsViewModel
@@ -40,9 +36,7 @@ class MediaDetailsViewModelTest {
     @BeforeEach
     fun setUp() {
         viewModel = MediaDetailsViewModel(
-            getActiveMediaUseCase = getActiveMediaUseCase,
-            moveToTrashUseCase = moveToTrashUseCase,
-            getItemsInTrashCountUseCase = getItemsInTrashCountUseCase,
+            repository = repository,
             resourceProvider = resourceProvider
         )
     }
@@ -63,8 +57,8 @@ class MediaDetailsViewModelTest {
         val mediaList = listOf(media1, media2, media3)
         val trashCount = 2
 
-        coEvery { getActiveMediaUseCase() } returns Result.success(mediaList)
-        coEvery { getItemsInTrashCountUseCase() } returns trashCount
+        coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
+        coEvery { repository.getItemsInTrashCount() } returns trashCount
 
         // When & Then
         viewModel.uiState.test {
@@ -77,8 +71,8 @@ class MediaDetailsViewModelTest {
             assertEquals(1, contentState.initialIndex)
             assertEquals(trashCount, contentState.trashCount)
 
-            coVerify(exactly = 1) { getActiveMediaUseCase() }
-            coVerify(exactly = 1) { getItemsInTrashCountUseCase() }
+            coVerify(exactly = 1) { repository.getActiveMedia() }
+            coVerify(exactly = 1) { repository.getItemsInTrashCount() }
         }
     }
 
@@ -90,8 +84,8 @@ class MediaDetailsViewModelTest {
         val mediaList = listOf(media1)
         val trashCount = 0
 
-        coEvery { getActiveMediaUseCase() } returns Result.success(mediaList)
-        coEvery { getItemsInTrashCountUseCase() } returns trashCount
+        coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
+        coEvery { repository.getItemsInTrashCount() } returns trashCount
 
         // When & Then
         viewModel.uiState.test {
@@ -104,8 +98,8 @@ class MediaDetailsViewModelTest {
             assertEquals(0, contentState.initialIndex)
             assertEquals(trashCount, contentState.trashCount)
 
-            coVerify(exactly = 1) { getActiveMediaUseCase() }
-            coVerify(exactly = 1) { getItemsInTrashCountUseCase() }
+            coVerify(exactly = 1) { repository.getActiveMedia() }
+            coVerify(exactly = 1) { repository.getItemsInTrashCount() }
         }
     }
 
@@ -115,7 +109,7 @@ class MediaDetailsViewModelTest {
         val errorMessage = "Failed to load media details"
         val exception = Exception("Failed to load media")
 
-        coEvery { getActiveMediaUseCase() } returns Result.failure(exception)
+        coEvery { repository.getActiveMedia() } returns Result.failure(exception)
         every { resourceProvider.getString(R.string.failed_to_load_photo_details) } returns errorMessage
 
         // When & Then
@@ -127,7 +121,7 @@ class MediaDetailsViewModelTest {
             val errorState = awaitItem() as MediaDetailsUiState.Error
             assertEquals(errorMessage, errorState.message)
 
-            coVerify(exactly = 1) { getActiveMediaUseCase() }
+            coVerify(exactly = 1) { repository.getActiveMedia() }
             coVerify(exactly = 1) { resourceProvider.getString(R.string.failed_to_load_photo_details) }
         }
     }
@@ -142,9 +136,9 @@ class MediaDetailsViewModelTest {
         val trashCountBefore = 2
         val trashCountAfter = 3
 
-        coEvery { getActiveMediaUseCase() } returns Result.success(mediaList)
-        coEvery { getItemsInTrashCountUseCase() } returnsMany listOf(trashCountBefore, trashCountAfter)
-        coEvery { moveToTrashUseCase(mediaId = 1L) } returns Unit
+        coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
+        coEvery { repository.getItemsInTrashCount() } returnsMany listOf(trashCountBefore, trashCountAfter)
+        coEvery { repository.moveToTrash(1L) } returns Unit
 
         // When & Then
         viewModel.uiState.test {
@@ -163,8 +157,8 @@ class MediaDetailsViewModelTest {
             assertEquals(listOf(media2), updatedContent.mediaList)
             assertEquals(trashCountAfter, updatedContent.trashCount)
 
-            coVerify(exactly = 1) { moveToTrashUseCase(mediaId = 1L) }
-            coVerify(exactly = 2) { getItemsInTrashCountUseCase() }
+            coVerify(exactly = 1) { repository.moveToTrash(1L) }
+            coVerify(exactly = 2) { repository.getItemsInTrashCount() }
         }
     }
 
@@ -176,9 +170,9 @@ class MediaDetailsViewModelTest {
         val mediaList = listOf(media1)
         val trashCount = 2
 
-        coEvery { getActiveMediaUseCase() } returns Result.success(mediaList)
-        coEvery { getItemsInTrashCountUseCase() } returns trashCount
-        coEvery { moveToTrashUseCase(mediaId = 1L) } returns Unit
+        coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
+        coEvery { repository.getItemsInTrashCount() } returns trashCount
+        coEvery { repository.moveToTrash(1L) } returns Unit
 
         // When & Then
         viewModel.uiState.test {
@@ -195,7 +189,7 @@ class MediaDetailsViewModelTest {
                 assertEquals(MediaDetailsUiEffect.NavigateBack, awaitItem())
             }
 
-            coVerify(exactly = 1) { moveToTrashUseCase(mediaId = 1L) }
+            coVerify(exactly = 1) { repository.moveToTrash(1L) }
         }
     }
 
@@ -217,8 +211,8 @@ class MediaDetailsViewModelTest {
         val mediaList = listOf(media1)
         val trashCount = 2
 
-        coEvery { getActiveMediaUseCase() } returns Result.success(mediaList)
-        coEvery { getItemsInTrashCountUseCase() } returns trashCount
+        coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
+        coEvery { repository.getItemsInTrashCount() } returns trashCount
 
         // When & Then
         viewModel.uiState.test {
@@ -250,8 +244,8 @@ class MediaDetailsViewModelTest {
         val mediaList = listOf(media1, media2)
         val trashCount = 1
 
-        coEvery { getActiveMediaUseCase() } returns Result.success(mediaList)
-        coEvery { getItemsInTrashCountUseCase() } returns trashCount
+        coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
+        coEvery { repository.getItemsInTrashCount() } returns trashCount
 
         // When & Then
         viewModel.uiState.test {
@@ -280,8 +274,8 @@ class MediaDetailsViewModelTest {
         val mediaList = listOf(media1, media2)
         val trashCount = 1
 
-        coEvery { getActiveMediaUseCase() } returns Result.success(mediaList)
-        coEvery { getItemsInTrashCountUseCase() } returns trashCount
+        coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
+        coEvery { repository.getItemsInTrashCount() } returns trashCount
 
         // When & Then
         viewModel.uiState.test {
@@ -310,8 +304,8 @@ class MediaDetailsViewModelTest {
         val mediaList = listOf(media1, media2)
         val trashCount = 1
 
-        coEvery { getActiveMediaUseCase() } returns Result.success(mediaList)
-        coEvery { getItemsInTrashCountUseCase() } returns trashCount
+        coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
+        coEvery { repository.getItemsInTrashCount() } returns trashCount
 
         // When & Then
         viewModel.uiState.test {

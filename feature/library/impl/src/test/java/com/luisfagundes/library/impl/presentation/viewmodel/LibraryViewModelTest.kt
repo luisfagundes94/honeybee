@@ -7,7 +7,7 @@ import com.luisfagundes.core.testing.MainDispatcherRule
 import com.luisfagundes.library.impl.R
 import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.api.domain.model.MediaSection
-import com.luisfagundes.library.impl.domain.usecase.GetItemsInTrashCountUseCase
+import com.luisfagundes.library.api.domain.repository.LibraryRepository
 import com.luisfagundes.library.impl.domain.usecase.GetMediaByMonthUseCase
 import com.luisfagundes.library.impl.presentation.effect.LibraryUiEffect
 import com.luisfagundes.library.impl.presentation.event.LibraryUiEvent
@@ -32,7 +32,7 @@ class LibraryViewModelTest {
     val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
 
     private val getMediaByMonthUseCase: GetMediaByMonthUseCase = mockk()
-    private val getItemsInTrashCountUseCase: GetItemsInTrashCountUseCase = mockk()
+    private val repository: LibraryRepository = mockk()
     private val resourceProvider: ResourceProvider = mockk()
 
     private lateinit var viewModel: LibraryViewModel
@@ -41,7 +41,7 @@ class LibraryViewModelTest {
     fun setUp() {
         viewModel = LibraryViewModel(
             getMediaByMonthUseCase = getMediaByMonthUseCase,
-            getItemsInTrashCountUseCase = getItemsInTrashCountUseCase,
+            repository = repository,
             resourceProvider = resourceProvider
         )
     }
@@ -71,7 +71,7 @@ class LibraryViewModelTest {
         )
         val trashCount = 5
 
-        coEvery { getItemsInTrashCountUseCase() } returns trashCount
+        coEvery { repository.getItemsInTrashCount() } returns trashCount
         coEvery { getMediaByMonthUseCase() } returns Result.success(mediaSections)
 
         // When & Then
@@ -84,7 +84,7 @@ class LibraryViewModelTest {
             assertEquals(mediaSections, contentState.mediaSectionList)
             assertEquals(trashCount, contentState.itemsInTrash)
 
-            coVerify(exactly = 1) { getItemsInTrashCountUseCase() }
+            coVerify(exactly = 1) { repository.getItemsInTrashCount() }
             coVerify(exactly = 1) { getMediaByMonthUseCase() }
         }
     }
@@ -95,7 +95,7 @@ class LibraryViewModelTest {
         val errorMessage = "Failed to load media"
         val exception = Exception("Network error")
 
-        coEvery { getItemsInTrashCountUseCase() } returns 2
+        coEvery { repository.getItemsInTrashCount() } returns 2
         coEvery { getMediaByMonthUseCase() } returns Result.failure(exception)
         every { resourceProvider.getString(R.string.error_loading_photos_message) } returns errorMessage
 
@@ -108,7 +108,7 @@ class LibraryViewModelTest {
             val errorState = awaitItem() as LibraryUiState.Error
             assertEquals(errorMessage, errorState.message)
 
-            coVerify(exactly = 1) { getItemsInTrashCountUseCase() }
+            coVerify(exactly = 1) { repository.getItemsInTrashCount() }
             coVerify(exactly = 1) { getMediaByMonthUseCase() }
             coVerify(exactly = 1) { resourceProvider.getString(R.string.error_loading_photos_message) }
         }

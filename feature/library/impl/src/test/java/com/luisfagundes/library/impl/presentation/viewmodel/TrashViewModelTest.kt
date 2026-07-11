@@ -8,10 +8,7 @@ import com.luisfagundes.core.common.presentation.tools.ResourceProvider
 import com.luisfagundes.core.testing.MainDispatcherRule
 import com.luisfagundes.library.impl.R
 import com.luisfagundes.library.api.domain.model.Media
-import com.luisfagundes.library.impl.domain.usecase.CreateDeleteRequestUseCase
-import com.luisfagundes.library.impl.domain.usecase.GetTrashMediaUseCase
-import com.luisfagundes.library.impl.domain.usecase.PermanentlyDeleteUseCase
-import com.luisfagundes.library.impl.domain.usecase.RestoreFromTrashUseCase
+import com.luisfagundes.library.api.domain.repository.LibraryRepository
 import com.luisfagundes.library.impl.presentation.effect.TrashUiEffect
 import com.luisfagundes.library.impl.presentation.event.TrashUiEvent
 import com.luisfagundes.library.impl.presentation.state.TrashUiState
@@ -33,10 +30,7 @@ class TrashViewModelTest {
     @RegisterExtension
     val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
 
-    private val getTrashMediaUseCase: GetTrashMediaUseCase = mockk()
-    private val restoreFromTrashUseCase: RestoreFromTrashUseCase = mockk()
-    private val permanentlyDeleteUseCase: PermanentlyDeleteUseCase = mockk()
-    private val createDeleteRequestUseCase: CreateDeleteRequestUseCase = mockk()
+    private val repository: LibraryRepository = mockk()
     private val resourceProvider: ResourceProvider = mockk()
 
     private lateinit var viewModel: TrashViewModel
@@ -44,10 +38,7 @@ class TrashViewModelTest {
     @BeforeEach
     fun setUp() {
         viewModel = TrashViewModel(
-            getTrashMediaUseCase = getTrashMediaUseCase,
-            restoreFromTrashUseCase = restoreFromTrashUseCase,
-            permanentlyDeleteUseCase = permanentlyDeleteUseCase,
-            createDeleteRequestUseCase = createDeleteRequestUseCase,
+            repository = repository,
             resourceProvider = resourceProvider
         )
     }
@@ -65,7 +56,7 @@ class TrashViewModelTest {
         val media = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false)
         val mediaList = listOf(media)
 
-        coEvery { getTrashMediaUseCase() } returns Result.success(mediaList)
+        coEvery { repository.getTrashMedia() } returns Result.success(mediaList)
 
         // When & Then
         viewModel.uiState.test {
@@ -76,7 +67,7 @@ class TrashViewModelTest {
             val contentState = awaitItem() as TrashUiState.Content
             assertEquals(mediaList, contentState.mediaToBeDeleted)
 
-            coVerify(exactly = 1) { getTrashMediaUseCase() }
+            coVerify(exactly = 1) { repository.getTrashMedia() }
         }
     }
 
@@ -86,7 +77,7 @@ class TrashViewModelTest {
         val errorMessage = "Failed to load trash media"
         val exception = Exception("Failed to load trash media")
 
-        coEvery { getTrashMediaUseCase() } returns Result.failure(exception)
+        coEvery { repository.getTrashMedia() } returns Result.failure(exception)
         every { resourceProvider.getString(R.string.failed_to_load_trash_photos) } returns errorMessage
 
         // When & Then
@@ -98,7 +89,7 @@ class TrashViewModelTest {
             val errorState = awaitItem() as TrashUiState.Error
             assertEquals(errorMessage, errorState.message)
 
-            coVerify(exactly = 1) { getTrashMediaUseCase() }
+            coVerify(exactly = 1) { repository.getTrashMedia() }
             coVerify(exactly = 1) { resourceProvider.getString(R.string.failed_to_load_trash_photos) }
         }
     }
@@ -111,8 +102,8 @@ class TrashViewModelTest {
         val media2 = Media(id = 2L, uri = mockUri, dateAdded = 1100L, size = 3000L, isVideo = true)
         val mediaList = listOf(media1, media2)
 
-        coEvery { getTrashMediaUseCase() } returns Result.success(mediaList)
-        coEvery { restoreFromTrashUseCase(listOf(1L)) } returns Unit
+        coEvery { repository.getTrashMedia() } returns Result.success(mediaList)
+        coEvery { repository.restoreFromTrash(listOf(1L)) } returns Unit
 
         // When & Then
         viewModel.uiState.test {
@@ -126,14 +117,14 @@ class TrashViewModelTest {
             val updatedContent = awaitItem() as TrashUiState.Content
             assertEquals(listOf(media2), updatedContent.mediaToBeDeleted)
 
-            coVerify(exactly = 1) { restoreFromTrashUseCase(listOf(1L)) }
+            coVerify(exactly = 1) { repository.restoreFromTrash(listOf(1L)) }
         }
     }
 
     @Test
     fun `dispatchEvent ConfirmDeletion with empty list should do nothing`() = runTest {
         // Given
-        coEvery { getTrashMediaUseCase() } returns Result.success(emptyList())
+        coEvery { repository.getTrashMedia() } returns Result.success(emptyList())
 
         // When & Then
         viewModel.uiState.test {
@@ -145,8 +136,8 @@ class TrashViewModelTest {
 
             viewModel.dispatchEvent(TrashUiEvent.ConfirmDeletion)
 
-            coVerify(exactly = 0) { createDeleteRequestUseCase(any()) }
-            coVerify(exactly = 0) { permanentlyDeleteUseCase(any()) }
+            coVerify(exactly = 0) { repository.createDeleteRequest(any()) }
+            coVerify(exactly = 0) { repository.permanentlyDelete(any()) }
         }
     }
 
@@ -159,8 +150,8 @@ class TrashViewModelTest {
         val mockPendingIntent = mockk<PendingIntent>()
         val mockIntentSender = mockk<IntentSender>()
 
-        coEvery { getTrashMediaUseCase() } returns Result.success(mediaList)
-        coEvery { createDeleteRequestUseCase(listOf(1L)) } returns mockPendingIntent
+        coEvery { repository.getTrashMedia() } returns Result.success(mediaList)
+        coEvery { repository.createDeleteRequest(listOf(1L)) } returns mockPendingIntent
         every { mockPendingIntent.intentSender } returns mockIntentSender
 
         // When & Then
@@ -177,8 +168,8 @@ class TrashViewModelTest {
                 assertEquals(mockIntentSender, effect.intentSender)
             }
 
-            coVerify(exactly = 1) { createDeleteRequestUseCase(listOf(1L)) }
-            coVerify(exactly = 0) { permanentlyDeleteUseCase(any()) }
+            coVerify(exactly = 1) { repository.createDeleteRequest(listOf(1L)) }
+            coVerify(exactly = 0) { repository.permanentlyDelete(any()) }
         }
     }
 
@@ -190,9 +181,9 @@ class TrashViewModelTest {
         val media2 = Media(id = 2L, uri = mockUri, dateAdded = 1100L, size = 3000L, isVideo = true)
         val mediaList = listOf(media1, media2)
 
-        coEvery { getTrashMediaUseCase() } returns Result.success(mediaList)
-        coEvery { createDeleteRequestUseCase(listOf(1L, 2L)) } returns null
-        coEvery { permanentlyDeleteUseCase(mediaList) } returns Unit
+        coEvery { repository.getTrashMedia() } returns Result.success(mediaList)
+        coEvery { repository.createDeleteRequest(listOf(1L, 2L)) } returns null
+        coEvery { repository.permanentlyDelete(mediaList) } returns Unit
 
         // When & Then
         viewModel.uiState.test {
@@ -209,8 +200,8 @@ class TrashViewModelTest {
                 assertEquals(5000L, effect.deletedSize)
             }
 
-            coVerify(exactly = 1) { createDeleteRequestUseCase(listOf(1L, 2L)) }
-            coVerify(exactly = 1) { permanentlyDeleteUseCase(mediaList) }
+            coVerify(exactly = 1) { repository.createDeleteRequest(listOf(1L, 2L)) }
+            coVerify(exactly = 1) { repository.permanentlyDelete(mediaList) }
         }
     }
 
@@ -222,8 +213,8 @@ class TrashViewModelTest {
         val media2 = Media(id = 2L, uri = mockUri, dateAdded = 1100L, size = 3000L, isVideo = true)
         val mediaList = listOf(media1, media2)
 
-        coEvery { getTrashMediaUseCase() } returns Result.success(mediaList)
-        coEvery { permanentlyDeleteUseCase(mediaList) } returns Unit
+        coEvery { repository.getTrashMedia() } returns Result.success(mediaList)
+        coEvery { repository.permanentlyDelete(mediaList) } returns Unit
 
         // When & Then
         viewModel.uiState.test {
@@ -240,7 +231,7 @@ class TrashViewModelTest {
                 assertEquals(5000L, effect.deletedSize)
             }
 
-            coVerify(exactly = 1) { permanentlyDeleteUseCase(mediaList) }
+            coVerify(exactly = 1) { repository.permanentlyDelete(mediaList) }
         }
     }
 }
