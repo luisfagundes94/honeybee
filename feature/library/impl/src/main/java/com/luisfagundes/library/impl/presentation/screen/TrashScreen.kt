@@ -285,13 +285,13 @@ private fun TrashMediaItem(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     .padding(MaterialTheme.spacing.verySmall)
-                    .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f), CircleShape)
                     .padding(MaterialTheme.spacing.verySmall)
             ) {
                 Icon(
                     imageVector = Icons.Default.PlayArrow,
-                    contentDescription = "Video",
-                    tint = Color.White,
+                    contentDescription = stringResource(com.luisfagundes.designsystem.R.string.video_content_description),
+                    tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(10.dp)
                 )
             }
