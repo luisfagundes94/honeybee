@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -33,7 +32,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
@@ -42,8 +40,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.luisfagundes.designsystem.R.string.video_content_description
 import com.luisfagundes.albums.impl.R
-import com.luisfagundes.albums.impl.domain.model.AlbumMedia
 import com.luisfagundes.albums.impl.presentation.effect.AlbumDetailsUiEffect
 import com.luisfagundes.albums.impl.presentation.event.AlbumDetailsUiEvent
 import com.luisfagundes.albums.impl.presentation.state.AlbumDetailsUiState
@@ -133,65 +131,81 @@ private fun AlbumDetailsScreen(
                 )
             }
             is AlbumDetailsUiState.Content -> {
-                if (uiState.mediaList.isEmpty()) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = stringResource(R.string.no_media),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                } else {
-                    LazyVerticalGrid(
-                        columns = GridCells.Adaptive(minSize = 100.dp),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .consumeWindowInsets(innerPadding),
-                        contentPadding = PaddingValues(
-                            top = innerPadding.calculateTopPadding(),
-                            bottom = innerPadding.calculateBottomPadding(),
-                            start = MaterialTheme.spacing.default,
-                            end = MaterialTheme.spacing.default
-                        ),
-                        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall),
-                        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall)
-                    ) {
-                        items(uiState.mediaList, key = { it.id }) { media ->
-                            Box(
-                                modifier = Modifier
-                                    .aspectRatio(1f)
-                                    .clip(MaterialTheme.shapes.small)
-                                    .clickable { onEvent(AlbumDetailsUiEvent.MediaClick(media.id)) }
-                            ) {
-                                AsyncImage(
-                                    model = media.uri,
-                                    contentDescription = null,
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize()
+                AlbumDetails(
+                    uiState = uiState,
+                    innerPadding = innerPadding,
+                    onEvent = onEvent
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AlbumDetails(
+    uiState: AlbumDetailsUiState.Content,
+    innerPadding: PaddingValues,
+    onEvent: (AlbumDetailsUiEvent) -> Unit
+) {
+    if (uiState.mediaList.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = stringResource(R.string.no_media),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    } else {
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 100.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .consumeWindowInsets(innerPadding),
+            contentPadding = PaddingValues(
+                top = innerPadding.calculateTopPadding(),
+                bottom = innerPadding.calculateBottomPadding(),
+                start = MaterialTheme.spacing.default,
+                end = MaterialTheme.spacing.default
+            ),
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall),
+            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall)
+        ) {
+            items(uiState.mediaList, key = { it.id }) { media ->
+                Box(
+                    modifier = Modifier
+                        .aspectRatio(1f)
+                        .clip(MaterialTheme.shapes.small)
+                        .clickable { onEvent(AlbumDetailsUiEvent.MediaClick(media.id)) }
+                ) {
+                    AsyncImage(
+                        model = media.uri,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                    if (media.isVideo) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(MaterialTheme.spacing.verySmall)
+                                .background(
+                                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                                    shape = CircleShape
                                 )
-                                if (media.isVideo) {
-                                    Box(
-                                        contentAlignment = Alignment.Center,
-                                        modifier = Modifier
-                                            .align(Alignment.BottomEnd)
-                                            .padding(MaterialTheme.spacing.verySmall)
-                                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f), CircleShape)
-                                            .padding(MaterialTheme.spacing.verySmall)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.PlayArrow,
-                                            contentDescription = stringResource(com.luisfagundes.designsystem.R.string.video_content_description),
-                                            tint = MaterialTheme.colorScheme.onSurface,
-                                            modifier = Modifier.size(MaterialTheme.spacing.default)
-                                        )
-                                    }
-                                }
-                            }
+                                .padding(MaterialTheme.spacing.verySmall)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.PlayArrow,
+                                contentDescription = stringResource(video_content_description),
+                                tint = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.size(MaterialTheme.spacing.default)
+                            )
                         }
                     }
                 }
