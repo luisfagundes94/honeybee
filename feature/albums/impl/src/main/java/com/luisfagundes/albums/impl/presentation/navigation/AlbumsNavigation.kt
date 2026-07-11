@@ -14,7 +14,12 @@ internal fun EntryProviderScope<NavKey>.albumsEntries() {
         val backStack = LocalNavBackStack.current
         AlbumsScreen(
             onNavigateToAlbumDetails = { albumId, albumName ->
-                backStack?.add(AlbumDetailsRoute(albumId, albumName))
+                backStack?.add(
+                    AlbumDetailsRoute(
+                        albumId = albumId,
+                        albumName = albumName
+                    )
+                )
             }
         )
     }
