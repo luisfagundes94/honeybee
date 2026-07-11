@@ -109,7 +109,7 @@ internal fun CongratulationsScreen(
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(MaterialTheme.spacing.small))
                 Text(
                     text = sizeUnit,
                     fontSize = 32.sp,

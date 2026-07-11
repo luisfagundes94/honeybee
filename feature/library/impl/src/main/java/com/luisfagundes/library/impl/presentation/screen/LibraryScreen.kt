@@ -195,13 +195,13 @@ private fun LibraryContent(
                                     .align(Alignment.BottomEnd)
                                     .padding(MaterialTheme.spacing.verySmall)
                                     .background(Color.Black.copy(alpha = 0.5f), CircleShape)
-                                    .padding(4.dp)
+                                    .padding(MaterialTheme.spacing.verySmall)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.PlayArrow,
                                     contentDescription = "Video",
                                     tint = Color.White,
-                                    modifier = Modifier.size(16.dp)
+                                    modifier = Modifier.size(MaterialTheme.spacing.default)
                                 )
                             }
                         }

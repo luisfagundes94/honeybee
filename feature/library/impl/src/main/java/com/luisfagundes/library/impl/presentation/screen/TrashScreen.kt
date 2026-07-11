@@ -269,7 +269,7 @@ private fun TrashMediaItem(
         modifier = Modifier
             .width(108.dp)
             .aspectRatio(1f)
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(MaterialTheme.spacing.small))
             .clickable(onClick = onItemClick)
     ) {
         AsyncImage(
@@ -284,9 +284,9 @@ private fun TrashMediaItem(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .align(Alignment.BottomStart)
-                    .padding(4.dp)
+                    .padding(MaterialTheme.spacing.verySmall)
                     .background(Color.Black.copy(alpha = 0.5f), CircleShape)
-                    .padding(4.dp)
+                    .padding(MaterialTheme.spacing.verySmall)
             ) {
                 Icon(
                     imageVector = Icons.Default.PlayArrow,
@@ -301,7 +301,7 @@ private fun TrashMediaItem(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(4.dp)
+                .padding(MaterialTheme.spacing.verySmall)
                 .size(24.dp)
                 .background(MaterialTheme.colorScheme.primary, CircleShape)
         ) {

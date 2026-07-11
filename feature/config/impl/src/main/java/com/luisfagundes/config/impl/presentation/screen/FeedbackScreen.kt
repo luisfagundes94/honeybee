@@ -147,7 +147,7 @@ private fun FeedbackScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(240.dp),
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(MaterialTheme.spacing.default),
                 singleLine = false,
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,

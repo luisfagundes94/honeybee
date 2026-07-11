@@ -59,8 +59,8 @@ internal fun AlbumDetailsScreen(
     albumName: String,
     onNavigateBack: () -> Unit,
     onNavigateToMediaDetail: (Long) -> Unit,
-    viewModel: AlbumDetailsViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: AlbumDetailsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -181,13 +181,13 @@ private fun AlbumDetailsScreen(
                                             .align(Alignment.BottomEnd)
                                             .padding(MaterialTheme.spacing.verySmall)
                                             .background(Color.Black.copy(alpha = 0.5f), CircleShape)
-                                            .padding(4.dp)
+                                            .padding(MaterialTheme.spacing.verySmall)
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.PlayArrow,
                                             contentDescription = "Video",
                                             tint = Color.White,
-                                            modifier = Modifier.size(16.dp)
+                                            modifier = Modifier.size(MaterialTheme.spacing.default)
                                         )
                                     }
                                 }
