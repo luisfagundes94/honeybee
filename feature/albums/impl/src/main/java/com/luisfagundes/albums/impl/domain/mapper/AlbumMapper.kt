@@ -8,58 +8,11 @@ import javax.inject.Inject
 internal class AlbumMapper @Inject constructor() {
 
     fun mapToAlbums(activeMedia: List<Media>): List<Album> {
-        val albumList = mutableListOf<Album>()
-
-        // 1. Group physical folders
-        val physicalGroups = activeMedia.filter { it.bucketId != null }.groupBy { it.bucketId }
-        physicalGroups.forEach { (bucketId, items) ->
-            if (bucketId != null && items.isNotEmpty()) {
-                albumList.add(
-                    Album.Physical(
-                        id = bucketId,
-                        name = items.first().bucketDisplayName ?: "Unknown",
-                        count = items.size,
-                        coverUri = items.first().uri,
-                        isVideo = items.first().isVideo
-                    )
-                )
-            }
-        }
-
-        // 2. Add Virtual Albums
-        // Favorites
-        val favoritesItems = activeMedia.filter { it.isFavorite }
-        if (favoritesItems.isNotEmpty()) {
-            albumList.add(
-                Album.Virtual.Favorites(
-                    count = favoritesItems.size,
-                    coverUri = favoritesItems.first().uri,
-                    isVideo = favoritesItems.first().isVideo
-                )
-            )
-        }
-
-        // Videos
-        val videoItems = activeMedia.filter { it.isVideo }
-        if (videoItems.isNotEmpty()) {
-            albumList.add(
-                Album.Virtual.Videos(
-                    count = videoItems.size,
-                    coverUri = videoItems.first().uri,
-                    isVideo = true
-                )
-            )
-        }
-
-        // Sort albums alphabetically by name
-        return albumList.sortedBy { album ->
-            val sortName = when (album) {
-                is Album.Physical -> album.name
-                is Album.Virtual.Favorites -> "Favorites"
-                is Album.Virtual.Videos -> "Videos"
-            }
-            sortName.lowercase()
-        }
+        return buildList {
+            addAll(getPhysicalAlbums(activeMedia))
+            getFavoritesAlbum(activeMedia)?.let { add(it) }
+            getVideosAlbum(activeMedia)?.let { add(it) }
+        }.sortedBy { getAlbumSortName(it).lowercase() }
     }
 
     fun mapToAlbumMedia(media: Media): AlbumMedia {
@@ -69,5 +22,52 @@ internal class AlbumMapper @Inject constructor() {
             dateAdded = media.dateAdded,
             isVideo = media.isVideo
         )
+    }
+
+    private fun getPhysicalAlbums(activeMedia: List<Media>): List<Album.Physical> {
+        return activeMedia
+            .groupBy { it.bucketId }
+            .mapNotNull { (bucketId, items) ->
+                if (bucketId == null) return@mapNotNull null
+                val first = items.first()
+                Album.Physical(
+                    id = bucketId,
+                    name = first.bucketDisplayName ?: "Unknown",
+                    count = items.size,
+                    coverUri = first.uri,
+                    isVideo = first.isVideo
+                )
+            }
+    }
+
+    private fun getFavoritesAlbum(activeMedia: List<Media>): Album.Virtual.Favorites? {
+        val favoritesItems = activeMedia.filter { it.isFavorite }
+        if (favoritesItems.isEmpty()) return null
+
+        val first = favoritesItems.first()
+        return Album.Virtual.Favorites(
+            count = favoritesItems.size,
+            coverUri = first.uri,
+            isVideo = first.isVideo
+        )
+    }
+
+    private fun getVideosAlbum(activeMedia: List<Media>): Album.Virtual.Videos? {
+        val videoItems = activeMedia.filter { it.isVideo }
+        if (videoItems.isEmpty()) return null
+
+        return Album.Virtual.Videos(
+            count = videoItems.size,
+            coverUri = videoItems.first().uri,
+            isVideo = true
+        )
+    }
+
+    private fun getAlbumSortName(album: Album): String {
+        return when (album) {
+            is Album.Physical -> album.name
+            is Album.Virtual.Favorites -> "Favorites"
+            is Album.Virtual.Videos -> "Videos"
+        }
     }
 }
