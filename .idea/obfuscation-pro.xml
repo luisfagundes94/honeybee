@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ObfuscationProSettings">
+    <option name="configurationFilePath" value="$PROJECT_DIR$/app/build/outputs/mapping/paidRelease/configuration.txt" />
+    <option name="mappingFilePaths">
+      <list>
+        <option value="$PROJECT_DIR$/app/build/outputs/mapping/paidRelease/mapping.txt" />
+      </list>
+    </option>
     <option name="moduleSettings">
       <list>
         <b />
@@ -75,7 +81,21 @@
         <b />
         <b />
         <b />
+        <b />
+        <b />
+        <b />
+        <b />
+        <b />
+        <b />
+        <b />
+        <b />
+        <b />
+        <b />
+        <b />
+        <b />
       </list>
     </option>
+    <option name="seedsFilePath" value="$PROJECT_DIR$/app/build/outputs/mapping/paidRelease/seeds.txt" />
+    <option name="usageFilePath" value="$PROJECT_DIR$/app/build/outputs/mapping/paidRelease/usage.txt" />
   </component>
 </project>
