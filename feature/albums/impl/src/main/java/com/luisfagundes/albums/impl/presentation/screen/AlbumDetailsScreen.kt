@@ -131,7 +131,7 @@ private fun AlbumDetailsScreen(
                 )
             }
             is AlbumDetailsUiState.Content -> {
-                AlbumDetails(
+                AlbumDetailsContent(
                     uiState = uiState,
                     innerPadding = innerPadding,
                     onEvent = onEvent
@@ -142,7 +142,7 @@ private fun AlbumDetailsScreen(
 }
 
 @Composable
-private fun AlbumDetails(
+private fun AlbumDetailsContent(
     uiState: AlbumDetailsUiState.Content,
     innerPadding: PaddingValues,
     onEvent: (AlbumDetailsUiEvent) -> Unit
