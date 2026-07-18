@@ -108,7 +108,7 @@ JUnit 5 + MockK + Turbine (Flow assertions)
     
         private lateinit var viewModel: MyViewModel
         
-        @Before
+        @BeforeEach
         fun setUp() {
             viewModel = MyViewModel()
         }
