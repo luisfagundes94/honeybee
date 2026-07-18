@@ -3,6 +3,10 @@
     <string name="error_loading_photos_message">Error loading media</string>
     <string name="items_in_trash">Items in trash</string>
     <string name="library">Library</string>
+    <string name="library_is_empty">No media found</string>
+    <string name="media_section_header">%1$s %2$d</string>
+    <string name="open_photo">Open photo</string>
+    <string name="open_video">Open video</string>
     <string name="done">Done</string>
     <string name="media_deleted">Media Deleted</string>
     <string name="saved">saved</string>

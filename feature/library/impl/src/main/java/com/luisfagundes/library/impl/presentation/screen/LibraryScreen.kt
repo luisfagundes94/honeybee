@@ -16,8 +16,8 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
-import com.luisfagundes.library.impl.presentation.components.TrashBadgedBox
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,11 +36,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
+import coil.compose.SubcomposeAsyncImage
+import coil.compose.SubcomposeAsyncImageContent
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.designsystem.components.HoneybeeLoadingTemplate
@@ -55,12 +59,17 @@ import androidx.compose.ui.tooling.preview.PreviewWrapper
 import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.api.domain.model.MediaSection
+import com.luisfagundes.library.impl.presentation.components.TrashBadgedBox
 import com.luisfagundes.library.impl.presentation.effect.LibraryUiEffect
 import com.luisfagundes.library.impl.presentation.event.LibraryUiEvent
 import com.luisfagundes.library.impl.presentation.state.LibraryUiState
 import com.luisfagundes.library.impl.presentation.tools.getFormattedMonthName
 import com.luisfagundes.library.impl.presentation.viewmodel.LibraryViewModel
 import java.time.YearMonth
+
+private val MinimumMediaTileSize = 100.dp
+private const val SquareAspectRatio = 1f
+private const val VideoIndicatorContainerAlpha = 0.5f
 
 @Composable
 internal fun LibraryScreen(
@@ -107,7 +116,7 @@ private fun LibraryScreen(
             mediaSectionList = uiState.mediaSectionList,
             itemsInTrash = uiState.itemsInTrash,
             onEvent = onEvent,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }
@@ -148,70 +157,61 @@ private fun LibraryContent(
             )
         }
     ) { innerPadding ->
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 100.dp),
-            modifier = Modifier
-                .fillMaxSize()
-                .consumeWindowInsets(innerPadding),
-            contentPadding = PaddingValues(
-                top = innerPadding.calculateTopPadding(),
-                bottom = innerPadding.calculateBottomPadding(),
-                start = MaterialTheme.spacing.default,
-                end = MaterialTheme.spacing.default
-            ),
-            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall),
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall)
-        ) {
-            mediaSectionList.forEach { mediaSection ->
-                item(
-                    key = "header_${mediaSection.yearMonth}",
-                    span = { GridItemSpan(maxLineSpan) },
-                    contentType = "header"
-                ) {
-                    val month = mediaSection.yearMonth.getFormattedMonthName()
-                    val year = mediaSection.yearMonth.year
-
-                    Text(
-                        text = "$month $year",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(vertical = MaterialTheme.spacing.small)
-                    )
-                }
-                items(
-                    items = mediaSection.mediaList,
-                    key = { media -> media.id },
-                    contentType = { "media" }
-                ) { media ->
-                    Box(
-                        modifier = Modifier
-                            .aspectRatio(1f)
-                            .clip(MaterialTheme.shapes.small)
-                            .clickable { onEvent(LibraryUiEvent.MediaClick(media.id)) }
+        if (mediaSectionList.isEmpty()) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                Text(
+                    text = stringResource(R.string.library_is_empty),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = MinimumMediaTileSize),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .consumeWindowInsets(innerPadding),
+                contentPadding = PaddingValues(
+                    top = innerPadding.calculateTopPadding(),
+                    bottom = innerPadding.calculateBottomPadding(),
+                    start = MaterialTheme.spacing.default,
+                    end = MaterialTheme.spacing.default
+                ),
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall),
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall)
+            ) {
+                mediaSectionList.forEach { mediaSection ->
+                    item(
+                        key = "header_${mediaSection.yearMonth}",
+                        span = { GridItemSpan(maxLineSpan) },
+                        contentType = "header"
                     ) {
-                        AsyncImage(
-                            model = media.uri,
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
+                        val month = mediaSection.yearMonth.getFormattedMonthName()
+                        val year = mediaSection.yearMonth.year
+
+                        Text(
+                            text = stringResource(R.string.media_section_header, month, year),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .padding(vertical = MaterialTheme.spacing.small)
+                                .semantics { heading() }
                         )
-                        if (media.isVideo) {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .padding(MaterialTheme.spacing.verySmall)
-                                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f), CircleShape)
-                                    .padding(MaterialTheme.spacing.verySmall)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.PlayArrow,
-                                    contentDescription = stringResource(com.luisfagundes.designsystem.R.string.video_content_description),
-                                    tint = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.size(MaterialTheme.spacing.default)
-                                )
-                            }
-                        }
+                    }
+                    items(
+                        items = mediaSection.mediaList,
+                        key = { media -> media.id },
+                        contentType = { "media" }
+                    ) { media ->
+                        MediaGridItem(
+                            media = media,
+                            onClick = { onEvent(LibraryUiEvent.MediaClick(media.id)) }
+                        )
                     }
                 }
             }
@@ -219,7 +219,83 @@ private fun LibraryContent(
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun MediaGridItem(
+    media: Media,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val mediaContentDescription = stringResource(
+        if (media.isVideo) R.string.open_video else R.string.open_photo
+    )
+
+    Box(
+        modifier = modifier
+            .aspectRatio(SquareAspectRatio)
+            .clip(MaterialTheme.shapes.small)
+            .clickable(
+                role = Role.Button,
+                onClick = onClick
+            )
+            .semantics {
+                contentDescription = mediaContentDescription
+            }
+    ) {
+        SubcomposeAsyncImage(
+            model = media.uri,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            when (painter.state) {
+                is AsyncImagePainter.State.Loading -> Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                )
+
+                is AsyncImagePainter.State.Error -> Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.BrokenImage,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                else -> SubcomposeAsyncImageContent()
+            }
+        }
+
+        if (media.isVideo) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(MaterialTheme.spacing.verySmall)
+                    .background(
+                        color = MaterialTheme.colorScheme.surface.copy(
+                            alpha = VideoIndicatorContainerAlpha
+                        ),
+                        shape = CircleShape
+                    )
+                    .padding(MaterialTheme.spacing.verySmall)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(MaterialTheme.spacing.default)
+                )
+            }
+        }
+    }
+}
+
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @PreviewWrapper(wrapper = HoneybeeThemeWrapper::class)
