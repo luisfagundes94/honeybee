@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.PrivacyTip
+import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -40,7 +41,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewWrapper
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
-import com.luisfagundes.core.designsystem.components.HoneybeeButton
 import com.luisfagundes.core.designsystem.components.HoneybeeLogo
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
@@ -119,7 +119,7 @@ private fun PermissionContent(
                 PermissionAlertCard(
                     modifier = Modifier.fillMaxWidth()
                 )
-                HoneybeeButton(
+                Button(
                     onClick = onAllowAccessClick,
                     modifier = Modifier.fillMaxWidth()
                 ) {

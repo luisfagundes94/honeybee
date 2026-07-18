@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -21,7 +22,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewWrapper
-import com.luisfagundes.core.designsystem.components.HoneybeeButton
 import com.luisfagundes.core.designsystem.components.HoneybeeLogo
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
@@ -44,7 +44,7 @@ private fun OnboardingContent(
 ) {
     Scaffold(
         bottomBar = {
-            HoneybeeButton(
+            Button(
                 onClick = onGetStartedClick,
                 modifier = Modifier
                     .fillMaxWidth()

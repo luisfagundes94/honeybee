@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -41,7 +42,6 @@ import com.luisfagundes.config.impl.presentation.state.FeedbackUiState
 import com.luisfagundes.config.impl.presentation.viewmodel.FeedbackViewModel
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.config.impl.presentation.tools.launchFeedbackEmailIntent
-import com.luisfagundes.core.designsystem.components.HoneybeeButton
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
 
@@ -105,7 +105,7 @@ private fun FeedbackScreen(
             )
         },
         bottomBar = {
-            HoneybeeButton(
+            Button(
                 onClick = { onEvent(FeedbackUiEvent.SubmitFeedback) },
                 modifier = Modifier
                     .fillMaxWidth()
