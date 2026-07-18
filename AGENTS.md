@@ -72,6 +72,7 @@ You can find the Hilt custom annotations at core/common/src/main/java/com/luisfa
 - **Retrofit** for Unsplash image API; auth injected via OkHttp interceptor
 - Unsplash API key: `secrets-gradle-plugin` reads `UNSPLASH_ACCESS_KEY` from `secrets.properties` (not committed) and exposes it via `BuildConfig.UNSPLASH_ACCESS_KEY`
 - Repositories return `Result<T>`; ViewModels fold on success/failure
+- Use DataStore for simple key-value storage (e.g. dark mode enabled, onboarding completed, notifications enabled, etc)
 
 ### Presentation Layer
 
