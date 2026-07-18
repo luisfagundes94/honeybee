@@ -187,11 +187,10 @@ private fun MediaDetailsContent(
         ) { page ->
             val pageMediaIndex = page.coerceIn(0, (totalCount - 1).coerceAtLeast(0))
             mediaList.getOrNull(pageMediaIndex)?.let { media ->
-                val isFavorite = content.favoriteMediaIds.contains(media.id)
                 val isPageSelected = page == pagerState.currentPage
+
                 MediaPagerItem(
                     media = media,
-                    isFavorite = isFavorite,
                     isPageSelected = isPageSelected,
                     onEvent = onEvent
                 )
@@ -283,7 +282,6 @@ private fun MediaDetailsBottomBar(
 @Composable
 private fun MediaPagerItem(
     media: Media,
-    isFavorite: Boolean,
     isPageSelected: Boolean,
     onEvent: (MediaDetailsUiEvent) -> Unit,
     modifier: Modifier = Modifier
@@ -384,8 +382,6 @@ private fun MediaPagerItem(
 
         MediaPagerItemActionsColumn(
             media = media,
-            isFavorite = isFavorite,
-            onEvent = onEvent,
             onInfoClick = { showBottomSheet = true },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -412,8 +408,6 @@ private fun MediaPagerItem(
 @Composable
 private fun MediaPagerItemActionsColumn(
     media: Media,
-    isFavorite: Boolean,
-    onEvent: (MediaDetailsUiEvent) -> Unit,
     onInfoClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
