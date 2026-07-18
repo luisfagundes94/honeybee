@@ -19,9 +19,9 @@ internal class GetMediaByMonthUseCase @Inject constructor(
             mediaByMonth.map { (month, list) ->
                 MediaSection(
                     yearMonth = month,
-                    mediaList = list
+                    mediaList = list.sortedByDescending { it.dateAdded }
                 )
-            }
+            }.sortedByDescending { it.yearMonth }
         }
     }
 }

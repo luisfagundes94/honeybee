@@ -1,8 +1,5 @@
 package com.luisfagundes.library.impl.presentation.screen
 
-import android.content.res.Configuration
-import android.net.Uri
-import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -30,41 +27,35 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewWrapper
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.ImageLoader
 import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
-import coil.request.ImageRequest
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.designsystem.components.HoneybeeLoadingTemplate
 import com.luisfagundes.designsystem.theme.spacing
 import com.luisfagundes.library.impl.R
+import android.content.res.Configuration
+import android.net.Uri
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewWrapper
 import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.api.domain.model.MediaSection
@@ -72,9 +63,7 @@ import com.luisfagundes.library.impl.presentation.components.TrashBadgedBox
 import com.luisfagundes.library.impl.presentation.effect.LibraryUiEffect
 import com.luisfagundes.library.impl.presentation.event.LibraryUiEvent
 import com.luisfagundes.library.impl.presentation.state.LibraryUiState
-import com.luisfagundes.library.impl.presentation.tools.MediaStoreThumbnailRequest
 import com.luisfagundes.library.impl.presentation.tools.getFormattedMonthName
-import com.luisfagundes.library.impl.presentation.tools.rememberMediaStoreThumbnailImageLoader
 import com.luisfagundes.library.impl.presentation.viewmodel.LibraryViewModel
 import java.time.YearMonth
 
@@ -141,11 +130,6 @@ private fun LibraryContent(
     modifier: Modifier = Modifier
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val mediaThumbnailImageLoader = rememberMediaStoreThumbnailImageLoader()
-    val gridSpacing = MaterialTheme.spacing.verySmall
-    val gridHorizontalPadding = MaterialTheme.spacing.default
-    val density = LocalDensity.current
-    var mediaTileSizePx by remember { mutableIntStateOf(0) }
 
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -191,27 +175,15 @@ private fun LibraryContent(
                 columns = GridCells.Adaptive(minSize = MinimumMediaTileSize),
                 modifier = Modifier
                     .fillMaxSize()
-                    .onSizeChanged { gridSize ->
-                        mediaTileSizePx = calculateMediaTileSizePx(
-                            gridWidthPx = gridSize.width,
-                            horizontalPaddingPx = with(density) {
-                                gridHorizontalPadding.roundToPx()
-                            },
-                            spacingPx = with(density) { gridSpacing.roundToPx() },
-                            minimumTileSizePx = with(density) {
-                                MinimumMediaTileSize.roundToPx()
-                            }
-                        )
-                    }
                     .consumeWindowInsets(innerPadding),
                 contentPadding = PaddingValues(
                     top = innerPadding.calculateTopPadding(),
                     bottom = innerPadding.calculateBottomPadding(),
-                    start = gridHorizontalPadding,
-                    end = gridHorizontalPadding
+                    start = MaterialTheme.spacing.default,
+                    end = MaterialTheme.spacing.default
                 ),
-                horizontalArrangement = Arrangement.spacedBy(gridSpacing),
-                verticalArrangement = Arrangement.spacedBy(gridSpacing)
+                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall),
+                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall)
             ) {
                 mediaSectionList.forEach { mediaSection ->
                     item(
@@ -238,8 +210,6 @@ private fun LibraryContent(
                     ) { media ->
                         MediaGridItem(
                             media = media,
-                            thumbnailSizePx = mediaTileSizePx,
-                            imageLoader = mediaThumbnailImageLoader,
                             onClick = { onEvent(LibraryUiEvent.MediaClick(media.id)) }
                         )
                     }
@@ -252,33 +222,12 @@ private fun LibraryContent(
 @Composable
 private fun MediaGridItem(
     media: Media,
-    thumbnailSizePx: Int,
-    imageLoader: ImageLoader,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     val mediaContentDescription = stringResource(
         if (media.isVideo) R.string.open_video else R.string.open_photo
     )
-    val thumbnailRequest = remember(context, media.uri, thumbnailSizePx) {
-        thumbnailSizePx.takeIf { it > 0 }?.let { sizePx ->
-            ImageRequest.Builder(context)
-                .data(
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        MediaStoreThumbnailRequest(
-                            uri = media.uri,
-                            widthPx = sizePx,
-                            heightPx = sizePx
-                        )
-                    } else {
-                        media.uri
-                    }
-                )
-                .size(sizePx, sizePx)
-                .build()
-        }
-    }
 
     Box(
         modifier = modifier
@@ -293,14 +242,12 @@ private fun MediaGridItem(
             }
     ) {
         SubcomposeAsyncImage(
-            model = thumbnailRequest,
-            imageLoader = imageLoader,
+            model = media.uri,
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         ) {
             when (painter.state) {
-                is AsyncImagePainter.State.Empty,
                 is AsyncImagePainter.State.Loading -> Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -347,19 +294,6 @@ private fun MediaGridItem(
             }
         }
     }
-}
-
-private fun calculateMediaTileSizePx(
-    gridWidthPx: Int,
-    horizontalPaddingPx: Int,
-    spacingPx: Int,
-    minimumTileSizePx: Int
-): Int {
-    val availableWidthPx = (gridWidthPx - horizontalPaddingPx * 2).coerceAtLeast(0)
-    val columnCount = ((availableWidthPx + spacingPx) / (minimumTileSizePx + spacingPx))
-        .coerceAtLeast(1)
-    val totalSpacingPx = spacingPx * (columnCount - 1)
-    return ((availableWidthPx - totalSpacingPx) / columnCount).coerceAtLeast(1)
 }
 
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
