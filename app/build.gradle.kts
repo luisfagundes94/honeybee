@@ -15,8 +15,8 @@ android {
         applicationId = "com.luisfagundes.honeybee"
         minSdk = 26
         targetSdk = 37
-        versionCode = 5
-        versionName = "0.9.2"
+        versionCode = 6
+        versionName = "0.9.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -123,4 +123,4 @@ dependencies {
 
 composeCompiler {
     stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("compose-stability.pro"))
-}
+}
