@@ -44,7 +44,6 @@ internal class LibraryRepositoryImpl @Inject constructor(
             mediaList.filter { media ->
                 media.id !in trashedIds && media.id !in deletedIds
             }.map { mediaMapper.mapToDomain(it) }
-                .sortedByDescending { it.dateAdded }
         }
     }
 
