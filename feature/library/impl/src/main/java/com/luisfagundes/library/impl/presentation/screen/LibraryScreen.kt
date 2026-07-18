@@ -48,12 +48,10 @@ import com.luisfagundes.designsystem.theme.spacing
 import com.luisfagundes.library.impl.R
 import android.content.res.Configuration
 import android.net.Uri
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewWrapper
-import coil.request.ImageRequest
 import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.api.domain.model.MediaSection
@@ -192,10 +190,7 @@ private fun LibraryContent(
                             .clickable { onEvent(LibraryUiEvent.MediaClick(media.id)) }
                     ) {
                         AsyncImage(
-                            model = ImageRequest.Builder(LocalContext.current)
-                                .data(media.uri)
-                                .crossfade(true)
-                                .build(),
+                            model = media.uri,
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()

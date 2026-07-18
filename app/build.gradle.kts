@@ -120,3 +120,7 @@ dependencies {
     testImplementation(libs.turbine)
     testImplementation(libs.junit)
 }
+
+composeCompiler {
+    stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("compose-stability.pro"))
+}
