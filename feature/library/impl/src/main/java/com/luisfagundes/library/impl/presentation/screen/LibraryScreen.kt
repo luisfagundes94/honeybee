@@ -107,7 +107,7 @@ private fun LibraryScreen(
             mediaSectionList = uiState.mediaSectionList,
             itemsInTrash = uiState.itemsInTrash,
             onEvent = onEvent,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxSize()
         )
     }
 }
