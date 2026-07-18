@@ -1,5 +1,6 @@
 package com.luisfagundes.config.impl.presentation.screen
 
+import android.content.Intent
 import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -41,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -50,6 +52,8 @@ import com.luisfagundes.config.impl.R
 import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.designsystem.theme.spacing
 
+private const val APP_INTERNAL_SHARE_LINK = "https://play.google.com/apps/internaltest/4701609758531422116"
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ConfigScreen(
@@ -57,6 +61,7 @@ internal fun ConfigScreen(
     onNavigateToStatistics: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     var isNotificationsEnabled by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -197,7 +202,15 @@ internal fun ConfigScreen(
                     ConfigItem(
                         title = stringResource(R.string.config_item_share_with_friends),
                         icon = Icons.Default.Share,
-                        onClick = { /* TODO: Share App */ }
+                        onClick = { 
+                            val sendIntent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_TEXT, APP_INTERNAL_SHARE_LINK)
+                                type = "text/plain"
+                            }
+                            val shareIntent = Intent.createChooser(sendIntent, null)
+                            context.startActivity(shareIntent)
+                        }
                     )
                 }
             }
