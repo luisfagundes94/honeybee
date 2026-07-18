@@ -23,6 +23,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+private const val CHANNEL_NEW_MESSAGE = "new_messages"
+private const val CHANNEL_SYSTEM_ALERT = "system_alerts"
+private const val CHANNEL_PROMOTION = "promotions"
+
 @AndroidEntryPoint
 class HoneybeeFirebaseMessagingService : FirebaseMessagingService() {
 
@@ -156,11 +160,5 @@ class HoneybeeFirebaseMessagingService : FirebaseMessagingService() {
             NotificationType.SYSTEM_ALERT -> CHANNEL_SYSTEM_ALERT
             NotificationType.PROMOTION -> CHANNEL_PROMOTION
         }
-    }
-
-    companion object {
-        private const val CHANNEL_NEW_MESSAGE = "new_messages"
-        private const val CHANNEL_SYSTEM_ALERT = "system_alerts"
-        private const val CHANNEL_PROMOTION = "promotions"
     }
 }
