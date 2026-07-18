@@ -2,8 +2,6 @@ package com.luisfagundes.config.impl.presentation.screen
 
 import android.content.Intent
 import android.content.res.Configuration
-import android.widget.Toast
-import android.widget.Toast.LENGTH_SHORT
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
