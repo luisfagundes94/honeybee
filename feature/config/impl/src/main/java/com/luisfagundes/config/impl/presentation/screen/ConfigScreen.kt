@@ -186,9 +186,7 @@ internal fun ConfigScreen(
                     ConfigItem(
                         title = stringResource(R.string.config_item_rate_app),
                         icon = Icons.Default.StarBorder,
-                        onClick = {
-                            Toast.makeText(context, "Not implemented yet", LENGTH_SHORT).show()
-                        }
+                        onClick = { /* TODO: Rate app */ }
                     )
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default),
