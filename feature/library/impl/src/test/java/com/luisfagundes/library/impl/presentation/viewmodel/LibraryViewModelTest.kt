@@ -2,9 +2,7 @@ package com.luisfagundes.library.impl.presentation.viewmodel
 
 import android.net.Uri
 import app.cash.turbine.test
-import com.luisfagundes.core.common.presentation.tools.ResourceProvider
 import com.luisfagundes.core.testing.MainDispatcherRule
-import com.luisfagundes.library.impl.R
 import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.api.domain.model.MediaSection
 import com.luisfagundes.library.api.domain.repository.LibraryRepository
@@ -14,7 +12,6 @@ import com.luisfagundes.library.impl.presentation.event.LibraryUiEvent
 import com.luisfagundes.library.impl.presentation.state.LibraryUiState
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -33,7 +30,6 @@ class LibraryViewModelTest {
 
     private val getMediaByMonthUseCase: GetMediaByMonthUseCase = mockk()
     private val repository: LibraryRepository = mockk()
-    private val resourceProvider: ResourceProvider = mockk()
 
     private lateinit var viewModel: LibraryViewModel
 
@@ -41,8 +37,7 @@ class LibraryViewModelTest {
     fun setUp() {
         viewModel = LibraryViewModel(
             getMediaByMonthUseCase = getMediaByMonthUseCase,
-            repository = repository,
-            resourceProvider = resourceProvider
+            repository = repository
         )
     }
 
@@ -92,12 +87,10 @@ class LibraryViewModelTest {
     @Test
     fun `dispatchEvent LoadMedia failure should set Error state`() = runTest {
         // Given
-        val errorMessage = "Failed to load media"
         val exception = Exception("Network error")
 
         coEvery { repository.getItemsInTrashCount() } returns 2
         coEvery { getMediaByMonthUseCase() } returns Result.failure(exception)
-        every { resourceProvider.getString(R.string.error_loading_photos_message) } returns errorMessage
 
         // When & Then
         viewModel.uiState.test {
@@ -105,12 +98,10 @@ class LibraryViewModelTest {
 
             viewModel.dispatchEvent(LibraryUiEvent.LoadMedia)
 
-            val errorState = awaitItem() as LibraryUiState.Error
-            assertEquals(errorMessage, errorState.message)
+            assertEquals(LibraryUiState.Error, awaitItem() )
 
             coVerify(exactly = 1) { repository.getItemsInTrashCount() }
             coVerify(exactly = 1) { getMediaByMonthUseCase() }
-            coVerify(exactly = 1) { resourceProvider.getString(R.string.error_loading_photos_message) }
         }
     }
 

@@ -3,7 +3,6 @@ package com.luisfagundes.config.impl.presentation.viewmodel
 import app.cash.turbine.test
 import com.luisfagundes.config.impl.presentation.event.StatisticsUiEvent
 import com.luisfagundes.config.impl.presentation.state.StatisticsUiState
-import com.luisfagundes.core.common.presentation.tools.ResourceProvider
 import com.luisfagundes.core.testing.MainDispatcherRule
 import com.luisfagundes.library.api.domain.model.Statistics
 import com.luisfagundes.library.api.domain.usecase.GetStatisticsUseCase
@@ -24,14 +23,13 @@ internal class StatisticsViewModelTest {
     val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
 
     private val getStatisticsUseCase: GetStatisticsUseCase = mockk()
-    private val resourceProvider: ResourceProvider = mockk()
+
     private lateinit var viewModel: StatisticsViewModel
 
     @BeforeEach
     fun setUp() {
         viewModel = StatisticsViewModel(
-            getStatisticsUseCase = getStatisticsUseCase,
-            resourceProvider = resourceProvider
+            getStatisticsUseCase = getStatisticsUseCase
         )
     }
 
@@ -44,6 +42,7 @@ internal class StatisticsViewModelTest {
             photosDeleted = 3,
             videosDeleted = 2
         )
+
         coEvery { getStatisticsUseCase() } returns Result.success(mockStats)
 
         // When
@@ -59,17 +58,14 @@ internal class StatisticsViewModelTest {
     @Test
     fun `init should fail to load statistics and set Error state`() = runTest {
         // Given
-        val errorMessage = "Error loading stats"
         coEvery { getStatisticsUseCase() } returns Result.failure(Exception())
-        coEvery { resourceProvider.getString(any()) } returns errorMessage
 
         // When
         viewModel.dispatchEvent(StatisticsUiEvent.LoadStatistics)
 
         // Then
         viewModel.uiState.test {
-            val state = awaitItem()
-            assertEquals(StatisticsUiState.Error(errorMessage), state)
+            assertEquals(StatisticsUiState.Error, awaitItem())
         }
     }
 
@@ -78,6 +74,7 @@ internal class StatisticsViewModelTest {
         // Given
         val mockStats1 = Statistics(1024L, 5, 3, 2)
         val mockStats2 = Statistics(2048L, 10, 6, 4)
+
         coEvery { getStatisticsUseCase() } returns Result.success(mockStats1) andThen Result.success(mockStats2)
         viewModel.dispatchEvent(StatisticsUiEvent.LoadStatistics)
 

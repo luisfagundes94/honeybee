@@ -56,15 +56,16 @@ import com.luisfagundes.library.impl.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
-import com.luisfagundes.designsystem.components.HoneybeeErrorTemplate
-import com.luisfagundes.designsystem.components.HoneybeeLoadingTemplate
+import com.luisfagundes.core.designsystem.components.HoneybeeErrorTemplate
+import com.luisfagundes.core.designsystem.components.HoneybeeLoadingTemplate
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.net.Uri
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewWrapper
-import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
-import com.luisfagundes.designsystem.theme.spacing
+import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
+import com.luisfagundes.core.designsystem.theme.spacing
+import com.luisfagundes.core.designsystem.R as DesignSystemResources
 import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.impl.presentation.effect.TrashUiEffect
 import com.luisfagundes.library.impl.presentation.event.TrashUiEvent
@@ -123,15 +124,12 @@ private fun TrashScreen(
     onBackClick: () -> Unit
 ) {
     when (uiState) {
-        is TrashUiState.Loading -> HoneybeeLoadingTemplate(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black)
-        )
+        is TrashUiState.Loading -> HoneybeeLoadingTemplate()
 
         is TrashUiState.Error -> HoneybeeErrorTemplate(
-            message = uiState.message,
-            onRetry = { onEvent(TrashUiEvent.LoadTrash) }
+            message = stringResource(R.string.failed_to_load_trash_photos),
+            primaryButtonLabel = stringResource(DesignSystemResources.string.retry),
+            onPrimaryButtonClick = { onEvent(TrashUiEvent.LoadTrash) }
         )
 
         is TrashUiState.Content -> TrashContent(
@@ -290,7 +288,9 @@ private fun TrashMediaItem(
             ) {
                 Icon(
                     imageVector = Icons.Default.PlayArrow,
-                    contentDescription = stringResource(com.luisfagundes.designsystem.R.string.video_content_description),
+                    contentDescription = stringResource(
+                        DesignSystemResources.string.video_content_description
+                    ),
                     tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(10.dp)
                 )

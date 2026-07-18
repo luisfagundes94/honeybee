@@ -6,5 +6,7 @@ internal sealed interface MediaDetailsUiEvent : UiEvent {
     data class LoadDetails(val initialMediaId: Long, val albumId: String? = null) : MediaDetailsUiEvent
     data class SwipeUp(val mediaId: Long) : MediaDetailsUiEvent
     data object TrashClick : MediaDetailsUiEvent
+    data object BackClick : MediaDetailsUiEvent
+    data object CancelClick : MediaDetailsUiEvent
     data class ToggleFavorite(val mediaId: Long) : MediaDetailsUiEvent
 }

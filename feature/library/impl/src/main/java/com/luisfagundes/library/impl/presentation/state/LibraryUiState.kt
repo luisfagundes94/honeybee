@@ -5,7 +5,7 @@ import com.luisfagundes.library.api.domain.model.MediaSection
 
 internal sealed interface LibraryUiState : UiState {
     data object Loading : LibraryUiState
-    data class Error(val message: String) : LibraryUiState
+    data object Error : LibraryUiState
     data class Content(
         val mediaSectionList: List<MediaSection>,
         val itemsInTrash: Int

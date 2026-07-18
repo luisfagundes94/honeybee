@@ -1,4 +1,4 @@
-package com.luisfagundes.designsystem.components
+package com.luisfagundes.core.designsystem.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource

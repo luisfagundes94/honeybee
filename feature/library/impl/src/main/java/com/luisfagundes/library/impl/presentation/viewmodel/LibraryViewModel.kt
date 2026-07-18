@@ -2,8 +2,6 @@ package com.luisfagundes.library.impl.presentation.viewmodel
 
 import androidx.lifecycle.viewModelScope
 import com.luisfagundes.core.common.presentation.arch.viewmodel.ViewModel
-import com.luisfagundes.core.common.presentation.tools.ResourceProvider
-import com.luisfagundes.library.impl.R.string.error_loading_photos_message
 import com.luisfagundes.library.api.domain.repository.LibraryRepository
 import com.luisfagundes.library.impl.domain.usecase.GetMediaByMonthUseCase
 import com.luisfagundes.library.impl.presentation.effect.LibraryUiEffect
@@ -16,8 +14,7 @@ import javax.inject.Inject
 @HiltViewModel
 internal class LibraryViewModel @Inject constructor(
     private val getMediaByMonthUseCase: GetMediaByMonthUseCase,
-    private val repository: LibraryRepository,
-    private val resourceProvider: ResourceProvider
+    private val repository: LibraryRepository
 ) : ViewModel<LibraryUiState, LibraryUiEvent, LibraryUiEffect>(
     LibraryUiState.Loading
 ) {
@@ -33,13 +30,13 @@ internal class LibraryViewModel @Inject constructor(
         setState { LibraryUiState.Loading }
 
         val trashCount = repository.getItemsInTrashCount()
+
         getMediaByMonthUseCase().fold(
             onSuccess = { mediaSectionList ->
                 setState { LibraryUiState.Content(mediaSectionList, trashCount) }
             },
             onFailure = {
-                val message = resourceProvider.getString(error_loading_photos_message)
-                setState { LibraryUiState.Error(message = message) }
+                setState { LibraryUiState.Error }
             }
         )
     }

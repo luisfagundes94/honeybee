@@ -46,9 +46,9 @@ import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
-import com.luisfagundes.designsystem.components.HoneybeeErrorTemplate
-import com.luisfagundes.designsystem.components.HoneybeeLoadingTemplate
-import com.luisfagundes.designsystem.theme.spacing
+import com.luisfagundes.core.designsystem.components.HoneybeeErrorTemplate
+import com.luisfagundes.core.designsystem.components.HoneybeeLoadingTemplate
+import com.luisfagundes.core.designsystem.theme.spacing
 import com.luisfagundes.library.impl.R
 import android.content.res.Configuration
 import android.net.Uri
@@ -56,9 +56,12 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewWrapper
-import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
+import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
+import com.luisfagundes.core.designsystem.R.string.retry
+import com.luisfagundes.core.designsystem.R.string.cancel
 import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.api.domain.model.MediaSection
+import com.luisfagundes.library.impl.R.string.error_loading_photos_message
 import com.luisfagundes.library.impl.presentation.components.TrashBadgedBox
 import com.luisfagundes.library.impl.presentation.effect.LibraryUiEffect
 import com.luisfagundes.library.impl.presentation.event.LibraryUiEvent
@@ -103,13 +106,12 @@ private fun LibraryScreen(
     onEvent: (LibraryUiEvent) -> Unit
 ) {
     when (uiState) {
-        is LibraryUiState.Loading -> HoneybeeLoadingTemplate(
-            modifier = Modifier.fillMaxSize()
-        )
+        is LibraryUiState.Loading -> HoneybeeLoadingTemplate()
 
         is LibraryUiState.Error -> HoneybeeErrorTemplate(
-            message = uiState.message,
-            onRetry = { onEvent(LibraryUiEvent.LoadMedia) }
+            message = stringResource(error_loading_photos_message),
+            primaryButtonLabel = stringResource(retry),
+            onPrimaryButtonClick = { onEvent(LibraryUiEvent.LoadMedia) },
         )
 
         is LibraryUiState.Content -> LibraryContent(

@@ -2,9 +2,7 @@ package com.luisfagundes.library.impl.presentation.viewmodel
 
 import android.net.Uri
 import app.cash.turbine.test
-import com.luisfagundes.core.common.presentation.tools.ResourceProvider
 import com.luisfagundes.core.testing.MainDispatcherRule
-import com.luisfagundes.library.impl.R
 import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.api.domain.repository.LibraryRepository
 import com.luisfagundes.library.impl.presentation.effect.MediaDetailsUiEffect
@@ -12,7 +10,6 @@ import com.luisfagundes.library.impl.presentation.event.MediaDetailsUiEvent
 import com.luisfagundes.library.impl.presentation.state.MediaDetailsUiState
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -29,15 +26,13 @@ class MediaDetailsViewModelTest {
     val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
 
     private val repository: LibraryRepository = mockk()
-    private val resourceProvider: ResourceProvider = mockk()
 
     private lateinit var viewModel: MediaDetailsViewModel
 
     @BeforeEach
     fun setUp() {
         viewModel = MediaDetailsViewModel(
-            repository = repository,
-            resourceProvider = resourceProvider
+            repository = repository
         )
     }
 
@@ -106,11 +101,9 @@ class MediaDetailsViewModelTest {
     @Test
     fun `dispatchEvent LoadDetails failure should set Error state`() = runTest {
         // Given
-        val errorMessage = "Failed to load media details"
         val exception = Exception("Failed to load media")
 
         coEvery { repository.getActiveMedia() } returns Result.failure(exception)
-        every { resourceProvider.getString(R.string.failed_to_load_photo_details) } returns errorMessage
 
         // When & Then
         viewModel.uiState.test {
@@ -118,11 +111,9 @@ class MediaDetailsViewModelTest {
 
             viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialMediaId = 1L))
 
-            val errorState = awaitItem() as MediaDetailsUiState.Error
-            assertEquals(errorMessage, errorState.message)
+            assertEquals(MediaDetailsUiState.Error, awaitItem())
 
             coVerify(exactly = 1) { repository.getActiveMedia() }
-            coVerify(exactly = 1) { resourceProvider.getString(R.string.failed_to_load_photo_details) }
         }
     }
 

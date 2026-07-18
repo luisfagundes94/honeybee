@@ -5,6 +5,6 @@ import com.luisfagundes.library.api.domain.model.Statistics
 
 internal sealed interface StatisticsUiState : UiState {
     data object Loading : StatisticsUiState
+    data object Error : StatisticsUiState
     data class Content(val statistics: Statistics) : StatisticsUiState
-    data class Error(val message: String) : StatisticsUiState
 }

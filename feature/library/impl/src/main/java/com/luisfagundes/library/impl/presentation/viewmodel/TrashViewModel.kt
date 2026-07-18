@@ -2,21 +2,18 @@ package com.luisfagundes.library.impl.presentation.viewmodel
 
 import androidx.lifecycle.viewModelScope
 import com.luisfagundes.core.common.presentation.arch.viewmodel.ViewModel
-import com.luisfagundes.core.common.presentation.tools.ResourceProvider
-import com.luisfagundes.library.impl.R.string.failed_to_load_trash_photos
+import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.api.domain.repository.LibraryRepository
 import com.luisfagundes.library.impl.presentation.effect.TrashUiEffect
 import com.luisfagundes.library.impl.presentation.event.TrashUiEvent
 import com.luisfagundes.library.impl.presentation.state.TrashUiState
-import com.luisfagundes.library.api.domain.model.Media
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 internal class TrashViewModel @Inject constructor(
-    private val repository: LibraryRepository,
-    private val resourceProvider: ResourceProvider
+    private val repository: LibraryRepository
 ) : ViewModel<TrashUiState, TrashUiEvent, TrashUiEffect>(
     TrashUiState.Loading
 ) {
@@ -36,8 +33,7 @@ internal class TrashViewModel @Inject constructor(
                 setState { TrashUiState.Content(mediaToBeDeleted = mediaList) }
             },
             onFailure = {
-                val errorMessage = resourceProvider.getString(failed_to_load_trash_photos)
-                setState { TrashUiState.Error(errorMessage) }
+                setState { TrashUiState.Error }
             }
         )
     }

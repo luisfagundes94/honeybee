@@ -39,7 +39,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.luisfagundes.albums.impl.R
+import com.luisfagundes.albums.impl.R.string.error_loading_albums
+import com.luisfagundes.albums.impl.R.string.albums
+import com.luisfagundes.albums.impl.R.string.no_albums
+import com.luisfagundes.albums.impl.R.string.favorites
+import com.luisfagundes.albums.impl.R.string.videos
 import com.luisfagundes.albums.impl.domain.model.Album
 import com.luisfagundes.albums.impl.presentation.effect.AlbumsUiEffect
 import com.luisfagundes.albums.impl.presentation.event.AlbumsUiEvent
@@ -49,9 +53,10 @@ import com.luisfagundes.albums.impl.presentation.tools.getDisplayName
 import com.luisfagundes.albums.impl.presentation.tools.getCountText
 import com.luisfagundes.albums.impl.presentation.viewmodel.AlbumsViewModel
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
-import com.luisfagundes.designsystem.components.HoneybeeErrorTemplate
-import com.luisfagundes.designsystem.components.HoneybeeLoadingTemplate
-import com.luisfagundes.designsystem.theme.spacing
+import com.luisfagundes.core.designsystem.components.HoneybeeErrorTemplate
+import com.luisfagundes.core.designsystem.components.HoneybeeLoadingTemplate
+import com.luisfagundes.core.designsystem.theme.spacing
+import com.luisfagundes.core.designsystem.R.string.retry
 
 @Composable
 internal fun AlbumsScreen(
@@ -93,7 +98,7 @@ private fun AlbumsScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = stringResource(R.string.albums),
+                        text = stringResource(albums),
                         modifier = Modifier.semantics { heading() }
                     )
                 },
@@ -106,18 +111,15 @@ private fun AlbumsScreen(
         when (uiState) {
             is AlbumsUiState.Loading -> {
                 HoneybeeLoadingTemplate(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
+                    modifier = Modifier.padding(innerPadding)
                 )
             }
             is AlbumsUiState.Error -> {
                 HoneybeeErrorTemplate(
-                    message = uiState.message,
-                    onRetry = { onEvent(AlbumsUiEvent.LoadAlbums) },
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
+                    message = stringResource(error_loading_albums),
+                    primaryButtonLabel = stringResource(retry),
+                    onPrimaryButtonClick = { onEvent(AlbumsUiEvent.LoadAlbums) },
+                    modifier = Modifier.padding(innerPadding)
                 )
             }
             is AlbumsUiState.Content -> {
@@ -129,7 +131,7 @@ private fun AlbumsScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = stringResource(R.string.no_albums),
+                            text = stringResource(no_albums),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -150,8 +152,9 @@ private fun AlbumsScreen(
                             .consumeWindowInsets(innerPadding)
                     ) {
                         items(uiState.albums, key = { it.id }) { album ->
-                            val favoritesName = stringResource(R.string.favorites)
-                            val videosName = stringResource(R.string.videos)
+                            val favoritesName = stringResource(favorites)
+                            val videosName = stringResource(videos)
+
                             AlbumCard(
                                 album = album,
                                 onClick = {

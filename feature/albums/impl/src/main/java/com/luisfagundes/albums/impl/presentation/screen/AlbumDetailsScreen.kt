@@ -40,16 +40,18 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.luisfagundes.designsystem.R.string.video_content_description
+import com.luisfagundes.core.designsystem.components.HoneybeeErrorTemplate
+import com.luisfagundes.core.designsystem.components.HoneybeeLoadingTemplate
+import com.luisfagundes.core.designsystem.theme.spacing
+import com.luisfagundes.core.designsystem.R.string.video_content_description
+import com.luisfagundes.core.designsystem.R.string.retry
+import com.luisfagundes.core.designsystem.R.string.cancel
+import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.albums.impl.R
 import com.luisfagundes.albums.impl.presentation.effect.AlbumDetailsUiEffect
 import com.luisfagundes.albums.impl.presentation.event.AlbumDetailsUiEvent
 import com.luisfagundes.albums.impl.presentation.state.AlbumDetailsUiState
 import com.luisfagundes.albums.impl.presentation.viewmodel.AlbumDetailsViewModel
-import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
-import com.luisfagundes.designsystem.components.HoneybeeErrorTemplate
-import com.luisfagundes.designsystem.components.HoneybeeLoadingTemplate
-import com.luisfagundes.designsystem.theme.spacing
 
 @Composable
 internal fun AlbumDetailsScreen(
@@ -100,7 +102,11 @@ private fun AlbumDetailsScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { onEvent(AlbumDetailsUiEvent.BackClick) }) {
+                    IconButton(
+                        onClick = {
+                            onEvent(AlbumDetailsUiEvent.BackClick)
+                        }
+                    ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.back)
@@ -116,20 +122,21 @@ private fun AlbumDetailsScreen(
         when (uiState) {
             is AlbumDetailsUiState.Loading -> {
                 HoneybeeLoadingTemplate(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
+                    modifier = Modifier.padding(innerPadding)
                 )
             }
+
             is AlbumDetailsUiState.Error -> {
                 HoneybeeErrorTemplate(
-                    message = uiState.message,
-                    onRetry = { onEvent(AlbumDetailsUiEvent.Retry) },
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
+                    message = stringResource(R.string.error_loading_album_media),
+                    primaryButtonLabel = stringResource(retry),
+                    onPrimaryButtonClick = { onEvent(AlbumDetailsUiEvent.Retry) },
+                    secondaryButtonLabel = stringResource(cancel),
+                    onSecondaryButtonClick = { onEvent(AlbumDetailsUiEvent.CancelClick) },
+                    modifier = Modifier.padding(innerPadding)
                 )
             }
+
             is AlbumDetailsUiState.Content -> {
                 AlbumDetailsContent(
                     uiState = uiState,
@@ -180,7 +187,9 @@ private fun AlbumDetailsContent(
                     modifier = Modifier
                         .aspectRatio(1f)
                         .clip(MaterialTheme.shapes.small)
-                        .clickable { onEvent(AlbumDetailsUiEvent.MediaClick(media.id)) }
+                        .clickable {
+                            onEvent(AlbumDetailsUiEvent.MediaClick(media.id))
+                        }
                 ) {
                     AsyncImage(
                         model = media.uri,

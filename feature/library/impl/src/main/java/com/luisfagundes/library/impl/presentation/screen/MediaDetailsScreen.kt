@@ -68,10 +68,11 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
-import com.luisfagundes.designsystem.components.HoneybeeErrorTemplate
-import com.luisfagundes.designsystem.components.HoneybeeLoadingTemplate
-import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
-import com.luisfagundes.designsystem.theme.spacing
+import com.luisfagundes.core.designsystem.components.HoneybeeErrorTemplate
+import com.luisfagundes.core.designsystem.components.HoneybeeLoadingTemplate
+import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
+import com.luisfagundes.core.designsystem.theme.spacing
+import com.luisfagundes.core.designsystem.R as DesignSystemResources
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import com.luisfagundes.library.impl.R
@@ -112,7 +113,7 @@ internal fun MediaDetailsScreen(
     MediaDetailsScreen(
         uiState = uiState,
         onEvent = viewModel::dispatchEvent,
-        onBackClick = onNavigateBack
+        initialMediaId = initialMediaId
     )
 }
 
@@ -121,24 +122,22 @@ internal fun MediaDetailsScreen(
 private fun MediaDetailsScreen(
     uiState: MediaDetailsUiState,
     onEvent: (MediaDetailsUiEvent) -> Unit,
-    onBackClick: () -> Unit
+    initialMediaId: Long,
 ) {
     when (uiState) {
-        is MediaDetailsUiState.Loading -> HoneybeeLoadingTemplate(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black)
-        )
+        is MediaDetailsUiState.Loading -> HoneybeeLoadingTemplate()
 
         is MediaDetailsUiState.Error -> HoneybeeErrorTemplate(
-            message = uiState.message,
-            onRetry = { /* Managed by key launch */ }
+            message = stringResource(R.string.failed_to_load_photo_details),
+            primaryButtonLabel = stringResource(DesignSystemResources.string.retry),
+            onPrimaryButtonClick = { onEvent(MediaDetailsUiEvent.LoadDetails(initialMediaId)) },
+            secondaryButtonLabel = stringResource(DesignSystemResources.string.cancel),
+            onSecondaryButtonClick = { onEvent(MediaDetailsUiEvent.CancelClick) },
         )
 
         is MediaDetailsUiState.Content -> MediaDetailsContent(
             content = uiState,
-            onEvent = onEvent,
-            onBackClick = onBackClick
+            onEvent = onEvent
         )
     }
 }
@@ -148,7 +147,6 @@ private fun MediaDetailsScreen(
 private fun MediaDetailsContent(
     content: MediaDetailsUiState.Content,
     onEvent: (MediaDetailsUiEvent) -> Unit,
-    onBackClick: () -> Unit
 ) {
     val mediaList = content.mediaList
     val totalCount = mediaList.size
@@ -171,7 +169,7 @@ private fun MediaDetailsContent(
                 totalCount = totalCount,
                 percent = percent,
                 trashCount = content.trashCount,
-                onBackClick = onBackClick,
+                onBackClick = { onEvent(MediaDetailsUiEvent.BackClick) },
                 onEvent = onEvent
             )
         },
@@ -583,6 +581,5 @@ private fun MediaDetailsContentPreview() {
             favoriteMediaIds = setOf()
         ),
         onEvent = {},
-        onBackClick = {}
     )
 }

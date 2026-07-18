@@ -5,7 +5,7 @@ import com.luisfagundes.library.api.domain.model.Media
 
 internal sealed interface TrashUiState : UiState {
     data object Loading : TrashUiState
-    data class Error(val message: String) : TrashUiState
+    data object Error : TrashUiState
     data class Content(
         val mediaToBeDeleted: List<Media>
     ) : TrashUiState

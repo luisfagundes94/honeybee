@@ -43,10 +43,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewWrapper
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
-import com.luisfagundes.designsystem.R.drawable.honeybee_low_res
-import com.luisfagundes.designsystem.components.HoneybeeButton
-import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
-import com.luisfagundes.designsystem.theme.spacing
+import com.luisfagundes.core.designsystem.R.drawable.honeybee_low_res
+import com.luisfagundes.core.designsystem.components.HoneybeeButton
+import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
+import com.luisfagundes.core.designsystem.theme.spacing
 import com.luisfagundes.onboarding.impl.R
 import com.luisfagundes.onboarding.impl.presentation.effect.PermissionUiEffect
 import com.luisfagundes.onboarding.impl.presentation.event.PermissionUiEvent

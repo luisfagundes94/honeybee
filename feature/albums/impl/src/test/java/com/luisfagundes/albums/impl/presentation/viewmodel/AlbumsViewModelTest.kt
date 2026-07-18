@@ -2,17 +2,14 @@ package com.luisfagundes.albums.impl.presentation.viewmodel
 
 import android.net.Uri
 import app.cash.turbine.test
-import com.luisfagundes.core.common.presentation.tools.ResourceProvider
-import com.luisfagundes.core.testing.MainDispatcherRule
-import com.luisfagundes.albums.impl.R
 import com.luisfagundes.albums.impl.domain.model.Album
 import com.luisfagundes.albums.impl.domain.usecase.GetAlbumsUseCase
 import com.luisfagundes.albums.impl.presentation.effect.AlbumsUiEffect
 import com.luisfagundes.albums.impl.presentation.event.AlbumsUiEvent
 import com.luisfagundes.albums.impl.presentation.state.AlbumsUiState
+import com.luisfagundes.core.testing.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -29,15 +26,13 @@ class AlbumsViewModelTest {
     val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
 
     private val getAlbumsUseCase: GetAlbumsUseCase = mockk()
-    private val resourceProvider: ResourceProvider = mockk()
 
     private lateinit var viewModel: AlbumsViewModel
 
     @BeforeEach
     fun setUp() {
         viewModel = AlbumsViewModel(
-            getAlbumsUseCase = getAlbumsUseCase,
-            resourceProvider = resourceProvider
+            getAlbumsUseCase = getAlbumsUseCase
         )
     }
 
@@ -64,8 +59,7 @@ class AlbumsViewModelTest {
 
             viewModel.dispatchEvent(AlbumsUiEvent.LoadAlbums)
 
-            val contentState = awaitItem() as AlbumsUiState.Content
-            assertEquals(albums, contentState.albums)
+            assertEquals(AlbumsUiState.Content(albums), awaitItem())
 
             coVerify(exactly = 1) { getAlbumsUseCase() }
         }
@@ -74,11 +68,9 @@ class AlbumsViewModelTest {
     @Test
     fun `dispatchEvent LoadAlbums failure should set Error state`() = runTest {
         // Given
-        val errorMessage = "Failed to load albums"
         val exception = Exception("Query error")
 
         coEvery { getAlbumsUseCase() } returns Result.failure(exception)
-        every { resourceProvider.getString(R.string.error_loading_albums) } returns errorMessage
 
         // When & Then
         viewModel.uiState.test {
@@ -86,11 +78,9 @@ class AlbumsViewModelTest {
 
             viewModel.dispatchEvent(AlbumsUiEvent.LoadAlbums)
 
-            val errorState = awaitItem() as AlbumsUiState.Error
-            assertEquals(errorMessage, errorState.message)
+            assertEquals(AlbumsUiState.Error, awaitItem())
 
             coVerify(exactly = 1) { getAlbumsUseCase() }
-            coVerify(exactly = 1) { resourceProvider.getString(R.string.error_loading_albums) }
         }
     }
 
@@ -104,9 +94,7 @@ class AlbumsViewModelTest {
         viewModel.uiEffect.test {
             viewModel.dispatchEvent(AlbumsUiEvent.AlbumClick(albumId, albumName))
 
-            val effect = awaitItem() as AlbumsUiEffect.NavigateToAlbumDetails
-            assertEquals(albumId, effect.albumId)
-            assertEquals(albumName, effect.albumName)
+            assertEquals(AlbumsUiEffect.NavigateToAlbumDetails(albumId, albumName), awaitItem())
         }
     }
 }

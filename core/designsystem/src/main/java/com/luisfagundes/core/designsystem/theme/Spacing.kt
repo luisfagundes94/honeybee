@@ -1,4 +1,4 @@
-package com.luisfagundes.designsystem.theme
+package com.luisfagundes.core.designsystem.theme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable

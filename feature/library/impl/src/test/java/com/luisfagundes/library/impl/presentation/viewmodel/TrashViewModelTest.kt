@@ -4,9 +4,7 @@ import android.app.PendingIntent
 import android.content.IntentSender
 import android.net.Uri
 import app.cash.turbine.test
-import com.luisfagundes.core.common.presentation.tools.ResourceProvider
 import com.luisfagundes.core.testing.MainDispatcherRule
-import com.luisfagundes.library.impl.R
 import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.api.domain.repository.LibraryRepository
 import com.luisfagundes.library.impl.presentation.effect.TrashUiEffect
@@ -31,15 +29,13 @@ class TrashViewModelTest {
     val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
 
     private val repository: LibraryRepository = mockk()
-    private val resourceProvider: ResourceProvider = mockk()
 
     private lateinit var viewModel: TrashViewModel
 
     @BeforeEach
     fun setUp() {
         viewModel = TrashViewModel(
-            repository = repository,
-            resourceProvider = resourceProvider
+            repository = repository
         )
     }
 
@@ -74,11 +70,9 @@ class TrashViewModelTest {
     @Test
     fun `dispatchEvent LoadTrash failure should set Error state`() = runTest {
         // Given
-        val errorMessage = "Failed to load trash media"
         val exception = Exception("Failed to load trash media")
 
         coEvery { repository.getTrashMedia() } returns Result.failure(exception)
-        every { resourceProvider.getString(R.string.failed_to_load_trash_photos) } returns errorMessage
 
         // When & Then
         viewModel.uiState.test {
@@ -86,11 +80,9 @@ class TrashViewModelTest {
 
             viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
 
-            val errorState = awaitItem() as TrashUiState.Error
-            assertEquals(errorMessage, errorState.message)
+            assertEquals(TrashUiState.Error, awaitItem() )
 
             coVerify(exactly = 1) { repository.getTrashMedia() }
-            coVerify(exactly = 1) { resourceProvider.getString(R.string.failed_to_load_trash_photos) }
         }
     }
 

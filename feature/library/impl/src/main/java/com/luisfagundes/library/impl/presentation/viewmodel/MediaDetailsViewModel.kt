@@ -2,8 +2,6 @@ package com.luisfagundes.library.impl.presentation.viewmodel
 
 import androidx.lifecycle.viewModelScope
 import com.luisfagundes.core.common.presentation.arch.viewmodel.ViewModel
-import com.luisfagundes.core.common.presentation.tools.ResourceProvider
-import com.luisfagundes.library.impl.R.string.failed_to_load_photo_details
 import com.luisfagundes.library.api.domain.repository.LibraryRepository
 import com.luisfagundes.library.impl.presentation.effect.MediaDetailsUiEffect
 import com.luisfagundes.library.impl.presentation.event.MediaDetailsUiEvent
@@ -14,8 +12,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class MediaDetailsViewModel @Inject constructor(
-    private val repository: LibraryRepository,
-    private val resourceProvider: ResourceProvider
+    private val repository: LibraryRepository
 ) : ViewModel<MediaDetailsUiState, MediaDetailsUiEvent, MediaDetailsUiEffect>(
     MediaDetailsUiState.Loading
 ) {
@@ -23,13 +20,10 @@ internal class MediaDetailsViewModel @Inject constructor(
         when (event) {
             is MediaDetailsUiEvent.LoadDetails -> loadDetails(event.initialMediaId, event.albumId)
             is MediaDetailsUiEvent.SwipeUp -> moveToTrash(event.mediaId)
-            is MediaDetailsUiEvent.TrashClick -> navigateToTrash()
             is MediaDetailsUiEvent.ToggleFavorite -> toggleFavorite(event.mediaId)
+            MediaDetailsUiEvent.TrashClick -> navigateToTrash()
+            MediaDetailsUiEvent.BackClick, MediaDetailsUiEvent.CancelClick -> navigateBack()
         }
-    }
-
-    private fun navigateToTrash() {
-        sendEffect { MediaDetailsUiEffect.NavigateToTrash }
     }
 
     private fun loadDetails(initialMediaId: Long, albumId: String?) = viewModelScope.launch {
@@ -47,8 +41,7 @@ internal class MediaDetailsViewModel @Inject constructor(
                 setState { MediaDetailsUiState.Content(filteredList, initialIndex, trashCount) }
             },
             onFailure = {
-                val errorMessage = resourceProvider.getString(failed_to_load_photo_details)
-                setState { MediaDetailsUiState.Error(errorMessage) }
+                setState { MediaDetailsUiState.Error }
             }
         )
     }
@@ -69,6 +62,14 @@ internal class MediaDetailsViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun navigateToTrash() {
+        sendEffect { MediaDetailsUiEffect.NavigateToTrash }
+    }
+
+    private fun navigateBack() {
+        sendEffect { MediaDetailsUiEffect.NavigateBack }
     }
 
     private fun toggleFavorite(mediaId: Long) {

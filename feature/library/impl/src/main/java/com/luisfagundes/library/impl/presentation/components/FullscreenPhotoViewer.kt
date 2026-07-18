@@ -22,7 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -31,7 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
-import com.luisfagundes.designsystem.theme.spacing
+import com.luisfagundes.core.designsystem.theme.spacing
 import com.luisfagundes.library.impl.R
 import kotlinx.coroutines.launch
 

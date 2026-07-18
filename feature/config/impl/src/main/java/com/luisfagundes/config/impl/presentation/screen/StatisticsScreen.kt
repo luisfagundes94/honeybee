@@ -47,14 +47,17 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.luisfagundes.config.impl.R
+import com.luisfagundes.config.impl.presentation.effect.StatisticsUiEffect
 import com.luisfagundes.config.impl.presentation.event.StatisticsUiEvent
 import com.luisfagundes.config.impl.presentation.state.StatisticsUiState
 import com.luisfagundes.config.impl.presentation.viewmodel.StatisticsViewModel
+import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.core.common.presentation.tools.formatSize
-import com.luisfagundes.designsystem.components.HoneybeeErrorTemplate
-import com.luisfagundes.designsystem.components.HoneybeeLoadingTemplate
-import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
-import com.luisfagundes.designsystem.theme.spacing
+import com.luisfagundes.core.designsystem.components.HoneybeeErrorTemplate
+import com.luisfagundes.core.designsystem.components.HoneybeeLoadingTemplate
+import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
+import com.luisfagundes.core.designsystem.theme.spacing
+import com.luisfagundes.core.designsystem.R as DesignSystemResources
 import com.luisfagundes.library.api.domain.model.Statistics
 
 @Composable
@@ -69,10 +72,15 @@ internal fun StatisticsScreen(
         viewModel.dispatchEvent(StatisticsUiEvent.LoadStatistics)
     }
 
+    CollectUiEffects(viewModel.uiEffect) { effect ->
+        when (effect) {
+            StatisticsUiEffect.NavigateBack -> onNavigateBack()
+        }
+    }
+
     StatisticsScreen(
         uiState = uiState,
-        onNavigateBack = onNavigateBack,
-        onRetry = { viewModel.dispatchEvent(StatisticsUiEvent.LoadStatistics) },
+        onEvent = viewModel::dispatchEvent,
         modifier = modifier
     )
 }
@@ -81,8 +89,7 @@ internal fun StatisticsScreen(
 @Composable
 private fun StatisticsScreen(
     uiState: StatisticsUiState,
-    onNavigateBack: () -> Unit,
-    onRetry: () -> Unit,
+    onEvent: (StatisticsUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -96,11 +103,13 @@ private fun StatisticsScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(
+                        onClick = { onEvent(StatisticsUiEvent.BackClick) }
+                    ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(
-                                id = R.string.statistics_back_button_content_description
+                                R.string.statistics_back_button_content_description
                             ),
                             tint = MaterialTheme.colorScheme.onBackground
                         )
@@ -115,18 +124,17 @@ private fun StatisticsScreen(
         when (uiState) {
             is StatisticsUiState.Loading -> {
                 HoneybeeLoadingTemplate(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
+                    modifier = Modifier.padding(innerPadding)
                 )
             }
             is StatisticsUiState.Error -> {
                 HoneybeeErrorTemplate(
-                    message = uiState.message,
-                    onRetry = onRetry,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
+                    message = stringResource(R.string.failed_to_load_statistics),
+                    primaryButtonLabel = stringResource(DesignSystemResources.string.retry),
+                    onPrimaryButtonClick = { onEvent(StatisticsUiEvent.LoadStatistics) },
+                    secondaryButtonLabel = stringResource(DesignSystemResources.string.cancel),
+                    onSecondaryButtonClick = { onEvent(StatisticsUiEvent.CancelClick) },
+                    modifier = Modifier.padding(innerPadding)
                 )
             }
             is StatisticsUiState.Content -> {
@@ -247,7 +255,6 @@ private fun StatisticsScreenPreview() {
                 videosDeleted = 12
             )
         ),
-        onNavigateBack = {},
-        onRetry = {}
+        onEvent = {}
     )
 }

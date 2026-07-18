@@ -1,4 +1,4 @@
-package com.luisfagundes.designsystem.components
+package com.luisfagundes.core.designsystem.components
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Box
@@ -10,7 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewWrapper
-import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
+import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 
 @ExperimentalMaterial3ExpressiveApi
 @Composable
@@ -18,7 +18,7 @@ fun HoneybeeLoadingTemplate(
     modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = modifier,
+        modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         LoadingIndicator()
@@ -31,7 +31,5 @@ fun HoneybeeLoadingTemplate(
 @PreviewWrapper(wrapper = HoneybeeThemeWrapper::class)
 @Composable
 fun HoneybeeLoadingTemplatePreview() {
-    HoneybeeLoadingTemplate(
-        modifier = Modifier.fillMaxSize()
-    )
+    HoneybeeLoadingTemplate()
 }

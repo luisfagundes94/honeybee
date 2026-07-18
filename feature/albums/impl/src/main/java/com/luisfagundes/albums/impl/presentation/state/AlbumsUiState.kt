@@ -5,6 +5,6 @@ import com.luisfagundes.albums.impl.domain.model.Album
 
 internal sealed interface AlbumsUiState : UiState {
     data object Loading : AlbumsUiState
-    data class Error(val message: String) : AlbumsUiState
+    data object Error : AlbumsUiState
     data class Content(val albums: List<Album>) : AlbumsUiState
 }

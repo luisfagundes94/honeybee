@@ -49,8 +49,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewWrapper
 import com.luisfagundes.config.impl.R
-import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
-import com.luisfagundes.designsystem.theme.spacing
+import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
+import com.luisfagundes.core.designsystem.theme.spacing
 
 private const val APP_INTERNAL_SHARE_LINK =
     "https://play.google.com/apps/internaltest/4701609758531422116"

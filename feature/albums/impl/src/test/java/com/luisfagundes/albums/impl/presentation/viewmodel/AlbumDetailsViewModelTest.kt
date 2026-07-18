@@ -2,17 +2,14 @@ package com.luisfagundes.albums.impl.presentation.viewmodel
 
 import android.net.Uri
 import app.cash.turbine.test
-import com.luisfagundes.core.common.presentation.tools.ResourceProvider
-import com.luisfagundes.core.testing.MainDispatcherRule
-import com.luisfagundes.albums.impl.R
 import com.luisfagundes.albums.impl.domain.model.AlbumMedia
 import com.luisfagundes.albums.impl.domain.usecase.GetAlbumMediaUseCase
 import com.luisfagundes.albums.impl.presentation.effect.AlbumDetailsUiEffect
 import com.luisfagundes.albums.impl.presentation.event.AlbumDetailsUiEvent
 import com.luisfagundes.albums.impl.presentation.state.AlbumDetailsUiState
+import com.luisfagundes.core.testing.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -29,15 +26,13 @@ class AlbumDetailsViewModelTest {
     val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
 
     private val getAlbumMediaUseCase: GetAlbumMediaUseCase = mockk()
-    private val resourceProvider: ResourceProvider = mockk()
 
     private lateinit var viewModel: AlbumDetailsViewModel
 
     @BeforeEach
     fun setUp() {
         viewModel = AlbumDetailsViewModel(
-            getAlbumMediaUseCase = getAlbumMediaUseCase,
-            resourceProvider = resourceProvider
+            getAlbumMediaUseCase = getAlbumMediaUseCase
         )
     }
 
@@ -65,8 +60,7 @@ class AlbumDetailsViewModelTest {
 
             viewModel.dispatchEvent(AlbumDetailsUiEvent.LoadMedia(albumId))
 
-            val contentState = awaitItem() as AlbumDetailsUiState.Content
-            assertEquals(mediaList, contentState.mediaList)
+            assertEquals(AlbumDetailsUiState.Content(mediaList), awaitItem())
 
             coVerify(exactly = 1) { getAlbumMediaUseCase(albumId) }
         }
@@ -76,11 +70,9 @@ class AlbumDetailsViewModelTest {
     fun `dispatchEvent LoadMedia failure should set Error state`() = runTest {
         // Given
         val albumId = "camera_id"
-        val errorMessage = "Failed to load media"
         val exception = Exception("Query error")
 
         coEvery { getAlbumMediaUseCase(albumId) } returns Result.failure(exception)
-        every { resourceProvider.getString(R.string.error_loading_album_media) } returns errorMessage
 
         // When & Then
         viewModel.uiState.test {
@@ -88,11 +80,9 @@ class AlbumDetailsViewModelTest {
 
             viewModel.dispatchEvent(AlbumDetailsUiEvent.LoadMedia(albumId))
 
-            val errorState = awaitItem() as AlbumDetailsUiState.Error
-            assertEquals(errorMessage, errorState.message)
+            assertEquals(AlbumDetailsUiState.Error, awaitItem())
 
             coVerify(exactly = 1) { getAlbumMediaUseCase(albumId) }
-            coVerify(exactly = 1) { resourceProvider.getString(R.string.error_loading_album_media) }
         }
     }
 
@@ -105,18 +95,18 @@ class AlbumDetailsViewModelTest {
             AlbumMedia(id = 1L, uri = mockUri, dateAdded = 1000L, isVideo = false)
         )
 
-        coEvery { getAlbumMediaUseCase(albumId) } returns Result.failure(Exception()) andThen Result.success(mediaList)
-        every { resourceProvider.getString(R.string.error_loading_album_media) } returns "Error"
+        coEvery { getAlbumMediaUseCase(albumId) } returns Result.failure(Exception()) andThen
+                Result.success(mediaList)
 
         // When & Then
         viewModel.uiState.test {
             assertEquals(AlbumDetailsUiState.Loading, awaitItem())
 
             viewModel.dispatchEvent(AlbumDetailsUiEvent.LoadMedia(albumId))
-            assertEquals("Error", (awaitItem() as AlbumDetailsUiState.Error).message)
+            assertEquals(AlbumDetailsUiState.Error, awaitItem())
 
             viewModel.dispatchEvent(AlbumDetailsUiEvent.Retry)
-            assertEquals(mediaList, (awaitItem() as AlbumDetailsUiState.Content).mediaList)
+            assertEquals(AlbumDetailsUiState.Content(mediaList), awaitItem())
 
             coVerify(exactly = 2) { getAlbumMediaUseCase(albumId) }
         }
@@ -131,8 +121,7 @@ class AlbumDetailsViewModelTest {
         viewModel.uiEffect.test {
             viewModel.dispatchEvent(AlbumDetailsUiEvent.MediaClick(mediaId))
 
-            val effect = awaitItem() as AlbumDetailsUiEffect.NavigateToMediaDetail
-            assertEquals(mediaId, effect.mediaId)
+            assertEquals(AlbumDetailsUiEffect.NavigateToMediaDetail(mediaId), awaitItem())
         }
     }
 

@@ -1,4 +1,4 @@
-package com.luisfagundes.designsystem.theme
+package com.luisfagundes.core.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
 

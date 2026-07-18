@@ -41,9 +41,9 @@ import com.luisfagundes.config.impl.presentation.state.FeedbackUiState
 import com.luisfagundes.config.impl.presentation.viewmodel.FeedbackViewModel
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.config.impl.presentation.tools.launchFeedbackEmailIntent
-import com.luisfagundes.designsystem.components.HoneybeeButton
-import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
-import com.luisfagundes.designsystem.theme.spacing
+import com.luisfagundes.core.designsystem.components.HoneybeeButton
+import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
+import com.luisfagundes.core.designsystem.theme.spacing
 
 @Composable
 internal fun FeedbackScreen(

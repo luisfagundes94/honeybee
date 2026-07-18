@@ -36,7 +36,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import com.luisfagundes.core.common.presentation.navigation.LocalNavBackStack
-import com.luisfagundes.designsystem.theme.HoneybeeTheme
+import com.luisfagundes.core.designsystem.theme.HoneybeeTheme
 import com.luisfagundes.albums.api.presentation.navigation.AlbumsRoute
 import com.luisfagundes.config.api.presentation.navigation.ConfigRoute
 import com.luisfagundes.honeybee.presentation.navigation.AppNavDisplay

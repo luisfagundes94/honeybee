@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.luisfagundes.designsystem"
+    namespace = "com.luisfagundes.core.designsystem"
     compileSdk = 37
 
     defaultConfig {
