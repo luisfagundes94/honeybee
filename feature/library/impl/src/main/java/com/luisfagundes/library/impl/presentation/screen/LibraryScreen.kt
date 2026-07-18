@@ -1,5 +1,7 @@
 package com.luisfagundes.library.impl.presentation.screen
 
+import android.content.res.Configuration
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,18 +29,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewWrapper
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -46,22 +52,14 @@ import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
+import com.luisfagundes.core.designsystem.R as DesignSystemResources
 import com.luisfagundes.core.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.core.designsystem.components.HoneybeeLoadingTemplate
-import com.luisfagundes.core.designsystem.theme.spacing
-import com.luisfagundes.library.impl.R
-import android.content.res.Configuration
-import android.net.Uri
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewWrapper
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
-import com.luisfagundes.core.designsystem.R.string.retry
-import com.luisfagundes.core.designsystem.R.string.cancel
+import com.luisfagundes.core.designsystem.theme.spacing
 import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.api.domain.model.MediaSection
-import com.luisfagundes.library.impl.R.string.error_loading_photos_message
+import com.luisfagundes.library.impl.R
 import com.luisfagundes.library.impl.presentation.components.TrashBadgedBox
 import com.luisfagundes.library.impl.presentation.effect.LibraryUiEffect
 import com.luisfagundes.library.impl.presentation.event.LibraryUiEvent
@@ -109,8 +107,8 @@ private fun LibraryScreen(
         is LibraryUiState.Loading -> HoneybeeLoadingTemplate()
 
         is LibraryUiState.Error -> HoneybeeErrorTemplate(
-            message = stringResource(error_loading_photos_message),
-            primaryButtonLabel = stringResource(retry),
+            message = stringResource(R.string.error_loading_photos_message),
+            primaryButtonLabel = stringResource(DesignSystemResources.string.retry),
             onPrimaryButtonClick = { onEvent(LibraryUiEvent.LoadMedia) },
         )
 
