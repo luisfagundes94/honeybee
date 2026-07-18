@@ -86,17 +86,54 @@ JUnit 5 + MockK + Turbine (Flow assertions)
 
 - Use `MainDispatcherRule` from `:core:testing` for coroutine tests.
 - Use Given, When and Then comments
+- Don't repeat fake data in tests. In this case, create a package tools and put the fake data there for reusability.
+- Don't create intermediate variables when asserting state or effects that only asserts one thing:
 
-```kotlin
-@RegisterExtension
-val dispatcher = MainDispatcherRule(UnconfinedTestDispatcher())
+    ❌ *Don't do this:*
+    ```kotlin 
+        val state = awaitItem() as UiState.Content
+        assertEquals(state.items, items)
+    ```
 
-class MyViewModelTest {
-    // turbine: viewModel.uiState.test { ... }
-}
-```
+    ✅ *Do this:*
+    ```kotlin
+        assertEquals(UiState.Content(items), awaitItem())
+    ```
+
+- Example testing with turbine:
+  ```kotlin
+    internal class MyViewModelTest { 
+        @RegisterExtension
+        val dispatcher = MainDispatcherRule(UnconfinedTestDispatcher())
+    
+        private lateinit var viewModel: MyViewModel
+        
+        @Before
+        fun setUp() {
+            viewModel = MyViewModel()
+        }
+    
+        @Test
+        fun `test event dispatching`() = runTest { 
+            // Given
+            val data = listOf(1, 2, 3)
+      
+            viewModel.uiState.test {
+                // When
+                viewModel.dispatchEvent(UiEvent.SomeEvent)
+      
+                // Then
+                assertEquals(UiState.Content(data), awaitItem())
+            } 
+        }
+    }
+    ```
 
 ### Design System Conventions
 
 - Use `MaterialTheme.spacing.*` (`verySmall=4dp`, `small=8dp`, `default=16dp`, `large=32dp`, `veryLarge=42dp`, `extraLarge=52dp`) instead of hardcoded `dp` values
 - Use Material3 always
+- Use `MaterialTheme.colorScheme.*` instead of hardcoded colors
+- Use `MaterialTheme.typography.*` instead of hardcoded font sizes
+- Use `MaterialTheme.shapes.*` instead of hardcoded corner radius
+- When importing a resource from design system module in another module, use the import com.luisfagundes.core.designsystem R as DesignSystemResources
