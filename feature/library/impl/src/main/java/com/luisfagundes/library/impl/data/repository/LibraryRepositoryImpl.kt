@@ -8,24 +8,18 @@ import android.os.Build
 import android.provider.MediaStore
 import com.luisfagundes.core.common.di.DefaultDispatcher
 import com.luisfagundes.core.common.tools.safeRunCatching
+import com.luisfagundes.library.api.domain.model.Media
+import com.luisfagundes.library.api.domain.model.Statistics
+import com.luisfagundes.library.api.domain.repository.LibraryRepository
+import com.luisfagundes.library.impl.data.database.dao.StatisticsDao
 import com.luisfagundes.library.impl.data.datasource.LibraryDataSource
 import com.luisfagundes.library.impl.data.datasource.LibraryPreferences
 import com.luisfagundes.library.impl.data.mapper.MediaMapper
-import com.luisfagundes.library.api.domain.model.Media
-import com.luisfagundes.library.api.domain.model.MediaSection
-import com.luisfagundes.library.api.domain.repository.LibraryRepository
+import com.luisfagundes.library.impl.data.mapper.StatisticsMapper
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import java.time.Instant
-import java.time.YearMonth
-import java.time.ZoneId
 import javax.inject.Inject
-import com.luisfagundes.library.api.domain.model.Statistics
-import com.luisfagundes.library.impl.data.database.dao.StatisticsDao
-import com.luisfagundes.library.impl.data.database.entity.StatisticsEntity
-import com.luisfagundes.library.impl.data.mapper.StatisticsMapper
-import com.luisfagundes.library.impl.data.model.MediaDto
 
 internal class LibraryRepositoryImpl @Inject constructor(
     private val dataSource: LibraryDataSource,
