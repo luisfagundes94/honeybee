@@ -36,9 +36,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -48,7 +45,14 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewWrapper
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.luisfagundes.config.impl.R
+import com.luisfagundes.config.impl.presentation.effect.ConfigUiEffect
+import com.luisfagundes.config.impl.presentation.event.ConfigUiEvent
+import com.luisfagundes.config.impl.presentation.state.ConfigUiState
+import com.luisfagundes.config.impl.presentation.viewmodel.ConfigViewModel
+import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
 
@@ -60,10 +64,33 @@ private const val APP_INTERNAL_SHARE_LINK =
 internal fun ConfigScreen(
     onNavigateToFeedback: () -> Unit,
     onNavigateToStatistics: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: ConfigViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    CollectUiEffects(viewModel.uiEffect) { effect ->
+        when (effect) {
+            ConfigUiEffect.NavigateToStatistics -> onNavigateToStatistics()
+            ConfigUiEffect.NavigateToFeedback -> onNavigateToFeedback()
+        }
+    }
+
+    ConfigScreen(
+        uiState = uiState,
+        onEvent = viewModel::dispatchEvent,
+        modifier = modifier
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ConfigScreen(
+    uiState: ConfigUiState,
+    onEvent: (ConfigUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    var isNotificationsEnabled by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -114,7 +141,7 @@ internal fun ConfigScreen(
                     ConfigItem(
                         title = stringResource(R.string.config_item_statistics),
                         icon = Icons.AutoMirrored.Filled.TrendingUp,
-                        onClick = onNavigateToStatistics
+                        onClick = { onEvent(ConfigUiEvent.StatisticsClick) }
                     )
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default),
@@ -171,11 +198,19 @@ internal fun ConfigScreen(
                         icon = Icons.Default.Notifications,
                         trailingContent = {
                             Switch(
-                                checked = isNotificationsEnabled,
-                                onCheckedChange = { isNotificationsEnabled = it }
+                                checked = uiState.isNotificationsEnabled,
+                                onCheckedChange = {
+                                    onEvent(ConfigUiEvent.NotificationsToggled(it))
+                                }
                             )
                         },
-                        onClick = { isNotificationsEnabled = !isNotificationsEnabled }
+                        onClick = {
+                            onEvent(
+                                ConfigUiEvent.NotificationsToggled(
+                                    enabled = !uiState.isNotificationsEnabled
+                                )
+                            )
+                        }
                     )
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default),
@@ -193,7 +228,7 @@ internal fun ConfigScreen(
                     ConfigItem(
                         title = stringResource(R.string.config_item_send_feedback),
                         icon = Icons.AutoMirrored.Filled.HelpOutline,
-                        onClick = onNavigateToFeedback
+                        onClick = { onEvent(ConfigUiEvent.FeedbackClick) }
                     )
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default),
@@ -272,7 +307,7 @@ private fun ConfigItem(
 @Composable
 private fun ConfigScreenPreview() {
     ConfigScreen(
-        onNavigateToFeedback = {},
-        onNavigateToStatistics = {}
+        uiState = ConfigUiState(),
+        onEvent = {}
     )
 }

@@ -9,6 +9,7 @@ import androidx.core.net.toUri
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.luisfagundes.core.common.di.IoDispatcher
+import com.luisfagundes.core.common.domain.preferences.UserPreferences
 import com.luisfagundes.honeybee.domain.model.HoneybeeNotification
 import com.luisfagundes.honeybee.domain.model.NotificationType
 import com.luisfagundes.honeybee.domain.repository.NotificationRepository
@@ -18,6 +19,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,6 +32,9 @@ class HoneybeeFirebaseMessagingService : FirebaseMessagingService() {
     @Inject
     @IoDispatcher
     internal lateinit var ioDispatcher: CoroutineDispatcher
+
+    @Inject
+    internal lateinit var userPreferences: UserPreferences
 
     private val serviceScope by lazy {
         CoroutineScope(SupervisorJob() + ioDispatcher)
@@ -51,19 +56,30 @@ class HoneybeeFirebaseMessagingService : FirebaseMessagingService() {
         super.onMessageReceived(remoteMessage)
 
         serviceScope.launch {
-            val data = remoteMessage.data.toMutableMap()
-            remoteMessage.notification?.let { notification ->
-                if (!data.containsKey("title")) {
-                    data["title"] = notification.title.orEmpty()
-                }
-                if (!data.containsKey("body")) {
-                    data["body"] = notification.body.orEmpty()
-                }
-            }
-
-            val notification = repository.processIncomingPayload(data)
-            showNotification(notification)
+            handleMessage(remoteMessage)
         }
+    }
+
+    internal suspend fun handleMessage(
+        remoteMessage: RemoteMessage,
+        postNotification: (HoneybeeNotification) -> Unit = ::showNotification
+    ) {
+        if (!userPreferences.notificationsEnabled().first()) {
+            return
+        }
+
+        val data = remoteMessage.data.toMutableMap()
+        remoteMessage.notification?.let { notification ->
+            if (!data.containsKey("title")) {
+                data["title"] = notification.title.orEmpty()
+            }
+            if (!data.containsKey("body")) {
+                data["body"] = notification.body.orEmpty()
+            }
+        }
+
+        val notification = repository.processIncomingPayload(data)
+        postNotification(notification)
     }
 
     private fun showNotification(notification: HoneybeeNotification) {

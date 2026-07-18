@@ -45,6 +45,9 @@ dependencies {
     // Lifecycle
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
+
     // Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.foundation)
@@ -56,7 +59,10 @@ dependencies {
 
     // Testing
     testImplementation(project(":core:testing"))
+    testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.junit5.jupiter.api)
     testRuntimeOnly(libs.junit5.jupiter.engine)
     testRuntimeOnly(libs.junit5.platform.launcher)
+    testImplementation(libs.mockk)
+    testImplementation(libs.turbine)
 }
