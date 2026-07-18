@@ -34,7 +34,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -49,10 +48,12 @@ import com.luisfagundes.designsystem.theme.spacing
 import com.luisfagundes.library.impl.R
 import android.content.res.Configuration
 import android.net.Uri
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewWrapper
+import coil.request.ImageRequest
 import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.api.domain.model.MediaSection
@@ -164,7 +165,11 @@ private fun LibraryContent(
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall)
         ) {
             mediaSectionList.forEach { mediaSection ->
-                item(span = { GridItemSpan(maxLineSpan) }) {
+                item(
+                    key = "header_${mediaSection.yearMonth}",
+                    span = { GridItemSpan(maxLineSpan) },
+                    contentType = "header"
+                ) {
                     val month = mediaSection.yearMonth.getFormattedMonthName()
                     val year = mediaSection.yearMonth.year
 
@@ -175,7 +180,11 @@ private fun LibraryContent(
                         modifier = Modifier.padding(vertical = MaterialTheme.spacing.small)
                     )
                 }
-                items(mediaSection.mediaList) { media ->
+                items(
+                    items = mediaSection.mediaList,
+                    key = { media -> media.id },
+                    contentType = { "media" }
+                ) { media ->
                     Box(
                         modifier = Modifier
                             .aspectRatio(1f)
@@ -183,7 +192,10 @@ private fun LibraryContent(
                             .clickable { onEvent(LibraryUiEvent.MediaClick(media.id)) }
                     ) {
                         AsyncImage(
-                            model = media.uri,
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(media.uri)
+                                .crossfade(true)
+                                .build(),
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
