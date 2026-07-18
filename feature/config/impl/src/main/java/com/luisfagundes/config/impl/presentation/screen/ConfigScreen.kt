@@ -2,6 +2,8 @@ package com.luisfagundes.config.impl.presentation.screen
 
 import android.content.Intent
 import android.content.res.Configuration
+import android.widget.Toast
+import android.widget.Toast.LENGTH_SHORT
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -87,8 +89,9 @@ internal fun ConfigScreen(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
         ) {
-            Spacer(modifier = Modifier.height(MaterialTheme.spacing.default))
-
+            Spacer(
+                modifier = Modifier.height(MaterialTheme.spacing.default)
+            )
             Text(
                 text = stringResource(R.string.config_category_my_data),
                 style = MaterialTheme.typography.titleSmall,
@@ -100,7 +103,6 @@ internal fun ConfigScreen(
                     )
                     .semantics { heading() }
             )
-
             Card(
                 shape = RoundedCornerShape(MaterialTheme.spacing.default),
                 colors = CardDefaults.cardColors(
@@ -127,9 +129,9 @@ internal fun ConfigScreen(
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(MaterialTheme.spacing.default))
-
+            Spacer(
+                modifier = Modifier.height(MaterialTheme.spacing.default)
+            )
             Text(
                 text = stringResource(R.string.config_category_other),
                 style = MaterialTheme.typography.titleSmall,
@@ -141,7 +143,6 @@ internal fun ConfigScreen(
                     )
                     .semantics { heading() }
             )
-
             Card(
                 shape = RoundedCornerShape(MaterialTheme.spacing.default),
                 colors = CardDefaults.cardColors(
@@ -185,7 +186,9 @@ internal fun ConfigScreen(
                     ConfigItem(
                         title = stringResource(R.string.config_item_rate_app),
                         icon = Icons.Default.StarBorder,
-                        onClick = { /* TODO: Trigger Rate App */ }
+                        onClick = {
+                            Toast.makeText(context, "Not implemented yet", LENGTH_SHORT).show()
+                        }
                     )
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default),
@@ -215,8 +218,9 @@ internal fun ConfigScreen(
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(MaterialTheme.spacing.default))
+            Spacer(
+                modifier = Modifier.height(MaterialTheme.spacing.default)
+            )
         }
     }
 }
