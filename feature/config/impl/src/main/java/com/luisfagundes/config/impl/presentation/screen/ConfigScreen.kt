@@ -52,7 +52,8 @@ import com.luisfagundes.config.impl.R
 import com.luisfagundes.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.designsystem.theme.spacing
 
-private const val APP_INTERNAL_SHARE_LINK = "https://play.google.com/apps/internaltest/4701609758531422116"
+private const val APP_INTERNAL_SHARE_LINK =
+    "https://play.google.com/apps/internaltest/4701609758531422116"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -202,7 +203,7 @@ internal fun ConfigScreen(
                     ConfigItem(
                         title = stringResource(R.string.config_item_share_with_friends),
                         icon = Icons.Default.Share,
-                        onClick = { 
+                        onClick = {
                             val sendIntent = Intent().apply {
                                 action = Intent.ACTION_SEND
                                 putExtra(Intent.EXTRA_TEXT, APP_INTERNAL_SHARE_LINK)
@@ -230,11 +231,8 @@ private fun ConfigItem(
     onClick: (() -> Unit)? = null
 ) {
     ListItem(
-        headlineContent = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge
-            )
+        modifier = modifier.let {
+            if (onClick != null) it.clickable(onClick = onClick) else it
         },
         leadingContent = {
             if (iconContainer != null) {
@@ -254,12 +252,17 @@ private fun ConfigItem(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         },
+        overlineContent = null,
+        supportingContent = null,
         colors = ListItemDefaults.colors(
             containerColor = Color.Transparent
         ),
-        modifier = modifier.let {
-            if (onClick != null) it.clickable(onClick = onClick) else it
-        }
+        content = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        },
     )
 }
 
