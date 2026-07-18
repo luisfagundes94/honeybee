@@ -1,14 +1,21 @@
 package com.luisfagundes.honeybee.data.repository
 
+import com.luisfagundes.core.testing.MainDispatcherRule
+import com.luisfagundes.honeybee.domain.model.HoneybeeNotification
 import com.luisfagundes.honeybee.domain.model.NotificationType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.RegisterExtension
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class NotificationRepositoryImplTest {
+internal class NotificationRepositoryImplTest {
+
+    @RegisterExtension
+    val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
 
     private val repository = NotificationRepositoryImpl()
 
@@ -17,7 +24,7 @@ class NotificationRepositoryImplTest {
         // Given
         val token = "test_token"
 
-        // When/Then
+        // When & Then
         repository.registerDeviceToken(token)
     }
 
@@ -33,14 +40,19 @@ class NotificationRepositoryImplTest {
         )
 
         // When
-        val result = repository.processIncomingPayload(rawData)
+        val notification = repository.processIncomingPayload(rawData)
 
         // Then
-        assertEquals("123", result.id)
-        assertEquals("Test Title", result.title)
-        assertEquals("Test Body", result.body)
-        assertEquals(NotificationType.NEW_MESSAGE, result.type)
-        assertEquals("https://honeybee.com/promo", result.deepLinkUrl)
+        assertEquals(
+            HoneybeeNotification(
+                id = "123",
+                title = "Test Title",
+                body = "Test Body",
+                type = NotificationType.NEW_MESSAGE,
+                deepLinkUrl = "https://honeybee.com/promo"
+            ),
+            notification
+        )
     }
 
     @Test
@@ -49,14 +61,14 @@ class NotificationRepositoryImplTest {
         val rawData = emptyMap<String, String>()
 
         // When
-        val result = repository.processIncomingPayload(rawData)
+        val notification = repository.processIncomingPayload(rawData)
 
         // Then
-        assertNotNull(result.id)
-        assertEquals("", result.title)
-        assertEquals("", result.body)
-        assertEquals(NotificationType.SYSTEM_ALERT, result.type)
-        assertEquals(null, result.deepLinkUrl)
+        assertNotNull(notification.id)
+        assertEquals("", notification.title)
+        assertEquals("", notification.body)
+        assertEquals(NotificationType.SYSTEM_ALERT, notification.type)
+        assertEquals(null, notification.deepLinkUrl)
     }
 
     @Test
@@ -67,9 +79,9 @@ class NotificationRepositoryImplTest {
         )
 
         // When
-        val result = repository.processIncomingPayload(rawData)
+        val notification = repository.processIncomingPayload(rawData)
 
         // Then
-        assertEquals(NotificationType.SYSTEM_ALERT, result.type)
+        assertEquals(NotificationType.SYSTEM_ALERT, notification.type)
     }
 }

@@ -3,8 +3,8 @@ package com.luisfagundes.config.impl.presentation.viewmodel
 import app.cash.turbine.test
 import com.luisfagundes.config.impl.presentation.event.StatisticsUiEvent
 import com.luisfagundes.config.impl.presentation.state.StatisticsUiState
+import com.luisfagundes.config.impl.tools.fakeStatistics
 import com.luisfagundes.core.testing.MainDispatcherRule
-import com.luisfagundes.library.api.domain.model.Statistics
 import com.luisfagundes.library.api.domain.usecase.GetStatisticsUseCase
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -36,12 +36,7 @@ internal class StatisticsViewModelTest {
     @Test
     fun `init should load statistics successfully and set Content state`() = runTest {
         // Given
-        val mockStats = Statistics(
-            memoryCleared = 1024L,
-            mediaDeleted = 5,
-            photosDeleted = 3,
-            videosDeleted = 2
-        )
+        val mockStats = fakeStatistics
 
         coEvery { getStatisticsUseCase() } returns Result.success(mockStats)
 
@@ -50,8 +45,7 @@ internal class StatisticsViewModelTest {
 
         // Then
         viewModel.uiState.test {
-            val state = awaitItem()
-            assertEquals(StatisticsUiState.Content(mockStats), state)
+            assertEquals(StatisticsUiState.Content(mockStats), awaitItem())
         }
     }
 
@@ -72,23 +66,25 @@ internal class StatisticsViewModelTest {
     @Test
     fun `dispatchEvent LoadStatistics should reload statistics successfully`() = runTest {
         // Given
-        val mockStats1 = Statistics(1024L, 5, 3, 2)
-        val mockStats2 = Statistics(2048L, 10, 6, 4)
+        val mockStats1 = fakeStatistics
+        val mockStats2 = fakeStatistics.copy(
+            memoryCleared = 2_048L,
+            mediaDeleted = 10,
+            photosDeleted = 6,
+            videosDeleted = 4
+        )
 
         coEvery { getStatisticsUseCase() } returns Result.success(mockStats1) andThen Result.success(mockStats2)
         viewModel.dispatchEvent(StatisticsUiEvent.LoadStatistics)
 
-        // When & Then
         viewModel.uiState.test {
-            // First item from initialization
             assertEquals(StatisticsUiState.Content(mockStats1), awaitItem())
 
-            // Trigger LoadStatistics again
+            // When
             viewModel.dispatchEvent(StatisticsUiEvent.LoadStatistics)
 
-            // Should eventually emit the updated Content state with mockStats2
-            val finalItem = expectMostRecentItem()
-            assertEquals(StatisticsUiState.Content(mockStats2), finalItem)
+            // Then
+            assertEquals(StatisticsUiState.Content(mockStats2), expectMostRecentItem())
         }
     }
 }

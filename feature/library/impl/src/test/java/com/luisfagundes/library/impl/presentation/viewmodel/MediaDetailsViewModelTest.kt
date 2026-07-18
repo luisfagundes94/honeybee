@@ -1,13 +1,12 @@
 package com.luisfagundes.library.impl.presentation.viewmodel
 
-import android.net.Uri
 import app.cash.turbine.test
 import com.luisfagundes.core.testing.MainDispatcherRule
-import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.api.domain.repository.LibraryRepository
 import com.luisfagundes.library.impl.presentation.effect.MediaDetailsUiEffect
 import com.luisfagundes.library.impl.presentation.event.MediaDetailsUiEvent
 import com.luisfagundes.library.impl.presentation.state.MediaDetailsUiState
+import com.luisfagundes.library.impl.tools.fakeMedia
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -20,7 +19,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class MediaDetailsViewModelTest {
+internal class MediaDetailsViewModelTest {
 
     @RegisterExtension
     val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
@@ -45,26 +44,24 @@ class MediaDetailsViewModelTest {
     @Test
     fun `dispatchEvent LoadDetails success should set Content state with correct initialIndex`() = runTest {
         // Given
-        val mockUri = mockk<Uri>()
-        val media1 = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false)
-        val media2 = Media(id = 2L, uri = mockUri, dateAdded = 1100L, size = 2100L, isVideo = true)
-        val media3 = Media(id = 3L, uri = mockUri, dateAdded = 1200L, size = 2200L, isVideo = false)
-        val mediaList = listOf(media1, media2, media3)
+        val mediaList = listOf(
+            fakeMedia,
+            fakeMedia.copy(id = 2L, dateAdded = 1_100L, size = 2_100L, isVideo = true),
+            fakeMedia.copy(id = 3L, dateAdded = 1_200L, size = 2_200L)
+        )
         val trashCount = 2
 
         coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
         coEvery { repository.getItemsInTrashCount() } returns trashCount
 
-        // When & Then
         viewModel.uiState.test {
             assertEquals(MediaDetailsUiState.Loading, awaitItem())
 
+            // When
             viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialMediaId = 2L))
 
-            val contentState = awaitItem() as MediaDetailsUiState.Content
-            assertEquals(mediaList, contentState.mediaList)
-            assertEquals(1, contentState.initialIndex)
-            assertEquals(trashCount, contentState.trashCount)
+            // Then
+            assertEquals(MediaDetailsUiState.Content(mediaList, 1, trashCount), awaitItem())
 
             coVerify(exactly = 1) { repository.getActiveMedia() }
             coVerify(exactly = 1) { repository.getItemsInTrashCount() }
@@ -74,24 +71,20 @@ class MediaDetailsViewModelTest {
     @Test
     fun `dispatchEvent LoadDetails success with non-existent id should set Content state with initialIndex 0`() = runTest {
         // Given
-        val mockUri = mockk<Uri>()
-        val media1 = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false)
-        val mediaList = listOf(media1)
+        val mediaList = listOf(fakeMedia)
         val trashCount = 0
 
         coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
         coEvery { repository.getItemsInTrashCount() } returns trashCount
 
-        // When & Then
         viewModel.uiState.test {
             assertEquals(MediaDetailsUiState.Loading, awaitItem())
 
+            // When
             viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialMediaId = 999L))
 
-            val contentState = awaitItem() as MediaDetailsUiState.Content
-            assertEquals(mediaList, contentState.mediaList)
-            assertEquals(0, contentState.initialIndex)
-            assertEquals(trashCount, contentState.trashCount)
+            // Then
+            assertEquals(MediaDetailsUiState.Content(mediaList, 0, trashCount), awaitItem())
 
             coVerify(exactly = 1) { repository.getActiveMedia() }
             coVerify(exactly = 1) { repository.getItemsInTrashCount() }
@@ -105,12 +98,13 @@ class MediaDetailsViewModelTest {
 
         coEvery { repository.getActiveMedia() } returns Result.failure(exception)
 
-        // When & Then
         viewModel.uiState.test {
             assertEquals(MediaDetailsUiState.Loading, awaitItem())
 
+            // When
             viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialMediaId = 1L))
 
+            // Then
             assertEquals(MediaDetailsUiState.Error, awaitItem())
 
             coVerify(exactly = 1) { repository.getActiveMedia() }
@@ -120,9 +114,8 @@ class MediaDetailsViewModelTest {
     @Test
     fun `dispatchEvent SwipeUp should move media to trash and update state when other media remain`() = runTest {
         // Given
-        val mockUri = mockk<Uri>()
-        val media1 = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false)
-        val media2 = Media(id = 2L, uri = mockUri, dateAdded = 1100L, size = 2100L, isVideo = true)
+        val media1 = fakeMedia
+        val media2 = fakeMedia.copy(id = 2L, dateAdded = 1_100L, size = 2_100L, isVideo = true)
         val mediaList = listOf(media1, media2)
         val trashCountBefore = 2
         val trashCountAfter = 3
@@ -131,22 +124,20 @@ class MediaDetailsViewModelTest {
         coEvery { repository.getItemsInTrashCount() } returnsMany listOf(trashCountBefore, trashCountAfter)
         coEvery { repository.moveToTrash(1L) } returns Unit
 
-        // When & Then
         viewModel.uiState.test {
             assertEquals(MediaDetailsUiState.Loading, awaitItem())
 
-            // Initial load
+            // When
             viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialMediaId = 1L))
-            val initialContent = awaitItem() as MediaDetailsUiState.Content
-            assertEquals(mediaList, initialContent.mediaList)
-            assertEquals(trashCountBefore, initialContent.trashCount)
 
-            // Swipe up/Move to trash
+            // Then
+            assertEquals(MediaDetailsUiState.Content(mediaList, 0, trashCountBefore), awaitItem())
+
+            // When
             viewModel.dispatchEvent(MediaDetailsUiEvent.SwipeUp(mediaId = 1L))
 
-            val updatedContent = awaitItem() as MediaDetailsUiState.Content
-            assertEquals(listOf(media2), updatedContent.mediaList)
-            assertEquals(trashCountAfter, updatedContent.trashCount)
+            // Then
+            assertEquals(MediaDetailsUiState.Content(listOf(media2), 0, trashCountAfter), awaitItem())
 
             coVerify(exactly = 1) { repository.moveToTrash(1L) }
             coVerify(exactly = 2) { repository.getItemsInTrashCount() }
@@ -156,27 +147,27 @@ class MediaDetailsViewModelTest {
     @Test
     fun `dispatchEvent SwipeUp should move media to trash and send NavigateBack effect when no media remain`() = runTest {
         // Given
-        val mockUri = mockk<Uri>()
-        val media1 = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false)
-        val mediaList = listOf(media1)
+        val mediaList = listOf(fakeMedia)
         val trashCount = 2
 
         coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
         coEvery { repository.getItemsInTrashCount() } returns trashCount
         coEvery { repository.moveToTrash(1L) } returns Unit
 
-        // When & Then
         viewModel.uiState.test {
             assertEquals(MediaDetailsUiState.Loading, awaitItem())
 
-            // Initial load
+            // When
             viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialMediaId = 1L))
-            val initialContent = awaitItem() as MediaDetailsUiState.Content
-            assertEquals(mediaList, initialContent.mediaList)
+
+            // Then
+            assertEquals(MediaDetailsUiState.Content(mediaList, 0, trashCount), awaitItem())
 
             viewModel.uiEffect.test {
+                // When
                 viewModel.dispatchEvent(MediaDetailsUiEvent.SwipeUp(mediaId = 1L))
 
+                // Then
                 assertEquals(MediaDetailsUiEffect.NavigateBack, awaitItem())
             }
 
@@ -186,10 +177,11 @@ class MediaDetailsViewModelTest {
 
     @Test
     fun `dispatchEvent TrashClick should emit NavigateToTrash effect`() = runTest {
-        // When & Then
         viewModel.uiEffect.test {
+            // When
             viewModel.dispatchEvent(MediaDetailsUiEvent.TrashClick)
 
+            // Then
             assertEquals(MediaDetailsUiEffect.NavigateToTrash, awaitItem())
         }
     }
@@ -197,51 +189,50 @@ class MediaDetailsViewModelTest {
     @Test
     fun `dispatchEvent ToggleFavorite should add media to favorite set if not favorited`() = runTest {
         // Given
-        val mockUri = mockk<Uri>()
-        val media1 = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false)
-        val mediaList = listOf(media1)
+        val mediaList = listOf(fakeMedia)
         val trashCount = 2
 
         coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
         coEvery { repository.getItemsInTrashCount() } returns trashCount
 
-        // When & Then
         viewModel.uiState.test {
             assertEquals(MediaDetailsUiState.Loading, awaitItem())
 
-            // Initial load
+            // When
             viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialMediaId = 1L))
-            val initialContent = awaitItem() as MediaDetailsUiState.Content
-            assertEquals(emptySet<Long>(), initialContent.favoriteMediaIds)
 
-            // Toggle favorite ON
-            viewModel.dispatchEvent(MediaDetailsUiEvent.ToggleFavorite(mediaId = 1L))
-            val favoritedContent = awaitItem() as MediaDetailsUiState.Content
-            assertEquals(setOf(1L), favoritedContent.favoriteMediaIds)
+            // Then
+            assertEquals(MediaDetailsUiState.Content(mediaList, 0, trashCount), awaitItem())
 
-            // Toggle favorite OFF
+            // When
             viewModel.dispatchEvent(MediaDetailsUiEvent.ToggleFavorite(mediaId = 1L))
-            val unfavoritedContent = awaitItem() as MediaDetailsUiState.Content
-            assertEquals(emptySet<Long>(), unfavoritedContent.favoriteMediaIds)
+
+            // Then
+            assertEquals(MediaDetailsUiState.Content(mediaList, 0, trashCount, setOf(1L)), awaitItem())
+
+            // When
+            viewModel.dispatchEvent(MediaDetailsUiEvent.ToggleFavorite(mediaId = 1L))
+
+            // Then
+            assertEquals(MediaDetailsUiState.Content(mediaList, 0, trashCount), awaitItem())
         }
     }
 
     @Test
     fun `dispatchEvent LoadDetails success with favorites albumId should scope to favorited media only`() = runTest {
         // Given
-        val mockUri = mockk<Uri>()
-        val media1 = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false, isFavorite = true)
-        val media2 = Media(id = 2L, uri = mockUri, dateAdded = 1100L, size = 2100L, isVideo = true, isFavorite = false)
+        val media1 = fakeMedia.copy(isFavorite = true)
+        val media2 = fakeMedia.copy(id = 2L, dateAdded = 1_100L, size = 2_100L, isVideo = true)
         val mediaList = listOf(media1, media2)
         val trashCount = 1
 
         coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
         coEvery { repository.getItemsInTrashCount() } returns trashCount
 
-        // When & Then
         viewModel.uiState.test {
             assertEquals(MediaDetailsUiState.Loading, awaitItem())
 
+            // When
             viewModel.dispatchEvent(
                 MediaDetailsUiEvent.LoadDetails(
                     initialMediaId = 1L,
@@ -249,29 +240,26 @@ class MediaDetailsViewModelTest {
                 )
             )
 
-            val contentState = awaitItem() as MediaDetailsUiState.Content
-            assertEquals(listOf(media1), contentState.mediaList)
-            assertEquals(0, contentState.initialIndex)
-            assertEquals(trashCount, contentState.trashCount)
+            // Then
+            assertEquals(MediaDetailsUiState.Content(listOf(media1), 0, trashCount), awaitItem())
         }
     }
 
     @Test
     fun `dispatchEvent LoadDetails success with videos albumId should scope to videos only`() = runTest {
         // Given
-        val mockUri = mockk<Uri>()
-        val media1 = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false)
-        val media2 = Media(id = 2L, uri = mockUri, dateAdded = 1100L, size = 2100L, isVideo = true)
+        val media1 = fakeMedia
+        val media2 = fakeMedia.copy(id = 2L, dateAdded = 1_100L, size = 2_100L, isVideo = true)
         val mediaList = listOf(media1, media2)
         val trashCount = 1
 
         coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
         coEvery { repository.getItemsInTrashCount() } returns trashCount
 
-        // When & Then
         viewModel.uiState.test {
             assertEquals(MediaDetailsUiState.Loading, awaitItem())
 
+            // When
             viewModel.dispatchEvent(
                 MediaDetailsUiEvent.LoadDetails(
                     initialMediaId = 2L,
@@ -279,29 +267,26 @@ class MediaDetailsViewModelTest {
                 )
             )
 
-            val contentState = awaitItem() as MediaDetailsUiState.Content
-            assertEquals(listOf(media2), contentState.mediaList)
-            assertEquals(0, contentState.initialIndex)
-            assertEquals(trashCount, contentState.trashCount)
+            // Then
+            assertEquals(MediaDetailsUiState.Content(listOf(media2), 0, trashCount), awaitItem())
         }
     }
 
     @Test
     fun `dispatchEvent LoadDetails success with physical albumId should scope to that bucketId only`() = runTest {
         // Given
-        val mockUri = mockk<Uri>()
-        val media1 = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false, bucketId = "downloads")
-        val media2 = Media(id = 2L, uri = mockUri, dateAdded = 1100L, size = 2100L, isVideo = false, bucketId = "camera")
+        val media1 = fakeMedia.copy(bucketId = "downloads")
+        val media2 = fakeMedia.copy(id = 2L, dateAdded = 1_100L, size = 2_100L, bucketId = "camera")
         val mediaList = listOf(media1, media2)
         val trashCount = 1
 
         coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
         coEvery { repository.getItemsInTrashCount() } returns trashCount
 
-        // When & Then
         viewModel.uiState.test {
             assertEquals(MediaDetailsUiState.Loading, awaitItem())
 
+            // When
             viewModel.dispatchEvent(
                 MediaDetailsUiEvent.LoadDetails(
                     initialMediaId = 1L,
@@ -309,10 +294,8 @@ class MediaDetailsViewModelTest {
                 )
             )
 
-            val contentState = awaitItem() as MediaDetailsUiState.Content
-            assertEquals(listOf(media1), contentState.mediaList)
-            assertEquals(0, contentState.initialIndex)
-            assertEquals(trashCount, contentState.trashCount)
+            // Then
+            assertEquals(MediaDetailsUiState.Content(listOf(media1), 0, trashCount), awaitItem())
         }
     }
 }

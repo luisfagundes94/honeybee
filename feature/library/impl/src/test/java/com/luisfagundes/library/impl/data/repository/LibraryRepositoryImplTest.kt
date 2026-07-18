@@ -10,7 +10,10 @@ import com.luisfagundes.library.impl.data.datasource.LibraryDataSource
 import com.luisfagundes.library.impl.data.datasource.LibraryPreferences
 import com.luisfagundes.library.impl.data.mapper.MediaMapper
 import com.luisfagundes.library.impl.data.mapper.StatisticsMapper
-import com.luisfagundes.library.impl.data.model.MediaDto
+import com.luisfagundes.library.impl.tools.fakeMedia
+import com.luisfagundes.library.impl.tools.fakeMediaDto
+import com.luisfagundes.library.impl.tools.fakeStatistics
+import com.luisfagundes.library.impl.tools.fakeStatisticsEntity
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -19,14 +22,13 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.Instant
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class LibraryRepositoryImplTest {
+internal class LibraryRepositoryImplTest {
 
     @RegisterExtension
     val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
@@ -64,21 +66,21 @@ class LibraryRepositoryImplTest {
         val may15Time = Instant.parse("2026-05-15T10:00:00Z").epochSecond
         val june10Time = Instant.parse("2026-06-10T10:00:00Z").epochSecond
 
-        val media1 = MediaDto(id = 1L, uri = mockUri1, dateAdded = may15Time, size = 100L, isVideo = false)
-        val media2 = MediaDto(id = 2L, uri = mockUri2, dateAdded = june10Time, size = 200L, isVideo = true)
-        val media3 = MediaDto(id = 3L, uri = mockUri3, dateAdded = may1Time, size = 300L, isVideo = false)
+        val mediaDtos = listOf(
+            fakeMediaDto.copy(id = 1L, uri = mockUri1, dateAdded = may15Time, size = 100L),
+            fakeMediaDto.copy(id = 2L, uri = mockUri2, dateAdded = june10Time, size = 200L, isVideo = true),
+            fakeMediaDto.copy(id = 3L, uri = mockUri3, dateAdded = may1Time, size = 300L)
+        )
 
-        coEvery { dataSource.fetchMediaList() } returns Result.success(listOf(media1, media2, media3))
+        coEvery { dataSource.fetchMediaList() } returns Result.success(mediaDtos)
         every { preferences.getTrashedPhotoIds() } returns emptySet()
         every { preferences.getDeletedPhotoIds() } returns emptySet()
 
         // When
-        val result = repository.getActiveMedia()
+        val media = repository.getActiveMedia().getOrThrow()
 
         // Then
-        assertTrue(result.isSuccess)
-        val mediaList = result.getOrDefault(emptyList())
-        assertEquals(3, mediaList.size)
+        assertEquals(3, media.size)
     }
 
     @Test
@@ -86,8 +88,8 @@ class LibraryRepositoryImplTest {
         // Given
         val mediaId = 1L
         val mockUri: Uri = mockk()
-        val mediaDto = MediaDto(id = mediaId, uri = mockUri, dateAdded = 0L, size = 100L, isVideo = false)
-        val media = Media(id = mediaId, uri = mockUri, dateAdded = 0L, size = 100L, isVideo = false)
+        val mediaDto = fakeMediaDto.copy(id = mediaId, uri = mockUri, dateAdded = 0L, size = 100L)
+        val media = fakeMedia.copy(id = mediaId, uri = mockUri, dateAdded = 0L, size = 100L)
 
         coEvery { dataSource.fetchMediaList() } returns Result.success(listOf(mediaDto))
         every { preferences.getTrashedPhotoIds() } returns setOf(mediaId)
@@ -120,8 +122,7 @@ class LibraryRepositoryImplTest {
     @Test
     fun `getStatistics should return statistics successfully`() = runTest {
         // Given
-        val expectedEntity = StatisticsEntity(
-            id = 1,
+        val expectedEntity = fakeStatisticsEntity.copy(
             memoryCleared = 200L,
             mediaDeleted = 2,
             photosDeleted = 1,
@@ -133,11 +134,16 @@ class LibraryRepositoryImplTest {
         val result = repository.getStatistics()
 
         // Then
-        assertTrue(result.isSuccess)
-        val stats = result.getOrNull()!!
-        assertEquals(200L, stats.memoryCleared)
-        assertEquals(2, stats.mediaDeleted)
-        assertEquals(1, stats.photosDeleted)
-        assertEquals(1, stats.videosDeleted)
+        assertEquals(
+            Result.success(
+                fakeStatistics.copy(
+                    memoryCleared = 200L,
+                    mediaDeleted = 2,
+                    photosDeleted = 1,
+                    videosDeleted = 1
+                )
+            ),
+            result
+        )
     }
 }

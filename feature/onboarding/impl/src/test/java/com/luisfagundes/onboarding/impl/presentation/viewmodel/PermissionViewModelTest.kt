@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class PermissionViewModelTest {
+internal class PermissionViewModelTest {
 
     @RegisterExtension
     val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
@@ -37,10 +37,11 @@ class PermissionViewModelTest {
         // Given
         coEvery { repository.completeOnboarding() } returns Unit
 
-        // When & Then
         viewModel.uiEffect.test {
+            // When
             viewModel.dispatchEvent(PermissionUiEvent.PermissionsGranted)
 
+            // Then
             assertEquals(PermissionUiEffect.NavigateToLibrary, awaitItem())
             coVerify(exactly = 1) { repository.completeOnboarding() }
         }
@@ -48,20 +49,22 @@ class PermissionViewModelTest {
 
     @Test
     fun `dispatchEvent PermissionsDenied with shouldShowRationale true should send ShowDeniedMessage effect`() = runTest {
-        // When & Then
         viewModel.uiEffect.test {
+            // When
             viewModel.dispatchEvent(PermissionUiEvent.PermissionsDenied(shouldShowRationale = true))
 
+            // Then
             assertEquals(PermissionUiEffect.ShowDeniedMessage, awaitItem())
         }
     }
 
     @Test
     fun `dispatchEvent PermissionsDenied with shouldShowRationale false should send ShowSettingsDialog effect`() = runTest {
-        // When & Then
         viewModel.uiEffect.test {
+            // When
             viewModel.dispatchEvent(PermissionUiEvent.PermissionsDenied(shouldShowRationale = false))
 
+            // Then
             assertEquals(PermissionUiEffect.ShowSettingsDialog, awaitItem())
         }
     }

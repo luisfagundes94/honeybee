@@ -1,15 +1,14 @@
 package com.luisfagundes.library.impl.presentation.viewmodel
 
-import android.net.Uri
 import app.cash.turbine.test
 import com.luisfagundes.core.testing.MainDispatcherRule
-import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.api.domain.model.MediaSection
 import com.luisfagundes.library.api.domain.repository.LibraryRepository
 import com.luisfagundes.library.impl.domain.usecase.GetMediaByMonthUseCase
 import com.luisfagundes.library.impl.presentation.effect.LibraryUiEffect
 import com.luisfagundes.library.impl.presentation.event.LibraryUiEvent
 import com.luisfagundes.library.impl.presentation.state.LibraryUiState
+import com.luisfagundes.library.impl.tools.fakeMedia
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -23,7 +22,7 @@ import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.YearMonth
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class LibraryViewModelTest {
+internal class LibraryViewModelTest {
 
     @RegisterExtension
     val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
@@ -50,14 +49,7 @@ class LibraryViewModelTest {
     @Test
     fun `dispatchEvent LoadMedia success should set Content state`() = runTest {
         // Given
-        val mockUri = mockk<Uri>()
-        val media = Media(
-            id = 1L,
-            uri = mockUri,
-            dateAdded = 1000L,
-            size = 2000L,
-            isVideo = false
-        )
+        val media = fakeMedia
         val mediaSections = listOf(
             MediaSection(
                 yearMonth = YearMonth.of(2026, 6),
@@ -69,15 +61,14 @@ class LibraryViewModelTest {
         coEvery { repository.getItemsInTrashCount() } returns trashCount
         coEvery { getMediaByMonthUseCase() } returns Result.success(mediaSections)
 
-        // When & Then
         viewModel.uiState.test {
             assertEquals(LibraryUiState.Loading, awaitItem())
 
+            // When
             viewModel.dispatchEvent(LibraryUiEvent.LoadMedia)
 
-            val contentState = awaitItem() as LibraryUiState.Content
-            assertEquals(mediaSections, contentState.mediaSectionList)
-            assertEquals(trashCount, contentState.itemsInTrash)
+            // Then
+            assertEquals(LibraryUiState.Content(mediaSections, trashCount), awaitItem())
 
             coVerify(exactly = 1) { repository.getItemsInTrashCount() }
             coVerify(exactly = 1) { getMediaByMonthUseCase() }
@@ -92,12 +83,13 @@ class LibraryViewModelTest {
         coEvery { repository.getItemsInTrashCount() } returns 2
         coEvery { getMediaByMonthUseCase() } returns Result.failure(exception)
 
-        // When & Then
         viewModel.uiState.test {
             assertEquals(LibraryUiState.Loading, awaitItem())
 
+            // When
             viewModel.dispatchEvent(LibraryUiEvent.LoadMedia)
 
+            // Then
             assertEquals(LibraryUiState.Error, awaitItem() )
 
             coVerify(exactly = 1) { repository.getItemsInTrashCount() }
@@ -107,10 +99,11 @@ class LibraryViewModelTest {
 
     @Test
     fun `dispatchEvent TrashClick should emit NavigateToTrash effect`() = runTest {
-        // When & Then
         viewModel.uiEffect.test {
+            // When
             viewModel.dispatchEvent(LibraryUiEvent.TrashClick)
 
+            // Then
             assertEquals(LibraryUiEffect.NavigateToTrash, awaitItem())
         }
     }
@@ -120,10 +113,11 @@ class LibraryViewModelTest {
         // Given
         val mediaId = 123L
 
-        // When & Then
         viewModel.uiEffect.test {
+            // When
             viewModel.dispatchEvent(LibraryUiEvent.MediaClick(mediaId))
 
+            // Then
             assertEquals(LibraryUiEffect.NavigateToMediaDetail(mediaId), awaitItem())
         }
     }

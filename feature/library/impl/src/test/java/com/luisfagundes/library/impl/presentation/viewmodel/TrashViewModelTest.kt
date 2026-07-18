@@ -2,7 +2,6 @@ package com.luisfagundes.library.impl.presentation.viewmodel
 
 import android.app.PendingIntent
 import android.content.IntentSender
-import android.net.Uri
 import app.cash.turbine.test
 import com.luisfagundes.core.testing.MainDispatcherRule
 import com.luisfagundes.library.api.domain.model.Media
@@ -10,6 +9,7 @@ import com.luisfagundes.library.api.domain.repository.LibraryRepository
 import com.luisfagundes.library.impl.presentation.effect.TrashUiEffect
 import com.luisfagundes.library.impl.presentation.event.TrashUiEvent
 import com.luisfagundes.library.impl.presentation.state.TrashUiState
+import com.luisfagundes.library.impl.tools.fakeMedia
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class TrashViewModelTest {
+internal class TrashViewModelTest {
 
     @RegisterExtension
     val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
@@ -48,20 +48,18 @@ class TrashViewModelTest {
     @Test
     fun `dispatchEvent LoadTrash success should set Content state`() = runTest {
         // Given
-        val mockUri = mockk<Uri>()
-        val media = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false)
-        val mediaList = listOf(media)
+        val mediaList = listOf(fakeMedia)
 
         coEvery { repository.getTrashMedia() } returns Result.success(mediaList)
 
-        // When & Then
         viewModel.uiState.test {
             assertEquals(TrashUiState.Loading, awaitItem())
 
+            // When
             viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
 
-            val contentState = awaitItem() as TrashUiState.Content
-            assertEquals(mediaList, contentState.mediaToBeDeleted)
+            // Then
+            assertEquals(TrashUiState.Content(mediaList), awaitItem())
 
             coVerify(exactly = 1) { repository.getTrashMedia() }
         }
@@ -74,12 +72,13 @@ class TrashViewModelTest {
 
         coEvery { repository.getTrashMedia() } returns Result.failure(exception)
 
-        // When & Then
         viewModel.uiState.test {
             assertEquals(TrashUiState.Loading, awaitItem())
 
+            // When
             viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
 
+            // Then
             assertEquals(TrashUiState.Error, awaitItem() )
 
             coVerify(exactly = 1) { repository.getTrashMedia() }
@@ -89,26 +88,27 @@ class TrashViewModelTest {
     @Test
     fun `dispatchEvent RestoreMedia should restore media and update Content state`() = runTest {
         // Given
-        val mockUri = mockk<Uri>()
-        val media1 = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false)
-        val media2 = Media(id = 2L, uri = mockUri, dateAdded = 1100L, size = 3000L, isVideo = true)
+        val media1 = fakeMedia
+        val media2 = fakeMedia.copy(id = 2L, dateAdded = 1_100L, size = 3_000L, isVideo = true)
         val mediaList = listOf(media1, media2)
 
         coEvery { repository.getTrashMedia() } returns Result.success(mediaList)
         coEvery { repository.restoreFromTrash(listOf(1L)) } returns Unit
 
-        // When & Then
         viewModel.uiState.test {
             assertEquals(TrashUiState.Loading, awaitItem())
 
+            // When
             viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
-            val initialContent = awaitItem() as TrashUiState.Content
-            assertEquals(mediaList, initialContent.mediaToBeDeleted)
 
+            // Then
+            assertEquals(TrashUiState.Content(mediaList), awaitItem())
+
+            // When
             viewModel.dispatchEvent(TrashUiEvent.RestoreMedia(mediaId = 1L))
-            val updatedContent = awaitItem() as TrashUiState.Content
-            assertEquals(listOf(media2), updatedContent.mediaToBeDeleted)
 
+            // Then
+            assertEquals(TrashUiState.Content(listOf(media2)), awaitItem())
             coVerify(exactly = 1) { repository.restoreFromTrash(listOf(1L)) }
         }
     }
@@ -118,16 +118,19 @@ class TrashViewModelTest {
         // Given
         coEvery { repository.getTrashMedia() } returns Result.success(emptyList())
 
-        // When & Then
         viewModel.uiState.test {
             assertEquals(TrashUiState.Loading, awaitItem())
 
+            // When
             viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
-            val initialContent = awaitItem() as TrashUiState.Content
-            assertEquals(emptyList<Media>(), initialContent.mediaToBeDeleted)
 
+            // Then
+            assertEquals(TrashUiState.Content(emptyList()), awaitItem())
+
+            // When
             viewModel.dispatchEvent(TrashUiEvent.ConfirmDeletion)
 
+            // Then
             coVerify(exactly = 0) { repository.createDeleteRequest(any()) }
             coVerify(exactly = 0) { repository.permanentlyDelete(any()) }
         }
@@ -136,9 +139,7 @@ class TrashViewModelTest {
     @Test
     fun `dispatchEvent ConfirmDeletion with pending intent should show delete confirmation effect`() = runTest {
         // Given
-        val mockUri = mockk<Uri>()
-        val media1 = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false)
-        val mediaList = listOf(media1)
+        val mediaList = listOf(fakeMedia)
         val mockPendingIntent = mockk<PendingIntent>()
         val mockIntentSender = mockk<IntentSender>()
 
@@ -146,18 +147,19 @@ class TrashViewModelTest {
         coEvery { repository.createDeleteRequest(listOf(1L)) } returns mockPendingIntent
         every { mockPendingIntent.intentSender } returns mockIntentSender
 
-        // When & Then
         viewModel.uiState.test {
             assertEquals(TrashUiState.Loading, awaitItem())
 
+            // When & Then
             viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
             awaitItem() // Skip Content state emissions
 
             viewModel.uiEffect.test {
+                // When
                 viewModel.dispatchEvent(TrashUiEvent.ConfirmDeletion)
 
-                val effect = awaitItem() as TrashUiEffect.ShowDeleteConfirmation
-                assertEquals(mockIntentSender, effect.intentSender)
+                // Then
+                assertEquals(TrashUiEffect.ShowDeleteConfirmation(mockIntentSender), awaitItem())
             }
 
             coVerify(exactly = 1) { repository.createDeleteRequest(listOf(1L)) }
@@ -168,28 +170,27 @@ class TrashViewModelTest {
     @Test
     fun `dispatchEvent ConfirmDeletion without pending intent should permanently delete media and navigate to congratulations`() = runTest {
         // Given
-        val mockUri = mockk<Uri>()
-        val media1 = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false)
-        val media2 = Media(id = 2L, uri = mockUri, dateAdded = 1100L, size = 3000L, isVideo = true)
+        val media1 = fakeMedia
+        val media2 = fakeMedia.copy(id = 2L, dateAdded = 1_100L, size = 3_000L, isVideo = true)
         val mediaList = listOf(media1, media2)
 
         coEvery { repository.getTrashMedia() } returns Result.success(mediaList)
         coEvery { repository.createDeleteRequest(listOf(1L, 2L)) } returns null
         coEvery { repository.permanentlyDelete(mediaList) } returns Unit
 
-        // When & Then
         viewModel.uiState.test {
             assertEquals(TrashUiState.Loading, awaitItem())
 
+            // When & Then
             viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
             awaitItem() // Skip Content state emissions
 
             viewModel.uiEffect.test {
+                // When
                 viewModel.dispatchEvent(TrashUiEvent.ConfirmDeletion)
 
-                val effect = awaitItem() as TrashUiEffect.NavigateToCongratulations
-                assertEquals(2, effect.deletedCount)
-                assertEquals(5000L, effect.deletedSize)
+                // Then
+                assertEquals(TrashUiEffect.NavigateToCongratulations(2, 5_000L), awaitItem())
             }
 
             coVerify(exactly = 1) { repository.createDeleteRequest(listOf(1L, 2L)) }
@@ -200,27 +201,26 @@ class TrashViewModelTest {
     @Test
     fun `dispatchEvent ApproveDeletion should permanently delete media and navigate to congratulations`() = runTest {
         // Given
-        val mockUri = mockk<Uri>()
-        val media1 = Media(id = 1L, uri = mockUri, dateAdded = 1000L, size = 2000L, isVideo = false)
-        val media2 = Media(id = 2L, uri = mockUri, dateAdded = 1100L, size = 3000L, isVideo = true)
+        val media1 = fakeMedia
+        val media2 = fakeMedia.copy(id = 2L, dateAdded = 1_100L, size = 3_000L, isVideo = true)
         val mediaList = listOf(media1, media2)
 
         coEvery { repository.getTrashMedia() } returns Result.success(mediaList)
         coEvery { repository.permanentlyDelete(mediaList) } returns Unit
 
-        // When & Then
         viewModel.uiState.test {
             assertEquals(TrashUiState.Loading, awaitItem())
 
+            // When & Then
             viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
             awaitItem() // Skip Content state emissions
 
             viewModel.uiEffect.test {
+                // When
                 viewModel.dispatchEvent(TrashUiEvent.ApproveDeletion)
 
-                val effect = awaitItem() as TrashUiEffect.NavigateToCongratulations
-                assertEquals(2, effect.deletedCount)
-                assertEquals(5000L, effect.deletedSize)
+                // Then
+                assertEquals(TrashUiEffect.NavigateToCongratulations(2, 5_000L), awaitItem())
             }
 
             coVerify(exactly = 1) { repository.permanentlyDelete(mediaList) }

@@ -1,12 +1,11 @@
 package com.luisfagundes.albums.impl.presentation.viewmodel
 
-import android.net.Uri
 import app.cash.turbine.test
-import com.luisfagundes.albums.impl.domain.model.AlbumMedia
 import com.luisfagundes.albums.impl.domain.usecase.GetAlbumMediaUseCase
 import com.luisfagundes.albums.impl.presentation.effect.AlbumDetailsUiEffect
 import com.luisfagundes.albums.impl.presentation.event.AlbumDetailsUiEvent
 import com.luisfagundes.albums.impl.presentation.state.AlbumDetailsUiState
+import com.luisfagundes.albums.impl.tools.fakeAlbumMedia
 import com.luisfagundes.core.testing.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -20,7 +19,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class AlbumDetailsViewModelTest {
+internal class AlbumDetailsViewModelTest {
 
     @RegisterExtension
     val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
@@ -46,20 +45,20 @@ class AlbumDetailsViewModelTest {
     fun `dispatchEvent LoadMedia success should set Content state`() = runTest {
         // Given
         val albumId = "camera_id"
-        val mockUri = mockk<Uri>()
         val mediaList = listOf(
-            AlbumMedia(id = 1L, uri = mockUri, dateAdded = 1000L, isVideo = false),
-            AlbumMedia(id = 2L, uri = mockUri, dateAdded = 2000L, isVideo = true)
+            fakeAlbumMedia,
+            fakeAlbumMedia.copy(id = 2L, dateAdded = 2_000L, isVideo = true)
         )
 
         coEvery { getAlbumMediaUseCase(albumId) } returns Result.success(mediaList)
 
-        // When & Then
         viewModel.uiState.test {
             assertEquals(AlbumDetailsUiState.Loading, awaitItem())
 
+            // When
             viewModel.dispatchEvent(AlbumDetailsUiEvent.LoadMedia(albumId))
 
+            // Then
             assertEquals(AlbumDetailsUiState.Content(mediaList), awaitItem())
 
             coVerify(exactly = 1) { getAlbumMediaUseCase(albumId) }
@@ -74,12 +73,13 @@ class AlbumDetailsViewModelTest {
 
         coEvery { getAlbumMediaUseCase(albumId) } returns Result.failure(exception)
 
-        // When & Then
         viewModel.uiState.test {
             assertEquals(AlbumDetailsUiState.Loading, awaitItem())
 
+            // When
             viewModel.dispatchEvent(AlbumDetailsUiEvent.LoadMedia(albumId))
 
+            // Then
             assertEquals(AlbumDetailsUiState.Error, awaitItem())
 
             coVerify(exactly = 1) { getAlbumMediaUseCase(albumId) }
@@ -90,22 +90,24 @@ class AlbumDetailsViewModelTest {
     fun `dispatchEvent Retry success should load media again`() = runTest {
         // Given
         val albumId = "camera_id"
-        val mockUri = mockk<Uri>()
-        val mediaList = listOf(
-            AlbumMedia(id = 1L, uri = mockUri, dateAdded = 1000L, isVideo = false)
-        )
+        val mediaList = listOf(fakeAlbumMedia)
 
         coEvery { getAlbumMediaUseCase(albumId) } returns Result.failure(Exception()) andThen
                 Result.success(mediaList)
 
-        // When & Then
         viewModel.uiState.test {
             assertEquals(AlbumDetailsUiState.Loading, awaitItem())
 
+            // When
             viewModel.dispatchEvent(AlbumDetailsUiEvent.LoadMedia(albumId))
+
+            // Then
             assertEquals(AlbumDetailsUiState.Error, awaitItem())
 
+            // When
             viewModel.dispatchEvent(AlbumDetailsUiEvent.Retry)
+
+            // Then
             assertEquals(AlbumDetailsUiState.Content(mediaList), awaitItem())
 
             coVerify(exactly = 2) { getAlbumMediaUseCase(albumId) }
@@ -117,20 +119,22 @@ class AlbumDetailsViewModelTest {
         // Given
         val mediaId = 123L
 
-        // When & Then
         viewModel.uiEffect.test {
+            // When
             viewModel.dispatchEvent(AlbumDetailsUiEvent.MediaClick(mediaId))
 
+            // Then
             assertEquals(AlbumDetailsUiEffect.NavigateToMediaDetail(mediaId), awaitItem())
         }
     }
 
     @Test
     fun `dispatchEvent BackClick should emit NavigateBack effect`() = runTest {
-        // When & Then
         viewModel.uiEffect.test {
+            // When
             viewModel.dispatchEvent(AlbumDetailsUiEvent.BackClick)
 
+            // Then
             assertEquals(AlbumDetailsUiEffect.NavigateBack, awaitItem())
         }
     }

@@ -3,7 +3,7 @@ package com.luisfagundes.core.common.presentation.tools
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-class FormatSizeTest {
+internal class FormatSizeTest {
 
     @Test
     fun `formatSize with zero bytes should return zero B`() {

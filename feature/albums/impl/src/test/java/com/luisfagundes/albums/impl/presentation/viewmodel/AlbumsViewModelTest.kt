@@ -1,12 +1,11 @@
 package com.luisfagundes.albums.impl.presentation.viewmodel
 
-import android.net.Uri
 import app.cash.turbine.test
-import com.luisfagundes.albums.impl.domain.model.Album
 import com.luisfagundes.albums.impl.domain.usecase.GetAlbumsUseCase
 import com.luisfagundes.albums.impl.presentation.effect.AlbumsUiEffect
 import com.luisfagundes.albums.impl.presentation.event.AlbumsUiEvent
 import com.luisfagundes.albums.impl.presentation.state.AlbumsUiState
+import com.luisfagundes.albums.impl.tools.fakeAlbum
 import com.luisfagundes.core.testing.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -20,7 +19,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class AlbumsViewModelTest {
+internal class AlbumsViewModelTest {
 
     @RegisterExtension
     val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
@@ -45,20 +44,20 @@ class AlbumsViewModelTest {
     @Test
     fun `dispatchEvent LoadAlbums success should set Content state`() = runTest {
         // Given
-        val mockUri = mockk<Uri>()
         val albums = listOf(
-            Album.Physical(id = "1", name = "Camera", count = 10, coverUri = mockUri, isVideo = false),
-            Album.Physical(id = "2", name = "Screenshots", count = 5, coverUri = mockUri, isVideo = false)
+            fakeAlbum.copy(id = "1"),
+            fakeAlbum.copy(id = "2", name = "Screenshots", count = 5)
         )
 
         coEvery { getAlbumsUseCase() } returns Result.success(albums)
 
-        // When & Then
         viewModel.uiState.test {
             assertEquals(AlbumsUiState.Loading, awaitItem())
 
+            // When
             viewModel.dispatchEvent(AlbumsUiEvent.LoadAlbums)
 
+            // Then
             assertEquals(AlbumsUiState.Content(albums), awaitItem())
 
             coVerify(exactly = 1) { getAlbumsUseCase() }
@@ -72,12 +71,13 @@ class AlbumsViewModelTest {
 
         coEvery { getAlbumsUseCase() } returns Result.failure(exception)
 
-        // When & Then
         viewModel.uiState.test {
             assertEquals(AlbumsUiState.Loading, awaitItem())
 
+            // When
             viewModel.dispatchEvent(AlbumsUiEvent.LoadAlbums)
 
+            // Then
             assertEquals(AlbumsUiState.Error, awaitItem())
 
             coVerify(exactly = 1) { getAlbumsUseCase() }
@@ -90,10 +90,11 @@ class AlbumsViewModelTest {
         val albumId = "camera_id"
         val albumName = "Camera"
 
-        // When & Then
         viewModel.uiEffect.test {
+            // When
             viewModel.dispatchEvent(AlbumsUiEvent.AlbumClick(albumId, albumName))
 
+            // Then
             assertEquals(AlbumsUiEffect.NavigateToAlbumDetails(albumId, albumName), awaitItem())
         }
     }
