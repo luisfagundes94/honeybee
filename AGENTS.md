@@ -26,6 +26,7 @@ Use conventional commits. The commit message should be structured as follows:
 - Avoid repeating code
 - Avoid magic numbers
 - Avoid too long methods, break them into smaller methods
+- Avoid companion objects that only have constants. Prefer top level private constants.
 
 ### Feature Module Structure
 
