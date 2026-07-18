@@ -15,8 +15,9 @@ import javax.inject.Inject
 internal class ConfigViewModel @Inject constructor(
     private val observeNotificationsEnabledUseCase: ObserveNotificationsEnabledUseCase,
     private val setNotificationsEnabledUseCase: SetNotificationsEnabledUseCase
-) : ViewModel<ConfigUiState, ConfigUiEvent, ConfigUiEffect>(ConfigUiState()) {
-
+) : ViewModel<ConfigUiState, ConfigUiEvent, ConfigUiEffect>(
+    initialState = ConfigUiState()
+) {
     init {
         observeNotificationsEnabled()
     }
