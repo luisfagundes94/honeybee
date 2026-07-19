@@ -1,6 +1,5 @@
 package com.luisfagundes.library.impl.presentation.screen
 
-import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,7 +14,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BrokenImage
@@ -41,7 +39,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewWrapper
@@ -52,7 +49,6 @@ import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
-import com.luisfagundes.core.designsystem.R as DesignSystemResources
 import com.luisfagundes.core.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.core.designsystem.components.HoneybeeLoadingTemplate
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
@@ -68,6 +64,7 @@ import com.luisfagundes.library.impl.presentation.state.LibraryUiState
 import com.luisfagundes.library.impl.presentation.tools.formatVideoDuration
 import com.luisfagundes.library.impl.presentation.tools.getFormattedMonthName
 import com.luisfagundes.library.impl.presentation.viewmodel.LibraryViewModel
+import com.luisfagundes.core.designsystem.R as DesignSystemResources
 
 private val MinimumMediaTileSize = 100.dp
 private const val SquareAspectRatio = 1f
