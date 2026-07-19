@@ -1,8 +1,6 @@
 package com.luisfagundes.library.impl.presentation.screen
 
 import android.content.Intent
-import android.content.res.Configuration
-import android.net.Uri
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -61,7 +59,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewWrapper
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -82,6 +81,7 @@ import com.luisfagundes.library.impl.presentation.components.TrashBadgedBox
 import com.luisfagundes.library.impl.presentation.components.VideoPlayer
 import com.luisfagundes.library.impl.presentation.effect.MediaDetailsUiEffect
 import com.luisfagundes.library.impl.presentation.event.MediaDetailsUiEvent
+import com.luisfagundes.library.impl.presentation.provider.MediaDetailsUiStateProvider
 import com.luisfagundes.library.impl.presentation.state.MediaDetailsUiState
 import com.luisfagundes.library.impl.presentation.tools.formatPhotoDate
 import com.luisfagundes.library.impl.presentation.tools.formatPhotoSize
@@ -558,22 +558,15 @@ private fun InfoRow(
     }
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@PreviewLightDark
 @PreviewWrapper(wrapper = HoneybeeThemeWrapper::class)
 @Composable
-private fun MediaDetailsContentPreview() {
-    MediaDetailsContent(
-        content = MediaDetailsUiState.Content(
-            mediaList = listOf(
-                Media(id = 1L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L, isVideo = false),
-                Media(id = 2L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L, isVideo = true),
-                Media(id = 3L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L, isVideo = false)
-            ),
-            initialIndex = 0,
-            trashCount = 2,
-            favoriteMediaIds = setOf()
-        ),
+private fun MediaDetailsScreenPreview(
+    @PreviewParameter(MediaDetailsUiStateProvider::class) uiState: MediaDetailsUiState
+) {
+    MediaDetailsScreen(
+        uiState = uiState,
         onEvent = {},
+        initialMediaId = 1L
     )
 }

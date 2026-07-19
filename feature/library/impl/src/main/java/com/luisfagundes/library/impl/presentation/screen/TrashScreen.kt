@@ -58,10 +58,8 @@ import coil.compose.AsyncImage
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.core.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.core.designsystem.components.HoneybeeLoadingTemplate
-import android.content.res.Configuration.UI_MODE_NIGHT_NO
-import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import android.net.Uri
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewWrapper
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
@@ -69,6 +67,7 @@ import com.luisfagundes.core.designsystem.R as DesignSystemResources
 import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.impl.presentation.effect.TrashUiEffect
 import com.luisfagundes.library.impl.presentation.event.TrashUiEvent
+import com.luisfagundes.library.impl.presentation.provider.TrashUiStateProvider
 import com.luisfagundes.library.impl.presentation.state.TrashUiState
 import com.luisfagundes.library.impl.presentation.viewmodel.TrashViewModel
 
@@ -315,17 +314,14 @@ private fun TrashMediaItem(
     }
 }
 
-@Preview(uiMode = UI_MODE_NIGHT_YES)
-@Preview(uiMode = UI_MODE_NIGHT_NO)
+@PreviewLightDark
 @PreviewWrapper(wrapper = HoneybeeThemeWrapper::class)
 @Composable
-private fun TrashContentPreview() {
-    TrashContent(
-        mediaToBeDeleted = listOf(
-            Media(id = 1L, uri = Uri.EMPTY, dateAdded = 0L, size = 1024L, isVideo = false),
-            Media(id = 2L, uri = Uri.EMPTY, dateAdded = 0L, size = 2048L, isVideo = true),
-            Media(id = 3L, uri = Uri.EMPTY, dateAdded = 0L, size = 4096L, isVideo = false),
-        ),
+private fun TrashScreenPreview(
+    @PreviewParameter(TrashUiStateProvider::class) uiState: TrashUiState
+) {
+    TrashScreen(
+        uiState = uiState,
         onEvent = {},
         onBackClick = {}
     )
