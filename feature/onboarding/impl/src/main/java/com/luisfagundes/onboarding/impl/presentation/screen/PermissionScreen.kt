@@ -1,8 +1,6 @@
 package com.luisfagundes.onboarding.impl.presentation.screen
 
 import android.content.Intent
-import android.content.res.Configuration.UI_MODE_NIGHT_NO
-import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.net.Uri
 import android.provider.Settings
 import android.widget.Toast
@@ -37,7 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewWrapper
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
@@ -229,8 +227,7 @@ private fun PermissionCardItem(
     }
 }
 
-@Preview(uiMode = UI_MODE_NIGHT_YES)
-@Preview(uiMode = UI_MODE_NIGHT_NO)
+@PreviewLightDark
 @PreviewWrapper(wrapper = HoneybeeThemeWrapper::class)
 @Composable
 private fun PermissionContentPreview() {
