@@ -1,6 +1,5 @@
 package com.luisfagundes.config.impl.presentation.screen
 
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -41,7 +40,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewWrapper
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -49,6 +49,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.luisfagundes.config.impl.R
 import com.luisfagundes.config.impl.presentation.effect.StatisticsUiEffect
 import com.luisfagundes.config.impl.presentation.event.StatisticsUiEvent
+import com.luisfagundes.config.impl.presentation.provider.StatisticsUiStateProvider
 import com.luisfagundes.config.impl.presentation.state.StatisticsUiState
 import com.luisfagundes.config.impl.presentation.viewmodel.StatisticsViewModel
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
@@ -58,7 +59,6 @@ import com.luisfagundes.core.designsystem.components.HoneybeeLoadingTemplate
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
 import com.luisfagundes.core.designsystem.R as DesignSystemResources
-import com.luisfagundes.library.api.domain.model.Statistics
 
 @Composable
 internal fun StatisticsScreen(
@@ -241,20 +241,14 @@ private fun StatCard(
     }
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@PreviewLightDark
 @PreviewWrapper(wrapper = HoneybeeThemeWrapper::class)
 @Composable
-private fun StatisticsScreenPreview() {
+private fun StatisticsScreenPreview(
+    @PreviewParameter(StatisticsUiStateProvider::class) uiState: StatisticsUiState
+) {
     StatisticsScreen(
-        uiState = StatisticsUiState.Content(
-            statistics = Statistics(
-                memoryCleared = 120 * 1024 * 1024L,
-                mediaDeleted = 42,
-                photosDeleted = 30,
-                videosDeleted = 12
-            )
-        ),
+        uiState = uiState,
         onEvent = {}
     )
 }
