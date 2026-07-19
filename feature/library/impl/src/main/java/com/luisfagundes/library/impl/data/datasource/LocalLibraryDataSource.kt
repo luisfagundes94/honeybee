@@ -49,6 +49,7 @@ internal class LocalLibraryDataSource @Inject constructor(
             MediaStore.Files.FileColumns.MIME_TYPE,
             MediaStore.Files.FileColumns.WIDTH,
             MediaStore.Files.FileColumns.HEIGHT,
+            MediaStore.Video.VideoColumns.DURATION,
             MediaStore.Files.FileColumns.MEDIA_TYPE,
             "bucket_display_name",
             "bucket_id"
@@ -75,6 +76,8 @@ internal class LocalLibraryDataSource @Inject constructor(
                 val mimeTypeColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MIME_TYPE)
                 val widthColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.WIDTH)
                 val heightColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.HEIGHT)
+                val durationColumn =
+                    cursor.getColumnIndexOrThrow(MediaStore.Video.VideoColumns.DURATION)
                 val mediaTypeColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE)
                 val bucketNameColumn = cursor.getColumnIndexOrThrow("bucket_display_name")
                 val bucketIdColumn = cursor.getColumnIndexOrThrow("bucket_id")
@@ -91,6 +94,7 @@ internal class LocalLibraryDataSource @Inject constructor(
                     val mimeType = cursor.getString(mimeTypeColumn)
                     val width = cursor.getInt(widthColumn)
                     val height = cursor.getInt(heightColumn)
+                    val durationMillis = cursor.getLong(durationColumn)
                     val mediaType = cursor.getInt(mediaTypeColumn)
                     val bucketDisplayName = cursor.getString(bucketNameColumn)
                     val bucketId = cursor.getString(bucketIdColumn)
@@ -115,6 +119,7 @@ internal class LocalLibraryDataSource @Inject constructor(
                             mimeType = mimeType,
                             width = width,
                             height = height,
+                            durationMillis = durationMillis,
                             isVideo = isVideo,
                             bucketId = bucketId,
                             bucketDisplayName = bucketDisplayName,

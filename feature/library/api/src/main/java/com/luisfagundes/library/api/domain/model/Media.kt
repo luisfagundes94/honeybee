@@ -10,6 +10,7 @@ data class Media(
     val mimeType: String? = null,
     val width: Int = 0,
     val height: Int = 0,
+    val durationMillis: Long = 0L,
     val isVideo: Boolean,
     val bucketId: String? = null,
     val bucketDisplayName: String? = null,

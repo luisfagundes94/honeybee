@@ -14,6 +14,7 @@ internal class MediaMapper @Inject constructor() {
             mimeType = source.mimeType,
             width = source.width,
             height = source.height,
+            durationMillis = source.durationMillis,
             isVideo = source.isVideo,
             bucketId = source.bucketId,
             bucketDisplayName = source.bucketDisplayName,

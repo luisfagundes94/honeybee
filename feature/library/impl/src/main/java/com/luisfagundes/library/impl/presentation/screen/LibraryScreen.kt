@@ -12,15 +12,14 @@ import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BrokenImage
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -64,6 +63,7 @@ import com.luisfagundes.library.impl.presentation.components.TrashBadgedBox
 import com.luisfagundes.library.impl.presentation.effect.LibraryUiEffect
 import com.luisfagundes.library.impl.presentation.event.LibraryUiEvent
 import com.luisfagundes.library.impl.presentation.state.LibraryUiState
+import com.luisfagundes.library.impl.presentation.tools.formatVideoDuration
 import com.luisfagundes.library.impl.presentation.tools.getFormattedMonthName
 import com.luisfagundes.library.impl.presentation.viewmodel.LibraryViewModel
 import java.time.YearMonth
@@ -277,15 +277,14 @@ private fun MediaGridItem(
                         color = MaterialTheme.colorScheme.surface.copy(
                             alpha = VideoIndicatorContainerAlpha
                         ),
-                        shape = CircleShape
+                        shape = RoundedCornerShape(MaterialTheme.spacing.verySmall)
                     )
                     .padding(MaterialTheme.spacing.verySmall)
             ) {
-                Icon(
-                    imageVector = Icons.Default.PlayArrow,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(MaterialTheme.spacing.default)
+                Text(
+                    text = media.durationMillis.formatVideoDuration(),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.labelMedium
                 )
             }
         }
@@ -303,14 +302,28 @@ private fun LibraryContentContentPreview() {
                 yearMonth = YearMonth.of(2026, 6),
                 mediaList = listOf(
                     Media(id = 1L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L, isVideo = false),
-                    Media(id = 2L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L, isVideo = true),
+                    Media(
+                        id = 2L,
+                        uri = Uri.EMPTY,
+                        dateAdded = 0L,
+                        size = 0L,
+                        durationMillis = 65_000L,
+                        isVideo = true
+                    ),
                     Media(id = 3L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L, isVideo = false),
                 )
             ),
             MediaSection(
                 yearMonth = YearMonth.of(2026, 5),
                 mediaList = listOf(
-                    Media(id = 4L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L, isVideo = true),
+                    Media(
+                        id = 4L,
+                        uri = Uri.EMPTY,
+                        dateAdded = 0L,
+                        size = 0L,
+                        durationMillis = 3_725_000L,
+                        isVideo = true
+                    ),
                     Media(id = 5L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L, isVideo = false),
                 )
             )
