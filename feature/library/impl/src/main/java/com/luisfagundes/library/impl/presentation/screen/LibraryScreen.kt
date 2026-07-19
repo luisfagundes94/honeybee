@@ -248,7 +248,12 @@ private fun MediaGridItem(
             modifier = Modifier.fillMaxSize()
         ) {
             when (painter.state) {
-                is AsyncImagePainter.State.Loading -> Unit
+                is AsyncImagePainter.State.Loading -> Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                ) {}
 
                 is AsyncImagePainter.State.Error -> Box(
                     contentAlignment = Alignment.Center,
