@@ -121,7 +121,7 @@ private fun AlbumsScreen(
             }
             is AlbumsUiState.Error -> {
                 HoneybeeErrorTemplate(
-                    message = stringResource(error_loading_albums),
+                    description = stringResource(error_loading_albums),
                     primaryButtonLabel = stringResource(retry),
                     onPrimaryButtonClick = { onEvent(AlbumsUiEvent.LoadAlbums) },
                     modifier = Modifier.padding(innerPadding)

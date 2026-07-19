@@ -24,10 +24,11 @@ import com.luisfagundes.core.designsystem.theme.spacing
 
 @Composable
 fun HoneybeeErrorTemplate(
-    message: String,
+    modifier: Modifier = Modifier,
+    title: String? = null,
+    description: String,
     primaryButtonLabel: String,
     onPrimaryButtonClick: () -> Unit,
-    modifier: Modifier = Modifier,
     secondaryButtonLabel: String? = null,
     onSecondaryButtonClick: () -> Unit = { }
 ) {
@@ -39,15 +40,21 @@ fun HoneybeeErrorTemplate(
         Column(
             modifier = Modifier.align(Alignment.Center),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.default)
+            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small)
         ) {
             Icon(
                 imageVector = Icons.Default.ErrorOutline,
                 contentDescription = null,
                 modifier = Modifier.size(MaterialTheme.spacing.extraLarge)
             )
+            title?.let {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
             Text(
-                text = message
+                text = description
             )
         }
 
@@ -83,7 +90,8 @@ fun HoneybeeErrorTemplate(
 @Composable
 private fun HoneybeeErrorTemplatePreview() {
     HoneybeeErrorTemplate(
-        message = "An unexpected error occurred",
+        title = "Something went wrong",
+        description = "An unexpected error occurred",
         primaryButtonLabel = "Retry",
         onPrimaryButtonClick = {},
         secondaryButtonLabel = "Cancel",

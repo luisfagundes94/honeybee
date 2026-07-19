@@ -129,7 +129,7 @@ private fun StatisticsScreen(
             }
             is StatisticsUiState.Error -> {
                 HoneybeeErrorTemplate(
-                    message = stringResource(R.string.failed_to_load_statistics),
+                    description = stringResource(R.string.failed_to_load_statistics),
                     primaryButtonLabel = stringResource(DesignSystemResources.string.retry),
                     onPrimaryButtonClick = { onEvent(StatisticsUiEvent.LoadStatistics) },
                     secondaryButtonLabel = stringResource(DesignSystemResources.string.cancel),

@@ -128,7 +128,7 @@ private fun MediaDetailsScreen(
         is MediaDetailsUiState.Loading -> HoneybeeLoadingTemplate()
 
         is MediaDetailsUiState.Error -> HoneybeeErrorTemplate(
-            message = stringResource(R.string.failed_to_load_photo_details),
+            description = stringResource(R.string.failed_to_load_photo_details),
             primaryButtonLabel = stringResource(DesignSystemResources.string.retry),
             onPrimaryButtonClick = { onEvent(MediaDetailsUiEvent.LoadDetails(initialMediaId)) },
             secondaryButtonLabel = stringResource(DesignSystemResources.string.cancel),
