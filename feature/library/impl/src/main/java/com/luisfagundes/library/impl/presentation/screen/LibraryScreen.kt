@@ -1,7 +1,6 @@
 package com.luisfagundes.library.impl.presentation.screen
 
 import android.content.res.Configuration
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -43,6 +42,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewWrapper
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -62,11 +62,11 @@ import com.luisfagundes.library.impl.R
 import com.luisfagundes.library.impl.presentation.components.TrashBadgedBox
 import com.luisfagundes.library.impl.presentation.effect.LibraryUiEffect
 import com.luisfagundes.library.impl.presentation.event.LibraryUiEvent
+import com.luisfagundes.library.impl.presentation.provider.LibraryUiStateProvider
 import com.luisfagundes.library.impl.presentation.state.LibraryUiState
 import com.luisfagundes.library.impl.presentation.tools.formatVideoDuration
 import com.luisfagundes.library.impl.presentation.tools.getFormattedMonthName
 import com.luisfagundes.library.impl.presentation.viewmodel.LibraryViewModel
-import java.time.YearMonth
 
 private val MinimumMediaTileSize = 100.dp
 private const val SquareAspectRatio = 1f
@@ -295,42 +295,12 @@ private fun MediaGridItem(
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @PreviewWrapper(wrapper = HoneybeeThemeWrapper::class)
 @Composable
-private fun LibraryContentContentPreview() {
-    LibraryContent(
-        mediaSectionList = listOf(
-            MediaSection(
-                yearMonth = YearMonth.of(2026, 6),
-                mediaList = listOf(
-                    Media(id = 1L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L, isVideo = false),
-                    Media(
-                        id = 2L,
-                        uri = Uri.EMPTY,
-                        dateAdded = 0L,
-                        size = 0L,
-                        durationMillis = 65_000L,
-                        isVideo = true
-                    ),
-                    Media(id = 3L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L, isVideo = false),
-                )
-            ),
-            MediaSection(
-                yearMonth = YearMonth.of(2026, 5),
-                mediaList = listOf(
-                    Media(
-                        id = 4L,
-                        uri = Uri.EMPTY,
-                        dateAdded = 0L,
-                        size = 0L,
-                        durationMillis = 3_725_000L,
-                        isVideo = true
-                    ),
-                    Media(id = 5L, uri = Uri.EMPTY, dateAdded = 0L, size = 0L, isVideo = false),
-                )
-            )
-        ),
-        itemsInTrash = 3,
-        onEvent = {},
-        modifier = Modifier.fillMaxWidth()
+private fun LibraryScreenPreview(
+    @PreviewParameter(LibraryUiStateProvider::class) uiState: LibraryUiState
+) {
+    LibraryScreen(
+        uiState = uiState,
+        onEvent = {}
     )
 }
 
