@@ -1,9 +1,9 @@
-package com.luisfagundes.library.impl.presentation.tools
+package com.luisfagundes.core.designsystem.components
 
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class FormatVideoDurationTest {
+internal class VideoDurationBadgeTest {
 
     @Test
     fun `duration under one hour should be formatted as minutes and seconds`() {

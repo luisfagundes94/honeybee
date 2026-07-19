@@ -13,7 +13,13 @@ internal class AlbumDetailsUiStateProvider : PreviewParameterProvider<AlbumDetai
         AlbumDetailsUiState.Content(
             mediaList = listOf(
                 AlbumMedia(id = 1L, uri = Uri.EMPTY, dateAdded = 0L, isVideo = false),
-                AlbumMedia(id = 2L, uri = Uri.EMPTY, dateAdded = 0L, isVideo = true),
+                AlbumMedia(
+                    id = 2L,
+                    uri = Uri.EMPTY,
+                    dateAdded = 0L,
+                    durationMillis = 65_000L,
+                    isVideo = true
+                ),
                 AlbumMedia(id = 3L, uri = Uri.EMPTY, dateAdded = 0L, isVideo = false)
             )
         )

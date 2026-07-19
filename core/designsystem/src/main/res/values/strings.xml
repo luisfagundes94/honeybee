@@ -3,5 +3,6 @@
     <string name="retry">Retry</string>
     <string name="cancel">Cancel</string>
     <string name="video_content_description">Video</string>
+    <string name="video_duration_content_description">Video duration: %1$s</string>
     <string name="honeybee_logo">Honeybee Logo</string>
 </resources>

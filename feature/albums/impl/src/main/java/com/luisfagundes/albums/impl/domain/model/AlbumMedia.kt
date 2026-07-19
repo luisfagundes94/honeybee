@@ -6,5 +6,6 @@ internal data class AlbumMedia(
     val id: Long,
     val uri: Uri,
     val dateAdded: Long,
+    val durationMillis: Long = 0L,
     val isVideo: Boolean
 )

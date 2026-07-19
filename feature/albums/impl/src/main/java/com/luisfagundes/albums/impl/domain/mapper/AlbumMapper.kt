@@ -20,6 +20,7 @@ internal class AlbumMapper @Inject constructor() {
             id = media.id,
             uri = media.uri,
             dateAdded = media.dateAdded,
+            durationMillis = media.durationMillis,
             isVideo = media.isVideo
         )
     }

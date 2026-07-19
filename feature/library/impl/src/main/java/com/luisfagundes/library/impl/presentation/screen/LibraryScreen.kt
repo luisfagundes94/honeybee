@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -51,6 +50,7 @@ import coil.compose.SubcomposeAsyncImageContent
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.core.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.core.designsystem.components.HoneybeeLoadingTemplate
+import com.luisfagundes.core.designsystem.components.VideoDurationBadge
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
 import com.luisfagundes.library.api.domain.model.Media
@@ -61,14 +61,12 @@ import com.luisfagundes.library.impl.presentation.effect.LibraryUiEffect
 import com.luisfagundes.library.impl.presentation.event.LibraryUiEvent
 import com.luisfagundes.library.impl.presentation.provider.LibraryUiStateProvider
 import com.luisfagundes.library.impl.presentation.state.LibraryUiState
-import com.luisfagundes.library.impl.presentation.tools.formatVideoDuration
 import com.luisfagundes.library.impl.presentation.tools.getFormattedMonthName
 import com.luisfagundes.library.impl.presentation.viewmodel.LibraryViewModel
 import com.luisfagundes.core.designsystem.R as DesignSystemResources
 
 private val MinimumMediaTileSize = 100.dp
 private const val SquareAspectRatio = 1f
-private const val VideoIndicatorContainerAlpha = 0.5f
 
 @Composable
 internal fun LibraryScreen(
@@ -271,25 +269,12 @@ private fun MediaGridItem(
         }
 
         if (media.isVideo) {
-            Box(
-                contentAlignment = Alignment.Center,
+            VideoDurationBadge(
+                durationMillis = media.durationMillis,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(MaterialTheme.spacing.verySmall)
-                    .background(
-                        color = MaterialTheme.colorScheme.surface.copy(
-                            alpha = VideoIndicatorContainerAlpha
-                        ),
-                        shape = RoundedCornerShape(MaterialTheme.spacing.verySmall)
-                    )
-                    .padding(MaterialTheme.spacing.verySmall)
-            ) {
-                Text(
-                    text = media.durationMillis.formatVideoDuration(),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.labelMedium
-                )
-            }
+            )
         }
     }
 }
