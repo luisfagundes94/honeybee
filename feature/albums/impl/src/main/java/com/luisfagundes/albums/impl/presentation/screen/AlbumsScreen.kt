@@ -42,7 +42,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.luisfagundes.albums.impl.R.string.error_loading_albums
+import com.luisfagundes.albums.impl.R.string.error_loading_albums_description
+import com.luisfagundes.albums.impl.R.string.error_loading_albums_title
 import com.luisfagundes.albums.impl.R.string.albums
 import com.luisfagundes.albums.impl.R.string.no_albums
 import com.luisfagundes.albums.impl.R.string.favorites
@@ -121,7 +122,8 @@ private fun AlbumsScreen(
             }
             is AlbumsUiState.Error -> {
                 HoneybeeErrorTemplate(
-                    description = stringResource(error_loading_albums),
+                    title = stringResource(error_loading_albums_title),
+                    description = stringResource(error_loading_albums_description),
                     primaryButtonLabel = stringResource(retry),
                     onPrimaryButtonClick = { onEvent(AlbumsUiEvent.LoadAlbums) },
                     modifier = Modifier.padding(innerPadding)

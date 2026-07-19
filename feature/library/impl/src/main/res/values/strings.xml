@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="error_loading_photos_message">Error loading media</string>
+    <string name="error_loading_media_title">Couldn\'t load your library</string>
+    <string name="error_loading_media_description">Try again to see the photos and videos in your library.</string>
     <string name="items_in_trash">Items in trash</string>
     <string name="library">Library</string>
     <string name="library_is_empty">No media found</string>
@@ -10,8 +11,10 @@
     <string name="done">Done</string>
     <string name="media_deleted">Media Deleted</string>
     <string name="saved">saved</string>
-    <string name="failed_to_load_photo_details">Failed to load media details</string>
-    <string name="failed_to_load_trash_photos">Failed to load trash media</string>
+    <string name="error_loading_media_details_title">Couldn\'t open media details</string>
+    <string name="error_loading_media_details_description">Try again, or return to your library.</string>
+    <string name="error_loading_trash_title">Couldn\'t load the trash</string>
+    <string name="error_loading_trash_description">Try again to see the media in your trash.</string>
     <string name="all_photos">All Media</string>
     <string name="media_details_progress_format">%1$d/%2$d • %3$d%%</string>
     <string name="close">Close</string>

@@ -103,7 +103,8 @@ private fun LibraryScreen(
         is LibraryUiState.Loading -> HoneybeeLoadingTemplate()
 
         is LibraryUiState.Error -> HoneybeeErrorTemplate(
-            description = stringResource(R.string.error_loading_photos_message),
+            title = stringResource(R.string.error_loading_media_title),
+            description = stringResource(R.string.error_loading_media_description),
             primaryButtonLabel = stringResource(DesignSystemResources.string.retry),
             onPrimaryButtonClick = { onEvent(LibraryUiEvent.LoadMedia) },
         )

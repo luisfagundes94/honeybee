@@ -126,7 +126,8 @@ private fun TrashScreen(
         is TrashUiState.Loading -> HoneybeeLoadingTemplate()
 
         is TrashUiState.Error -> HoneybeeErrorTemplate(
-            description = stringResource(R.string.failed_to_load_trash_photos),
+            title = stringResource(R.string.error_loading_trash_title),
+            description = stringResource(R.string.error_loading_trash_description),
             primaryButtonLabel = stringResource(DesignSystemResources.string.retry),
             onPrimaryButtonClick = { onEvent(TrashUiEvent.LoadTrash) }
         )

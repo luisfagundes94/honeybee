@@ -129,7 +129,8 @@ private fun AlbumDetailsScreen(
 
             is AlbumDetailsUiState.Error -> {
                 HoneybeeErrorTemplate(
-                    description = stringResource(R.string.error_loading_album_media),
+                    title = stringResource(R.string.error_loading_album_media_title),
+                    description = stringResource(R.string.error_loading_album_media_description),
                     primaryButtonLabel = stringResource(retry),
                     onPrimaryButtonClick = { onEvent(AlbumDetailsUiEvent.Retry) },
                     secondaryButtonLabel = stringResource(cancel),

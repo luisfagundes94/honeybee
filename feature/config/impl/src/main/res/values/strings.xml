@@ -18,7 +18,8 @@
     <string name="feedback_email_subject">Honeybee App Feedback</string>
     <string name="feedback_email_chooser_title">Send email using…</string>
     <string name="statistics_title">Statistics</string>
-    <string name="failed_to_load_statistics">Failed to load statistics</string>
+    <string name="error_loading_statistics_title">Couldn\'t load statistics</string>
+    <string name="error_loading_statistics_description">Try again, or return to settings.</string>
     <string name="memory_cleared">Memory Cleared</string>
     <string name="media_deleted">Media Deleted</string>
     <string name="photos_deleted">Photos Deleted</string>
