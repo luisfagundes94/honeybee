@@ -35,6 +35,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewWrapper
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -47,6 +50,7 @@ import com.luisfagundes.albums.impl.R.string.videos
 import com.luisfagundes.albums.impl.domain.model.Album
 import com.luisfagundes.albums.impl.presentation.effect.AlbumsUiEffect
 import com.luisfagundes.albums.impl.presentation.event.AlbumsUiEvent
+import com.luisfagundes.albums.impl.presentation.provider.AlbumsUiStateProvider
 import com.luisfagundes.albums.impl.presentation.state.AlbumsUiState
 import com.luisfagundes.albums.impl.presentation.tools.getAlbumStyle
 import com.luisfagundes.albums.impl.presentation.tools.getDisplayName
@@ -55,6 +59,7 @@ import com.luisfagundes.albums.impl.presentation.viewmodel.AlbumsViewModel
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.core.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.core.designsystem.components.HoneybeeLoadingTemplate
+import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
 import com.luisfagundes.core.designsystem.R.string.retry
 
@@ -235,4 +240,16 @@ private fun AlbumCard(
             }
         }
     }
+}
+
+@PreviewLightDark
+@PreviewWrapper(wrapper = HoneybeeThemeWrapper::class)
+@Composable
+private fun AlbumsScreenPreview(
+    @PreviewParameter(AlbumsUiStateProvider::class) uiState: AlbumsUiState
+) {
+    AlbumsScreen(
+        uiState = uiState,
+        onEvent = {}
+    )
 }

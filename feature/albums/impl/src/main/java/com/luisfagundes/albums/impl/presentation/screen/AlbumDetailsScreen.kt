@@ -36,12 +36,16 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewWrapper
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.luisfagundes.core.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.core.designsystem.components.HoneybeeLoadingTemplate
+import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
 import com.luisfagundes.core.designsystem.R.string.video_content_description
 import com.luisfagundes.core.designsystem.R.string.retry
@@ -50,6 +54,7 @@ import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.albums.impl.R
 import com.luisfagundes.albums.impl.presentation.effect.AlbumDetailsUiEffect
 import com.luisfagundes.albums.impl.presentation.event.AlbumDetailsUiEvent
+import com.luisfagundes.albums.impl.presentation.provider.AlbumDetailsUiStateProvider
 import com.luisfagundes.albums.impl.presentation.state.AlbumDetailsUiState
 import com.luisfagundes.albums.impl.presentation.viewmodel.AlbumDetailsViewModel
 
@@ -221,4 +226,17 @@ private fun AlbumDetailsContent(
             }
         }
     }
+}
+
+@PreviewLightDark
+@PreviewWrapper(wrapper = HoneybeeThemeWrapper::class)
+@Composable
+private fun AlbumDetailsScreenPreview(
+    @PreviewParameter(AlbumDetailsUiStateProvider::class) uiState: AlbumDetailsUiState
+) {
+    AlbumDetailsScreen(
+        albumName = "Camera",
+        uiState = uiState,
+        onEvent = {}
+    )
 }
