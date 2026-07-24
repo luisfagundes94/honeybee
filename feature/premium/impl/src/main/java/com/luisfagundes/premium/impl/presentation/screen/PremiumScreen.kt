@@ -1,6 +1,5 @@
 package com.luisfagundes.premium.impl.presentation.screen
 
-import android.app.Activity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -36,6 +34,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.core.common.provider.SubscriptionStatus
+import com.luisfagundes.core.designsystem.components.HoneybeePrimaryButton
 import com.luisfagundes.core.designsystem.theme.spacing
 import com.luisfagundes.premium.impl.R
 import com.luisfagundes.premium.impl.data.PlayBillingSubscriptionProvider
@@ -123,9 +122,10 @@ private fun PremiumActiveContent(onEvent: (PremiumUiEvent) -> Unit) {
         text = stringResource(R.string.premium_active),
         style = MaterialTheme.typography.headlineSmall,
     )
-    Button(onClick = { onEvent(PremiumUiEvent.ManageSubscriptionClick) }) {
-        Text(stringResource(R.string.premium_manage))
-    }
+    HoneybeePrimaryButton(
+        label = stringResource(R.string.premium_manage),
+        onClick = { onEvent(PremiumUiEvent.ManageSubscriptionClick) }
+    )
 }
 
 @Composable
@@ -134,18 +134,25 @@ private fun PremiumOffersContent(
     onEvent: (PremiumUiEvent) -> Unit,
 ) {
     if (uiState.isPurchasePending) {
-        Text(stringResource(R.string.premium_pending))
-        Button(onClick = { onEvent(PremiumUiEvent.RestoreClick) }) {
-            Text(stringResource(R.string.premium_restore))
-        }
+        Text(
+            text =
+                stringResource(R.string.premium_pending)
+        )
+        HoneybeePrimaryButton(
+            label = stringResource(R.string.premium_restore),
+            onClick = { onEvent(PremiumUiEvent.RestoreClick) }
+        )
         return
     }
 
     if (uiState.offers.isEmpty()) {
-        Text(stringResource(R.string.premium_no_offers))
-        Button(onClick = { onEvent(PremiumUiEvent.RestoreClick) }) {
-            Text(stringResource(R.string.premium_restore))
-        }
+        Text(
+            text = stringResource(R.string.premium_no_offers)
+        )
+        HoneybeePrimaryButton(
+            label = stringResource(R.string.premium_restore),
+            onClick = { onEvent(PremiumUiEvent.RestoreClick) }
+        )
         return
     }
 
@@ -156,18 +163,16 @@ private fun PremiumOffersContent(
             onClick = { onEvent(PremiumUiEvent.OfferSelected(offer.id)) },
         )
     }
-    Button(
+    HoneybeePrimaryButton(
+        label = stringResource(R.string.premium_purchase),
         onClick = { onEvent(PremiumUiEvent.PurchaseClick) },
         modifier = Modifier.fillMaxWidth(),
-    ) {
-        Text(stringResource(R.string.premium_purchase))
-    }
-    Button(
+    )
+    HoneybeePrimaryButton(
+        label = stringResource(R.string.premium_restore),
         onClick = { onEvent(PremiumUiEvent.RestoreClick) },
         modifier = Modifier.fillMaxWidth(),
-    ) {
-        Text(stringResource(R.string.premium_restore))
-    }
+    )
 }
 
 @Composable

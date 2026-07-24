@@ -10,7 +10,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,9 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -59,6 +56,7 @@ import coil.compose.AsyncImage
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.core.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.core.designsystem.components.HoneybeeLoadingTemplate
+import com.luisfagundes.core.designsystem.components.HoneybeePrimaryButton
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
 import com.luisfagundes.library.api.domain.model.Media
@@ -148,13 +146,42 @@ private fun TrashContent(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TrashTopBar(onBackClick = onBackClick)
+            CenterAlignedTopAppBar(
+                modifier = Modifier,
+                title = {
+                    Text(
+                        text = stringResource(R.string.trash),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = stringResource(R.string.close)
+                        )
+                    }
+                }
+            )
         },
         bottomBar = {
-            TrashBottomBar(
-                deleteCount = mediaToBeDeleted.size,
-                onConfirmDeletion = { onEvent(TrashUiEvent.ConfirmDeletion) }
-            )
+            val deleteCount = mediaToBeDeleted.size
+
+            if (deleteCount > 0) {
+                HoneybeePrimaryButton(
+                    label = pluralStringResource(
+                        id = R.plurals.delete_media_format,
+                        count = deleteCount,
+                        deleteCount
+                    ),
+                    icon = Icons.Default.Delete,
+                    onClick = { onEvent(TrashUiEvent.ConfirmDeletion) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(MaterialTheme.spacing.default)
+                )
+            }
         }
     ) { innerPadding ->
         if (mediaToBeDeleted.isEmpty()) {
@@ -192,65 +219,6 @@ private fun TrashContent(
                     )
                 }
             }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun TrashTopBar(
-    onBackClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    CenterAlignedTopAppBar(
-        modifier = modifier,
-        title = {
-            Text(
-                text = stringResource(R.string.trash),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-        },
-        navigationIcon = {
-            IconButton(onClick = onBackClick) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = stringResource(R.string.close)
-                )
-            }
-        }
-    )
-}
-
-@Composable
-private fun TrashBottomBar(
-    deleteCount: Int,
-    onConfirmDeletion: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    if (deleteCount > 0) {
-        Button(
-            onClick = onConfirmDeletion,
-            modifier = modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(MaterialTheme.spacing.default)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = null,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(MaterialTheme.spacing.small))
-            Text(
-                text = pluralStringResource(
-                    id = R.plurals.delete_media_format,
-                    count = deleteCount,
-                    deleteCount
-                ),
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.titleMedium
-            )
         }
     }
 }

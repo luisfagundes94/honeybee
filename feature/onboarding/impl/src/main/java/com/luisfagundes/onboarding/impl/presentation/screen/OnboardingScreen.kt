@@ -6,9 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -21,6 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewWrapper
 import com.luisfagundes.core.designsystem.components.HoneybeeLogo
+import com.luisfagundes.core.designsystem.components.HoneybeePrimaryButton
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
 import com.luisfagundes.onboarding.impl.R
@@ -42,17 +41,13 @@ private fun OnboardingContent(
 ) {
     Scaffold(
         bottomBar = {
-            Button(
+            HoneybeePrimaryButton(
+                label = stringResource(R.string.get_started),
                 onClick = onGetStartedClick,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .navigationBarsPadding()
                     .padding(MaterialTheme.spacing.default)
-            ) {
-                Text(
-                    text = stringResource(R.string.get_started)
-                )
-            }
+            )
         },
         modifier = modifier
     ) { innerPadding ->

@@ -9,10 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -63,23 +61,17 @@ fun HoneybeeErrorTemplate(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.default)
         ) {
-            Button(
+            HoneybeePrimaryButton(
+                label = primaryButtonLabel,
                 onClick = onPrimaryButtonClick,
                 modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = primaryButtonLabel
-                )
-            }
+            )
             secondaryButtonLabel?.let {
-                OutlinedButton(
+                HoneybeeTertiaryButton(
+                    label = secondaryButtonLabel,
                     onClick = onSecondaryButtonClick,
                     modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = secondaryButtonLabel
-                    )
-                }
+                )
             }
         }
     }

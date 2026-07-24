@@ -40,6 +40,7 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.luisfagundes.core.common.presentation.tools.formatSize
+import com.luisfagundes.core.designsystem.components.HoneybeePrimaryButton
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
 import com.luisfagundes.library.impl.R
@@ -70,19 +71,13 @@ internal fun CongratulationsScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
         bottomBar = {
-            Button(
+            HoneybeePrimaryButton(
+                label = stringResource(R.string.done),
                 onClick = { activity?.let(onDoneClick) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .navigationBarsPadding()
                     .padding(MaterialTheme.spacing.default)
-            ) {
-                Text(
-                    text = stringResource(R.string.done),
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.titleMedium
-                )
-            }
+            )
         }
     ) { innerPadding ->
         Column(
