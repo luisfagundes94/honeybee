@@ -6,4 +6,6 @@ internal sealed interface ConfigUiEvent : UiEvent {
     data class NotificationsToggled(val enabled: Boolean) : ConfigUiEvent
     data object StatisticsClick : ConfigUiEvent
     data object FeedbackClick : ConfigUiEvent
+    data object PremiumClick : ConfigUiEvent
+    data object PrivacyChoicesClick : ConfigUiEvent
 }

@@ -7,6 +7,9 @@ import com.luisfagundes.config.impl.presentation.effect.ConfigUiEffect
 import com.luisfagundes.config.impl.presentation.event.ConfigUiEvent
 import com.luisfagundes.config.impl.presentation.state.ConfigUiState
 import com.luisfagundes.core.testing.MainDispatcherRule
+import com.luisfagundes.core.ads.AdsConfig
+import com.luisfagundes.core.ads.AdsCoordinator
+import com.luisfagundes.core.ads.AdsState
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -29,13 +32,22 @@ internal class ConfigViewModelTest {
     private val notificationsEnabled = MutableStateFlow(true)
     private val observeNotificationsEnabled: ObserveNotificationsEnabledUseCase = mockk()
     private val setNotificationsEnabled: SetNotificationsEnabledUseCase = mockk()
+    private val adsCoordinator: AdsCoordinator = mockk {
+        every { state } returns MutableStateFlow(AdsState())
+    }
+    private val adsConfig = AdsConfig("banner", "interstitial")
     private lateinit var viewModel: ConfigViewModel
 
     @BeforeEach
     fun setUp() {
         every { observeNotificationsEnabled() } returns notificationsEnabled
         coEvery { setNotificationsEnabled(any()) } returns Result.success(Unit)
-        viewModel = ConfigViewModel(observeNotificationsEnabled, setNotificationsEnabled)
+        viewModel = ConfigViewModel(
+            observeNotificationsEnabled,
+            setNotificationsEnabled,
+            adsCoordinator,
+            adsConfig,
+        )
     }
 
     @Test

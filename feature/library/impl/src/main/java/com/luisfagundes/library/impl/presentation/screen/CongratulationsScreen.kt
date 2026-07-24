@@ -1,5 +1,6 @@
 package com.luisfagundes.library.impl.presentation.screen
 
+import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -47,8 +49,9 @@ import com.luisfagundes.core.common.presentation.tools.formatSize
 internal fun CongratulationsScreen(
     deletedCount: Int,
     deletedSize: Long,
-    onDoneClick: () -> Unit
+    onDoneClick: (Activity) -> Unit
 ) {
+    val activity = LocalContext.current as? Activity
     val animationResource = LottieCompositionSpec.RawRes(congratulations_animation)
     val composition by rememberLottieComposition(
         spec = animationResource,
@@ -68,7 +71,7 @@ internal fun CongratulationsScreen(
             .background(MaterialTheme.colorScheme.background),
         bottomBar = {
             Button(
-                onClick = onDoneClick,
+                onClick = { activity?.let(onDoneClick) },
                 shape = RoundedCornerShape(24.dp),
                 modifier = Modifier
                     .fillMaxWidth()

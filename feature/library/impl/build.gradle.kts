@@ -37,6 +37,7 @@ dependencies {
     implementation(project(":feature:library:api"))
     implementation(project(":core:common"))
     implementation(project(":core:designsystem"))
+    implementation(project(":core:ads"))
 
     // Core
     implementation(libs.androidx.appcompat)
@@ -87,4 +88,4 @@ dependencies {
 
 composeCompiler {
     stabilityConfigurationFiles.add(rootProject.layout.projectDirectory.file("compose-stability.pro"))
-}
+}

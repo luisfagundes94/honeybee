@@ -8,9 +8,13 @@ import com.luisfagundes.config.api.presentation.navigation.StatisticsRoute
 import com.luisfagundes.config.impl.presentation.screen.ConfigScreen
 import com.luisfagundes.config.impl.presentation.screen.FeedbackScreen
 import com.luisfagundes.config.impl.presentation.screen.StatisticsScreen
+import com.luisfagundes.core.ads.AdsCoordinator
 import com.luisfagundes.core.common.presentation.navigation.LocalNavBackStack
+import com.luisfagundes.premium.api.presentation.navigation.PremiumRoute
 
-internal fun EntryProviderScope<NavKey>.configEntries() {
+internal fun EntryProviderScope<NavKey>.configEntries(
+    adsCoordinator: AdsCoordinator,
+) {
     entry<ConfigRoute> {
         val backStack = LocalNavBackStack.current
         ConfigScreen(
@@ -19,7 +23,11 @@ internal fun EntryProviderScope<NavKey>.configEntries() {
             },
             onNavigateToStatistics = {
                 backStack?.add(StatisticsRoute)
-            }
+            },
+            onNavigateToPremium = {
+                backStack?.add(PremiumRoute)
+            },
+            adsCoordinator = adsCoordinator,
         )
     }
 

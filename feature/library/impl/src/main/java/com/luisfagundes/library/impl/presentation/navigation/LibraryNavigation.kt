@@ -3,6 +3,7 @@ package com.luisfagundes.library.impl.presentation.navigation
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.luisfagundes.core.common.presentation.navigation.LocalNavBackStack
+import com.luisfagundes.core.ads.AdsCoordinator
 import com.luisfagundes.library.api.presentation.navigation.CongratulationsRoute
 import com.luisfagundes.library.api.presentation.navigation.LibraryRoute
 import com.luisfagundes.library.api.presentation.navigation.MediaDetailsRoute
@@ -12,7 +13,9 @@ import com.luisfagundes.library.impl.presentation.screen.LibraryScreen
 import com.luisfagundes.library.impl.presentation.screen.MediaDetailsScreen
 import com.luisfagundes.library.impl.presentation.screen.TrashScreen
 
-internal fun EntryProviderScope<NavKey>.libraryEntries() {
+internal fun EntryProviderScope<NavKey>.libraryEntries(
+    adsCoordinator: AdsCoordinator,
+) {
     entry<LibraryRoute> {
         val backStack = LocalNavBackStack.current
         LibraryScreen(
@@ -53,9 +56,14 @@ internal fun EntryProviderScope<NavKey>.libraryEntries() {
         CongratulationsScreen(
             deletedCount = route.deletedCount,
             deletedSize = route.deletedSize,
-            onDoneClick = {
-                backStack?.clear()
-                backStack?.add(LibraryRoute)
+            onDoneClick = { activity ->
+                adsCoordinator.showCleanupInterstitial(
+                    activity = activity,
+                    deletedCount = route.deletedCount,
+                ) {
+                    backStack?.clear()
+                    backStack?.add(LibraryRoute)
+                }
             }
         )
     }

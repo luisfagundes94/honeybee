@@ -4,6 +4,7 @@
     <string name="config_category_other">Other</string>
     <string name="config_item_statistics">Statistics</string>
     <string name="config_item_privacy">Privacy</string>
+    <string name="config_item_privacy_choices">Privacy choices</string>
     <string name="config_item_premium">Premium</string>
     <string name="config_item_notifications">Notifications</string>
     <string name="config_item_rate_app">Rate app</string>

@@ -3,6 +3,7 @@ package com.luisfagundes.library.impl.di
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.luisfagundes.library.impl.presentation.navigation.libraryEntries
+import com.luisfagundes.core.ads.AdsCoordinator
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -14,7 +15,9 @@ import dagger.multibindings.IntoSet
 internal object NavigationModule {
     @IntoSet
     @Provides
-    fun provideLibraryEntries(): @JvmSuppressWildcards (EntryProviderScope<NavKey>) -> Unit = { scope ->
-        scope.libraryEntries()
+    fun provideLibraryEntries(
+        adsCoordinator: AdsCoordinator,
+    ): @JvmSuppressWildcards (EntryProviderScope<NavKey>) -> Unit = { scope ->
+        scope.libraryEntries(adsCoordinator)
     }
 }

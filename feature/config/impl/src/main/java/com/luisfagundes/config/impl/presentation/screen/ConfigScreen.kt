@@ -1,6 +1,7 @@
 package com.luisfagundes.config.impl.presentation.screen
 
 import android.content.Intent
+import android.app.Activity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -51,6 +52,8 @@ import com.luisfagundes.config.impl.presentation.effect.ConfigUiEffect
 import com.luisfagundes.config.impl.presentation.event.ConfigUiEvent
 import com.luisfagundes.config.impl.presentation.state.ConfigUiState
 import com.luisfagundes.config.impl.presentation.viewmodel.ConfigViewModel
+import com.luisfagundes.core.ads.AdsCoordinator
+import com.luisfagundes.core.ads.presentation.SettingsBannerAd
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
@@ -63,15 +66,22 @@ private const val APP_INTERNAL_SHARE_LINK =
 internal fun ConfigScreen(
     onNavigateToFeedback: () -> Unit,
     onNavigateToStatistics: () -> Unit,
+    onNavigateToPremium: () -> Unit,
+    adsCoordinator: AdsCoordinator,
     modifier: Modifier = Modifier,
     viewModel: ConfigViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val activity = LocalContext.current as? Activity
 
     CollectUiEffects(viewModel.uiEffect) { effect ->
         when (effect) {
             ConfigUiEffect.NavigateToStatistics -> onNavigateToStatistics()
             ConfigUiEffect.NavigateToFeedback -> onNavigateToFeedback()
+            ConfigUiEffect.NavigateToPremium -> onNavigateToPremium()
+            ConfigUiEffect.ShowPrivacyOptions -> {
+                activity?.let(adsCoordinator::showPrivacyOptions)
+            }
         }
     }
 
@@ -151,6 +161,17 @@ private fun ConfigScreen(
                         icon = Icons.Default.BackHand,
                         onClick = { /* TODO: Navigate to privacy */ }
                     )
+                    if (uiState.isPrivacyOptionsRequired) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default),
+                            color = MaterialTheme.colorScheme.outlineVariant
+                        )
+                        ConfigItem(
+                            title = stringResource(R.string.config_item_privacy_choices),
+                            icon = Icons.Default.BackHand,
+                            onClick = { onEvent(ConfigUiEvent.PrivacyChoicesClick) }
+                        )
+                    }
                 }
             }
             Spacer(
@@ -186,7 +207,7 @@ private fun ConfigScreen(
                                 contentDescription = null
                             )
                         },
-                        onClick = { /* TODO: Go to Premium screen */ }
+                        onClick = { onEvent(ConfigUiEvent.PremiumClick) }
                     )
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default),
@@ -247,6 +268,13 @@ private fun ConfigScreen(
                         }
                     )
                 }
+            }
+            if (uiState.canShowSettingsBanner && uiState.settingsBannerAdUnitId.isNotBlank()) {
+                Spacer(modifier = Modifier.height(MaterialTheme.spacing.default))
+                SettingsBannerAd(
+                    adUnitId = uiState.settingsBannerAdUnitId,
+                    modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default)
+                )
             }
             Spacer(
                 modifier = Modifier.height(MaterialTheme.spacing.default)
