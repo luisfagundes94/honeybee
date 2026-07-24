@@ -12,6 +12,7 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/baselineProfile" />
             <option value="$PROJECT_DIR$/core" />
+            <option value="$PROJECT_DIR$/core/ads" />
             <option value="$PROJECT_DIR$/core/common" />
             <option value="$PROJECT_DIR$/core/designsystem" />
             <option value="$PROJECT_DIR$/core/testing" />
@@ -28,6 +29,9 @@
             <option value="$PROJECT_DIR$/feature/onboarding" />
             <option value="$PROJECT_DIR$/feature/onboarding/api" />
             <option value="$PROJECT_DIR$/feature/onboarding/impl" />
+            <option value="$PROJECT_DIR$/feature/premium" />
+            <option value="$PROJECT_DIR$/feature/premium/api" />
+            <option value="$PROJECT_DIR$/feature/premium/impl" />
           </set>
         </option>
       </GradleProjectSettings>

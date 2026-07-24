@@ -1,5 +1,21 @@
 package com.luisfagundes.core.common.provider
 
-interface SubscriptionProvider {
-    fun isPremium(): Boolean
+import kotlinx.coroutines.flow.StateFlow
+
+sealed interface SubscriptionStatus {
+    data object Loading : SubscriptionStatus
+    data object Free : SubscriptionStatus
+    data object Premium : SubscriptionStatus
 }
+
+interface SubscriptionProvider {
+    val status: StateFlow<SubscriptionStatus>
+
+    suspend fun refresh()
+}
+
+data class SubscriptionConfig(
+    val productId: String,
+    val monthlyBasePlanId: String,
+    val annualBasePlanId: String,
+)

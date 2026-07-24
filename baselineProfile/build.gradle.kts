@@ -21,11 +21,6 @@ android {
 
     targetProjectPath = ":app"
 
-    flavorDimensions += listOf("tier")
-    productFlavors {
-        create("free") { dimension = "tier" }
-        create("paid") { dimension = "tier" }
-    }
 }
 
 // This is the configuration block for the Baseline Profile plugin.

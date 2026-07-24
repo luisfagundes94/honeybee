@@ -2,6 +2,8 @@ package com.luisfagundes.library.impl.presentation.viewmodel
 
 import app.cash.turbine.test
 import com.luisfagundes.core.testing.MainDispatcherRule
+import com.luisfagundes.core.common.provider.SubscriptionProvider
+import com.luisfagundes.core.common.provider.SubscriptionStatus
 import com.luisfagundes.library.api.domain.model.MediaSection
 import com.luisfagundes.library.api.domain.repository.LibraryRepository
 import com.luisfagundes.library.impl.domain.usecase.GetMediaByMonthUseCase
@@ -11,10 +13,12 @@ import com.luisfagundes.library.impl.presentation.state.LibraryUiState
 import com.luisfagundes.library.impl.tools.fakeMedia
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -29,6 +33,9 @@ internal class LibraryViewModelTest {
 
     private val getMediaByMonthUseCase: GetMediaByMonthUseCase = mockk()
     private val repository: LibraryRepository = mockk()
+    private val subscriptionProvider: SubscriptionProvider = mockk {
+        every { status } returns MutableStateFlow(SubscriptionStatus.Loading)
+    }
 
     private lateinit var viewModel: LibraryViewModel
 
@@ -36,7 +43,8 @@ internal class LibraryViewModelTest {
     fun setUp() {
         viewModel = LibraryViewModel(
             getMediaByMonthUseCase = getMediaByMonthUseCase,
-            repository = repository
+            repository = repository,
+            subscriptionProvider = subscriptionProvider,
         )
     }
 

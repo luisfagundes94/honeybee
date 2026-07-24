@@ -1,0 +1,14 @@
+<resources>
+    <string name="premium_title">Honeybee Premium</string>
+    <string name="premium_description">Clean photos and videos with no ads.</string>
+    <string name="premium_monthly">Monthly</string>
+    <string name="premium_annual">Annual</string>
+    <string name="premium_purchase">Start Premium</string>
+    <string name="premium_active">Premium is active</string>
+    <string name="premium_manage">Manage subscription</string>
+    <string name="premium_restore">Restore purchases</string>
+    <string name="premium_loading">Loading available plans…</string>
+    <string name="premium_no_offers">Premium plans are unavailable right now. Please try again.</string>
+    <string name="premium_pending">Your payment is pending. Premium will unlock after Google Play confirms it.</string>
+    <string name="premium_back">Back</string>
+</resources>

@@ -8,6 +8,7 @@ import com.luisfagundes.core.common.tools.safeRunCatching
 import com.luisfagundes.library.impl.data.model.MediaDto
 import com.luisfagundes.core.common.di.IoDispatcher
 import com.luisfagundes.core.common.provider.SubscriptionProvider
+import com.luisfagundes.core.common.provider.SubscriptionStatus
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -23,7 +24,7 @@ internal class LocalLibraryDataSource @Inject constructor(
     override suspend fun fetchMediaList(): Result<List<MediaDto>> = withContext(dispatcher) {
         val mediaList = mutableListOf<MediaDto>()
 
-        val isPremium = subscriptionProvider.isPremium()
+        val isPremium = subscriptionProvider.status.value == SubscriptionStatus.Premium
 
         val selection = if (isPremium) {
             "${MediaStore.Files.FileColumns.MEDIA_TYPE} = ? OR ${MediaStore.Files.FileColumns.MEDIA_TYPE} = ?"

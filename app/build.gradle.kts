@@ -1,3 +1,31 @@
+import java.util.Properties
+import org.gradle.api.DefaultTask
+import org.gradle.api.provider.MapProperty
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.TaskAction
+
+abstract class ValidateReleaseMonetizationConfig : DefaultTask() {
+    @get:Input
+    abstract val values: MapProperty<String, String>
+
+    @TaskAction
+    fun validate() {
+        values.get().forEach { (name, value) ->
+            require(!value.startsWith("MISSING_")) { "Missing required release configuration: $name" }
+            require(!value.contains("ca-app-pub-3940256099942544")) {
+                "$name must not use a Google test ad identifier"
+            }
+        }
+    }
+}
+
+val localMonetizationProperties = Properties().apply {
+    val propertiesFile = rootProject.file("local.properties")
+    if (propertiesFile.exists()) {
+        propertiesFile.inputStream().use(::load)
+    }
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -21,18 +49,15 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    flavorDimensions += "tier"
-
-    productFlavors {
-        create("free") {
-            dimension = "tier"
-        }
-        create("paid") {
-            dimension = "tier"
-        }
-    }
-
     buildTypes {
+        debug {
+            manifestPlaceholders["admobAppId"] = "ca-app-pub-3940256099942544~3347511713"
+            buildConfigField("String", "ADMOB_SETTINGS_BANNER_AD_UNIT_ID", "\"ca-app-pub-3940256099942544/9214589741\"")
+            buildConfigField("String", "ADMOB_CLEANUP_INTERSTITIAL_AD_UNIT_ID", "\"ca-app-pub-3940256099942544/1033173712\"")
+            buildConfigField("String", "PREMIUM_PRODUCT_ID", "\"premium\"")
+            buildConfigField("String", "PREMIUM_MONTHLY_BASE_PLAN_ID", "\"monthly\"")
+            buildConfigField("String", "PREMIUM_ANNUAL_BASE_PLAN_ID", "\"annual\"")
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
@@ -40,6 +65,13 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            val admobAppId = releaseValue("HONEYBEE_ADMOB_APP_ID")
+            manifestPlaceholders["admobAppId"] = admobAppId
+            buildConfigField("String", "ADMOB_SETTINGS_BANNER_AD_UNIT_ID", quotedReleaseValue("HONEYBEE_SETTINGS_BANNER_AD_UNIT_ID"))
+            buildConfigField("String", "ADMOB_CLEANUP_INTERSTITIAL_AD_UNIT_ID", quotedReleaseValue("HONEYBEE_CLEANUP_INTERSTITIAL_AD_UNIT_ID"))
+            buildConfigField("String", "PREMIUM_PRODUCT_ID", quotedReleaseValue("HONEYBEE_PREMIUM_PRODUCT_ID"))
+            buildConfigField("String", "PREMIUM_MONTHLY_BASE_PLAN_ID", quotedReleaseValue("HONEYBEE_PREMIUM_MONTHLY_BASE_PLAN_ID"))
+            buildConfigField("String", "PREMIUM_ANNUAL_BASE_PLAN_ID", quotedReleaseValue("HONEYBEE_PREMIUM_ANNUAL_BASE_PLAN_ID"))
         }
         create("benchmark") {
             initWith(buildTypes.getByName("release"))
@@ -54,6 +86,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     testOptions {
         unitTests {
@@ -68,6 +101,7 @@ android {
 dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:designsystem"))
+    implementation(project(":core:ads"))
 
     implementation(project(":feature:library:api"))
     implementation(project(":feature:library:impl"))
@@ -80,6 +114,8 @@ dependencies {
 
     implementation(project(":feature:config:api"))
     implementation(project(":feature:config:impl"))
+    implementation(project(":feature:premium:api"))
+    implementation(project(":feature:premium:impl"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
@@ -119,6 +155,46 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.turbine)
     testImplementation(libs.junit)
+}
+
+fun Project.releaseValue(name: String): String {
+    val value = (providers.gradleProperty(name)
+        .orElse(providers.environmentVariable(name))
+        .orNull
+        ?: localMonetizationProperties.getProperty(name))
+        .orEmpty()
+        .trim()
+    return value.ifBlank { "MISSING_$name" }
+}
+
+fun Project.quotedReleaseValue(name: String): String = "\"${releaseValue(name)}\""
+
+val requiredReleaseMonetizationValues = listOf(
+    "HONEYBEE_ADMOB_APP_ID",
+    "HONEYBEE_SETTINGS_BANNER_AD_UNIT_ID",
+    "HONEYBEE_CLEANUP_INTERSTITIAL_AD_UNIT_ID",
+    "HONEYBEE_PREMIUM_PRODUCT_ID",
+    "HONEYBEE_PREMIUM_MONTHLY_BASE_PLAN_ID",
+    "HONEYBEE_PREMIUM_ANNUAL_BASE_PLAN_ID",
+)
+
+val releaseMonetizationValues = mapOf(
+    "HONEYBEE_ADMOB_APP_ID" to releaseValue("HONEYBEE_ADMOB_APP_ID"),
+    "HONEYBEE_SETTINGS_BANNER_AD_UNIT_ID" to releaseValue("HONEYBEE_SETTINGS_BANNER_AD_UNIT_ID"),
+    "HONEYBEE_CLEANUP_INTERSTITIAL_AD_UNIT_ID" to releaseValue("HONEYBEE_CLEANUP_INTERSTITIAL_AD_UNIT_ID"),
+    "HONEYBEE_PREMIUM_PRODUCT_ID" to releaseValue("HONEYBEE_PREMIUM_PRODUCT_ID"),
+    "HONEYBEE_PREMIUM_MONTHLY_BASE_PLAN_ID" to releaseValue("HONEYBEE_PREMIUM_MONTHLY_BASE_PLAN_ID"),
+    "HONEYBEE_PREMIUM_ANNUAL_BASE_PLAN_ID" to releaseValue("HONEYBEE_PREMIUM_ANNUAL_BASE_PLAN_ID"),
+)
+
+val validateReleaseMonetizationConfig = tasks.register<ValidateReleaseMonetizationConfig>("validateReleaseMonetizationConfig") {
+    values.putAll(releaseMonetizationValues)
+}
+
+tasks.matching { task ->
+    task.name.contains("Release", ignoreCase = true) && task.name != "validateReleaseMonetizationConfig"
+}.configureEach {
+    dependsOn(validateReleaseMonetizationConfig)
 }
 
 composeCompiler {

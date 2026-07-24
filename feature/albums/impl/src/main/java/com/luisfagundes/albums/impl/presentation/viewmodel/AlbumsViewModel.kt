@@ -6,14 +6,28 @@ import com.luisfagundes.albums.impl.presentation.effect.AlbumsUiEffect
 import com.luisfagundes.albums.impl.presentation.event.AlbumsUiEvent
 import com.luisfagundes.albums.impl.presentation.state.AlbumsUiState
 import com.luisfagundes.core.common.presentation.arch.viewmodel.ViewModel
+import com.luisfagundes.core.common.provider.SubscriptionProvider
+import com.luisfagundes.core.common.provider.SubscriptionStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import javax.inject.Inject
 
 @HiltViewModel
 internal class AlbumsViewModel @Inject constructor(
-    private val getAlbumsUseCase: GetAlbumsUseCase
+    private val getAlbumsUseCase: GetAlbumsUseCase,
+    subscriptionProvider: SubscriptionProvider,
 ) : ViewModel<AlbumsUiState, AlbumsUiEvent, AlbumsUiEffect>(AlbumsUiState.Loading) {
+    init {
+        viewModelScope.launch {
+            subscriptionProvider.status
+                .filter { it != SubscriptionStatus.Loading }
+                .distinctUntilChanged()
+                .collect { loadAlbums() }
+        }
+    }
+
 
     override fun dispatchEvent(event: AlbumsUiEvent) {
         when (event) {

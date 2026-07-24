@@ -107,7 +107,7 @@
         <b />
       </list>
     </option>
-    <option name="seedsFilePath" value="$PROJECT_DIR$/app/build/outputs/mapping/paidRelease/seeds.txt" />
-    <option name="usageFilePath" value="$PROJECT_DIR$/app/build/outputs/mapping/paidRelease/usage.txt" />
+    <option name="seedsFilePath" value="$PROJECT_DIR$/app/build/outputs/mapping/release/seeds.txt" />
+    <option name="usageFilePath" value="$PROJECT_DIR$/app/build/outputs/mapping/release/usage.txt" />
   </component>
 </project>

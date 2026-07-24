@@ -36,7 +36,10 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import com.luisfagundes.core.common.presentation.navigation.LocalNavBackStack
+import com.luisfagundes.core.common.provider.SubscriptionProvider
+import com.luisfagundes.core.common.provider.SubscriptionStatus
 import com.luisfagundes.core.designsystem.theme.HoneybeeTheme
+import com.luisfagundes.core.ads.AdsCoordinator
 import com.luisfagundes.albums.api.presentation.navigation.AlbumsRoute
 import com.luisfagundes.config.api.presentation.navigation.ConfigRoute
 import com.luisfagundes.honeybee.presentation.navigation.AppNavDisplay
@@ -54,15 +57,28 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var entryBuilders: @JvmSuppressWildcards Set<(EntryProviderScope<NavKey>) -> Unit>
 
+    @Inject
+    lateinit var adsCoordinator: AdsCoordinator
+
+    @Inject
+    lateinit var subscriptionProvider: SubscriptionProvider
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             val onboardingCompleted by viewModel.isOnboardingCompleted()
                 .collectAsStateWithLifecycle(initialValue = null)
+            val subscriptionStatus by subscriptionProvider.status.collectAsStateWithLifecycle()
             
             HoneybeeTheme {
                 if (onboardingCompleted == null) return@HoneybeeTheme
+
+                LaunchedEffect(subscriptionStatus) {
+                    if (subscriptionStatus == SubscriptionStatus.Free) {
+                        adsCoordinator.gatherConsent(this@MainActivity)
+                    }
+                }
 
                 val startRoute = if (onboardingCompleted == true) LibraryRoute else OnboardingRoute
                 val backStack = rememberNavBackStack(startRoute)
@@ -73,6 +89,11 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.refreshSubscription()
     }
 }
 

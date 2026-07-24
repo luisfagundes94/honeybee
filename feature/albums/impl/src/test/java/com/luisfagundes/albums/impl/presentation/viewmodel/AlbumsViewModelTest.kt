@@ -7,12 +7,16 @@ import com.luisfagundes.albums.impl.presentation.event.AlbumsUiEvent
 import com.luisfagundes.albums.impl.presentation.state.AlbumsUiState
 import com.luisfagundes.albums.impl.tools.fakeAlbum
 import com.luisfagundes.core.testing.MainDispatcherRule
+import com.luisfagundes.core.common.provider.SubscriptionProvider
+import com.luisfagundes.core.common.provider.SubscriptionStatus
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -25,13 +29,17 @@ internal class AlbumsViewModelTest {
     val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
 
     private val getAlbumsUseCase: GetAlbumsUseCase = mockk()
+    private val subscriptionProvider: SubscriptionProvider = mockk {
+        every { status } returns MutableStateFlow(SubscriptionStatus.Loading)
+    }
 
     private lateinit var viewModel: AlbumsViewModel
 
     @BeforeEach
     fun setUp() {
         viewModel = AlbumsViewModel(
-            getAlbumsUseCase = getAlbumsUseCase
+            getAlbumsUseCase = getAlbumsUseCase,
+            subscriptionProvider = subscriptionProvider,
         )
     }
 
