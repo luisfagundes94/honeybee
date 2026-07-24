@@ -73,7 +73,6 @@ internal fun CongratulationsScreen(
         bottomBar = {
             Button(
                 onClick = { activity?.let(onDoneClick) },
-                shape = RoundedCornerShape(24.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .navigationBarsPadding()

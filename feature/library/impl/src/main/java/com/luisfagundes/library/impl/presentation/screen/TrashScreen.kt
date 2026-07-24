@@ -232,7 +232,6 @@ private fun TrashBottomBar(
     if (deleteCount > 0) {
         Button(
             onClick = onConfirmDeletion,
-            shape = RoundedCornerShape(24.dp),
             modifier = modifier
                 .fillMaxWidth()
                 .navigationBarsPadding()
