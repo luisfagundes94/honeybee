@@ -1,5 +1,10 @@
 package com.luisfagundes.library.impl.presentation.screen
 
+import android.app.Activity
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,13 +15,13 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -40,36 +45,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import android.app.Activity
-import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.IntentSenderRequest
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewWrapper
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.luisfagundes.library.impl.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.core.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.core.designsystem.components.HoneybeeLoadingTemplate
-import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.tooling.preview.PreviewWrapper
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
-import com.luisfagundes.core.designsystem.R as DesignSystemResources
 import com.luisfagundes.library.api.domain.model.Media
+import com.luisfagundes.library.impl.R
 import com.luisfagundes.library.impl.presentation.effect.TrashUiEffect
 import com.luisfagundes.library.impl.presentation.event.TrashUiEvent
 import com.luisfagundes.library.impl.presentation.provider.TrashUiStateProvider
 import com.luisfagundes.library.impl.presentation.state.TrashUiState
 import com.luisfagundes.library.impl.presentation.viewmodel.TrashViewModel
+import com.luisfagundes.core.designsystem.R as DesignSystemResources
 
 @Composable
 internal fun TrashScreen(

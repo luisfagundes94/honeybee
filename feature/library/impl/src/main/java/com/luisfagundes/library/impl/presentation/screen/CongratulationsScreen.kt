@@ -28,23 +28,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewWrapper
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.airbnb.lottie.compose.LottieClipSpec
 import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieClipSpec
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.luisfagundes.core.common.presentation.tools.formatSize
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
 import com.luisfagundes.library.impl.R
 import com.luisfagundes.library.impl.R.raw.congratulations_animation
-import com.luisfagundes.core.common.presentation.tools.formatSize
 
 @Composable
 internal fun CongratulationsScreen(
