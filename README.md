@@ -1,8 +1,30 @@
 # Honeybee 🐝
 
-Honeybee is a modern Android application designed for photo library management, sorting, details tracking, and secure media deletion built with cutting-edge Android development patterns and tools.
+Swipe through photos and videos, clear the clutter, and reclaim your storage.
 
----
+## Description
+
+Your best memories deserve space—not endless duplicates, blurry shots, and forgotten videos.
+
+Honeybee makes cleaning up your photo library quick and satisfying. Browse your photos and videos, swipe up to move unwanted items to the trash, and keep the moments that matter.
+
+Review everything before deleting it permanently, or restore anything you change your mind about. Honeybee gives you control while helping you reclaim valuable storage space.
+
+With Honeybee, you can:
+- Quickly review photos and videos
+- Swipe up to clear unwanted media
+- Restore items from the trash before deletion
+- Browse your library by month or album
+- View photos in full screen and play videos
+- Mark your favorite memories
+- Share photos and videos
+- Check file size and date information
+- Track how many files you’ve deleted and how much space you’ve recovered
+
+Private by design:
+Your photos and videos remain stored on your device. Honeybee only accesses your media with your permission.
+
+Less clutter. More space. Keep the memories that matter with Honeybee.
 
 ## 📷 Screenshots
 
