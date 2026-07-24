@@ -237,7 +237,6 @@ private fun TrashBottomBar(
                 .fillMaxWidth()
                 .navigationBarsPadding()
                 .padding(MaterialTheme.spacing.default)
-                .height(56.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.Delete,
