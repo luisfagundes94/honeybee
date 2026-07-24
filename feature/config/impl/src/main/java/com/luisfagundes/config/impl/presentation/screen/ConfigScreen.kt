@@ -2,6 +2,7 @@ package com.luisfagundes.config.impl.presentation.screen
 
 import android.content.Intent
 import android.app.Activity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -72,7 +73,7 @@ internal fun ConfigScreen(
     viewModel: ConfigViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val activity = LocalContext.current as? Activity
+    val activity = LocalActivity.current
 
     CollectUiEffects(viewModel.uiEffect) { effect ->
         when (effect) {

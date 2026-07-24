@@ -1,6 +1,7 @@
 package com.luisfagundes.premium.impl.presentation.screen
 
 import android.app.Activity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -53,7 +54,7 @@ internal fun PremiumScreen(
     viewModel: PremiumViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val activity = LocalContext.current as? Activity
+    val activity = LocalActivity.current
 
     CollectUiEffects(viewModel.uiEffect) { effect ->
         when (effect) {

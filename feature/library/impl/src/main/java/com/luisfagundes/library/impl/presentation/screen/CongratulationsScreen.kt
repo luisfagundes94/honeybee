@@ -1,6 +1,7 @@
 package com.luisfagundes.library.impl.presentation.screen
 
 import android.app.Activity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -51,7 +52,7 @@ internal fun CongratulationsScreen(
     deletedSize: Long,
     onDoneClick: (Activity) -> Unit
 ) {
-    val activity = LocalContext.current as? Activity
+    val activity = LocalActivity.current
     val animationResource = LottieCompositionSpec.RawRes(congratulations_animation)
     val composition by rememberLottieComposition(
         spec = animationResource,
