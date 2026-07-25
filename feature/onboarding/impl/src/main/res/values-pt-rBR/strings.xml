@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="welcome_to">Boas-vindas ao</string>
+    <string name="honeybee">Honeybee</string>
+    <string name="honeybee_app_description">Porque você não precisa de 10 fotos borradas do mesmo pôr do sol. Deslize para cima para excluir o que não presta, salvar as memórias e liberar espaço!</string>
+    <string name="get_started">Começar</string>
+    <string name="photo_library_permission_title">Biblioteca de fotos</string>
+    <string name="photo_library_permission_description">Permita que nossas abelhas acessem sua biblioteca de fotos</string>
+    <string name="notifications_permission_title">Notificações</string>
+    <string name="notifications_permission_description">Permita que o Honeybee envie notificações</string>
+    <string name="allow_access">Permitir acesso</string>
+    <string name="privacy_assurance">Sua mídia permanece segura, armazenada somente no seu dispositivo</string>
+    <string name="permission_screen_title">Conceda as permissões para usar o Honeybee</string>
+    <string name="permissions_denied_message">Precisamos dessas permissões para que o app funcione</string>
+    <string name="permissions_required_title">Permissões necessárias</string>
+    <string name="permissions_required_description">Você negou as permissões necessárias. Ative-as nas configurações para continuar.</string>
+    <string name="go_to_settings">Ir para configurações</string>
+    <string name="cancel">Cancelar</string>
+</resources>

@@ -1,0 +1,21 @@
+<resources>
+    <string name="albums">Álbuns</string>
+    <string name="favorites">Favoritos</string>
+    <string name="videos">Vídeos</string>
+    <string name="camera">Câmera</string>
+    <string name="screenshots">Capturas de tela</string>
+    <string name="downloads">Downloads</string>
+    <string name="whatsapp">WhatsApp</string>
+    <string name="error_loading_albums_title">Não foi possível carregar os álbuns</string>
+    <string name="error_loading_albums_description">Tente novamente para ver seus álbuns.</string>
+    <string name="error_loading_album_media_title">Não foi possível abrir este álbum</string>
+    <string name="error_loading_album_media_description">Tente novamente ou volte aos seus álbuns.</string>
+    <string name="no_media">Nenhuma foto ou vídeo encontrado.</string>
+    <string name="no_albums">Nenhum álbum encontrado.</string>
+    <string name="items_count_zero">Nenhum item</string>
+    <plurals name="items_count">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d itens</item>
+    </plurals>
+    <string name="back">Voltar</string>
+</resources>

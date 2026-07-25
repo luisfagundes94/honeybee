@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="retry">Tentar novamente</string>
+    <string name="cancel">Cancelar</string>
+    <string name="video_content_description">Vídeo</string>
+    <string name="video_duration_content_description">Duração do vídeo: %1$s</string>
+    <string name="honeybee_logo">Logo do Honeybee</string>
+</resources>

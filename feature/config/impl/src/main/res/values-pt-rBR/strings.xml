@@ -1,0 +1,29 @@
+<resources>
+    <string name="config">Configurações</string>
+    <string name="config_category_my_data">Meus dados</string>
+    <string name="config_category_other">Outros</string>
+    <string name="config_item_statistics">Estatísticas</string>
+    <string name="config_item_privacy">Privacidade</string>
+    <string name="config_item_privacy_choices">Escolhas de privacidade</string>
+    <string name="config_item_premium">Premium</string>
+    <string name="config_item_notifications">Notificações</string>
+    <string name="config_item_rate_app">Avaliar o app</string>
+    <string name="config_item_send_feedback">Enviar feedback</string>
+    <string name="config_item_share_with_friends">Compartilhar com amigos</string>
+    <string name="feedback_title">Como podemos ajudar?</string>
+    <string name="feedback_placeholder">Conte-nos mais detalhes…</string>
+    <string name="feedback_submit">Enviar</string>
+    <string name="feedback_submitted_success">Feedback enviado com sucesso!</string>
+    <string name="feedback_back_button_content_description">Voltar</string>
+    <string name="feedback">Feedback</string>
+    <string name="feedback_email_subject">Feedback do app Honeybee</string>
+    <string name="feedback_email_chooser_title">Enviar e-mail usando…</string>
+    <string name="statistics_title">Estatísticas</string>
+    <string name="error_loading_statistics_title">Não foi possível carregar as estatísticas</string>
+    <string name="error_loading_statistics_description">Tente novamente ou volte às configurações.</string>
+    <string name="memory_cleared">Memória liberada</string>
+    <string name="media_deleted">Mídia excluída</string>
+    <string name="photos_deleted">Fotos excluídas</string>
+    <string name="videos_deleted">Vídeos excluídos</string>
+    <string name="statistics_back_button_content_description">Voltar</string>
+</resources>

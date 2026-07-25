@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_loading_media_title">Não foi possível carregar sua biblioteca</string>
+    <string name="error_loading_media_description">Tente novamente para ver as fotos e os vídeos na sua biblioteca.</string>
+    <string name="items_in_trash">Itens na lixeira</string>
+    <string name="library">Biblioteca</string>
+    <string name="library_is_empty">Nenhuma mídia encontrada</string>
+    <string name="media_section_header">%1$s %2$d</string>
+    <string name="open_photo">Abrir foto</string>
+    <string name="open_video">Abrir vídeo</string>
+    <string name="done">Concluído</string>
+    <string name="media_deleted">Mídia excluída</string>
+    <string name="saved">salvo</string>
+    <string name="error_loading_media_details_title">Não foi possível abrir os detalhes da mídia</string>
+    <string name="error_loading_media_details_description">Tente novamente ou volte à sua biblioteca.</string>
+    <string name="error_loading_trash_title">Não foi possível carregar a lixeira</string>
+    <string name="error_loading_trash_description">Tente novamente para ver as mídias na sua lixeira.</string>
+    <string name="all_photos">Todas as mídias</string>
+    <string name="media_details_progress_format">%1$d/%2$d • %3$d%%</string>
+    <string name="close">Fechar</string>
+    <string name="media_details_info_format">%1$s • %2$s</string>
+    <string name="media_details_toast_info">Tamanho do arquivo: %1$s\nData de adição: %2$s</string>
+    <string name="info">Informações</string>
+    <string name="share_photo">Compartilhar mídia</string>
+    <string name="share">Compartilhar</string>
+    <string name="favorite">Favorito</string>
+    <string name="trash">Lixeira</string>
+    <string name="deletion_not_allowed">Você não permitiu a exclusão de mídia</string>
+    <string name="trash_is_empty">A lixeira está vazia</string>
+    <plurals name="delete_media_format">
+        <item quantity="one">Excluir (%1$d arquivo)</item>
+        <item quantity="other">Excluir (%1$d arquivos)</item>
+    </plurals>
+</resources>
