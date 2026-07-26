@@ -2,15 +2,13 @@ package com.luisfagundes.core.ads.presentation
 
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -26,12 +24,15 @@ fun SettingsBannerAd(
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val density = LocalDensity.current
-    val widthPx = with(density) { LocalConfiguration.current.screenWidthDp.dp.roundToPx() }
-    val adSize = remember(widthPx) {
-        AdSize.getCurrentOrientationInlineAdaptiveBannerAdSize(context, widthPx)
+    val adWidthDp = with(LocalDensity.current) {
+        LocalWindowInfo.current.containerSize.width.toDp()
     }
-    val height = with(density) { adSize.getHeightInPixels(context).toDp() }
+    val adSize = remember(adWidthDp) {
+        AdSize.getCurrentOrientationInlineAdaptiveBannerAdSize(
+            context,
+            adWidthDp.value.toInt(),
+        )
+    }
     val adView = remember(adUnitId, adSize) {
         AdView(context).apply {
             setAdSize(adSize)
@@ -59,7 +60,6 @@ fun SettingsBannerAd(
     AndroidView(
         factory = { adView },
         modifier = modifier
-            .fillMaxWidth()
-            .height(height),
+            .fillMaxWidth(),
     )
 }

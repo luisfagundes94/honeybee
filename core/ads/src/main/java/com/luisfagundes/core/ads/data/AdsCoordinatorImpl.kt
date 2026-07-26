@@ -139,6 +139,7 @@ internal class AdsCoordinatorImpl @Inject constructor(
 
                 override fun onAdFailedToShowFullScreenContent(adError: com.google.android.gms.ads.AdError) = completeOnce()
             }
+            ad.setImmersiveMode(true)
             ad.show(activity)
         }
     }
