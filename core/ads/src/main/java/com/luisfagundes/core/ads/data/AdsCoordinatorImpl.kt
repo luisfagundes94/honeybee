@@ -7,6 +7,8 @@ import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
+import com.google.android.gms.ads.AdError
+import com.google.android.gms.ads.LoadAdError
 import com.google.android.ump.ConsentInformation
 import com.google.android.ump.ConsentRequestParameters
 import com.google.android.ump.UserMessagingPlatform
@@ -137,7 +139,7 @@ internal class AdsCoordinatorImpl @Inject constructor(
 
                 override fun onAdDismissedFullScreenContent() = completeOnce()
 
-                override fun onAdFailedToShowFullScreenContent(adError: com.google.android.gms.ads.AdError) = completeOnce()
+                override fun onAdFailedToShowFullScreenContent(adError: AdError) = completeOnce()
             }
             ad.setImmersiveMode(true)
             ad.show(activity)
@@ -182,7 +184,7 @@ internal class AdsCoordinatorImpl @Inject constructor(
                     interstitialAd = ad
                 }
 
-                override fun onAdFailedToLoad(loadAdError: com.google.android.gms.ads.LoadAdError) {
+                override fun onAdFailedToLoad(loadAdError: LoadAdError) {
                     isInterstitialLoading = false
                 }
             },
