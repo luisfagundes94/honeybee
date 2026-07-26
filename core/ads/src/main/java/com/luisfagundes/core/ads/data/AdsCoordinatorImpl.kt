@@ -30,15 +30,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 private const val MINIMUM_DELETED_ITEMS_FOR_INTERSTITIAL = 5
-private const val INTERSTITIAL_COOLDOWN_MILLIS = 15 * 60 * 1_000L
 
 @Singleton
 internal class AdsCoordinatorImpl @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val subscriptionProvider: SubscriptionProvider,
-    private val adsConfig: AdsConfig,
-    private val adsPreferences: AdsPreferences,
-    private val clock: AdsClock,
+    private val adsConfig: AdsConfig
 ) : AdsCoordinator {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val consentInformation: ConsentInformation =
@@ -113,9 +110,8 @@ internal class AdsCoordinatorImpl @Inject constructor(
         }
 
         scope.launch {
-            val elapsed = clock.nowMillis() - adsPreferences.lastInterstitialShownAt()
             val ad = interstitialAd
-            if (elapsed < INTERSTITIAL_COOLDOWN_MILLIS || ad == null) {
+            if (ad == null) {
                 onComplete()
                 return@launch
             }
@@ -133,10 +129,6 @@ internal class AdsCoordinatorImpl @Inject constructor(
             }
 
             ad.fullScreenContentCallback = object : FullScreenContentCallback() {
-                override fun onAdShowedFullScreenContent() {
-                    scope.launch { adsPreferences.setLastInterstitialShownAt(clock.nowMillis()) }
-                }
-
                 override fun onAdDismissedFullScreenContent() = completeOnce()
 
                 override fun onAdFailedToShowFullScreenContent(adError: AdError) = completeOnce()
