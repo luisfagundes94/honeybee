@@ -14,7 +14,9 @@ import javax.inject.Inject
 @HiltViewModel
 internal class PremiumViewModel @Inject constructor(
     private val subscriptionProvider: PlayBillingSubscriptionProvider,
-) : ViewModel<PremiumUiState, PremiumUiEvent, PremiumUiEffect>(PremiumUiState()) {
+) : ViewModel<PremiumUiState, PremiumUiEvent, PremiumUiEffect>(
+    initialState = PremiumUiState()
+) {
     init {
         viewModelScope.launch {
             subscriptionProvider.status.collect { status ->

@@ -57,11 +57,11 @@ internal fun PremiumScreen(
     CollectUiEffects(viewModel.uiEffect) { effect ->
         when (effect) {
             PremiumUiEffect.NavigateBack -> onNavigateBack()
-            is PremiumUiEffect.LaunchPurchase -> activity?.let {
-                subscriptionProvider.launchPurchase(it, effect.offerToken)
-            }
             PremiumUiEffect.OpenSubscriptionManagement -> activity?.let {
                 subscriptionProvider.openSubscriptionManagement(it)
+            }
+            is PremiumUiEffect.LaunchPurchase -> activity?.let {
+                subscriptionProvider.launchPurchase(it, effect.offerToken)
             }
         }
     }

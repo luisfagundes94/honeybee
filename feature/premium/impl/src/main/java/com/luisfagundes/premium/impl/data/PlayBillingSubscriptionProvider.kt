@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
+import androidx.core.net.toUri
 
 @Singleton
 internal class PlayBillingSubscriptionProvider @Inject constructor(
@@ -81,13 +82,15 @@ internal class PlayBillingSubscriptionProvider @Inject constructor(
     }
 
     fun openSubscriptionManagement(activity: Activity) {
-        val uri = Uri.parse(
-            "https://play.google.com/store/account/subscriptions?package=${context.packageName}&sku=${config.productId}",
-        )
+        val uri = ("https://play.google.com/store/account/" +
+                "subscriptions?package=${context.packageName}&sku=${config.productId}").toUri()
         activity.startActivity(Intent(Intent.ACTION_VIEW, uri))
     }
 
-    override fun onPurchasesUpdated(billingResult: BillingResult, purchases: MutableList<Purchase>?) {
+    override fun onPurchasesUpdated(
+        billingResult: BillingResult,
+        purchases: MutableList<Purchase>?
+    ) {
         if (billingResult.responseCode == BillingClient.BillingResponseCode.OK && purchases != null) {
             processPurchases(purchases)
         }
