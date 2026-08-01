@@ -34,6 +34,7 @@ plugins {
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.baselineprofile)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.google.firebase.crashlytics)
 }
 
 android {
@@ -130,6 +131,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.profileinstaller)
+    implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.messaging)
     implementation(libs.coil.compose)
     implementation(libs.coil.video)

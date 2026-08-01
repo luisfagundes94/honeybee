@@ -35,6 +35,8 @@ playBilling = "9.1.0"
 googleMobileAds = "25.4.0"
 ump = "4.0.0"
 detekt = "2.0.0-alpha.5"
+firebaseCrashlytics = "20.1.0"
+googleFirebaseCrashlytics = "3.0.7"
 
 [libraries]
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
@@ -84,6 +86,7 @@ androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profi
 play-billing-ktx = { module = "com.android.billingclient:billing-ktx", version.ref = "playBilling" }
 google-mobile-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "googleMobileAds" }
 google-ump = { module = "com.google.android.ump:user-messaging-platform", version.ref = "ump" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics", version.ref = "firebaseCrashlytics" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -96,5 +99,6 @@ google-gms-google-services = { id = "com.google.gms.google-services", version.re
 android-test = { id = "com.android.test", version.ref = "agp" }
 baselineprofile = { id = "androidx.baselineprofile", version.ref = "baselineprofile" }
 detekt = { id = "dev.detekt", version.ref = "detekt" }
+google-firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "googleFirebaseCrashlytics" }
 
 

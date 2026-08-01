@@ -12,6 +12,7 @@ plugins {
     alias(libs.plugins.android.test) apply false
     alias(libs.plugins.baselineprofile) apply false
     alias(libs.plugins.detekt) apply false
+    alias(libs.plugins.google.firebase.crashlytics) apply false
 }
 
 val detektAll = tasks.register("detektAll") {
