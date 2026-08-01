@@ -11,7 +11,8 @@ This file is the quick-reference guide for agents and contributors working in th
 - Create a UseCase only when it contains meaningful business rules or orchestration.
 - Handle both success and failure for every `Result<T>` operation.
 - New code uses Coroutines + Flow.
-- `UiState`, `UiEvent`, and `UiEffect` use sealed interfaces or sealed classes.
+- Name private mutable `StateFlow` backing properties with a leading underscore (for example, `_state`); expose them as immutable `state`.
+- Use sealed interfaces/classes for finite UI-state variants; use a data class when a state is one evolving immutable snapshot.
 - Use design-system tokens instead of hardcoded Compose dimensions, colors, strings, or previews.
 - Keep domain and data entities as `class`; presentation UI models, states, and args may use `data class`.
 - Use extension functions for data-to-domain mapping; do not create mapper classes.

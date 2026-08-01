@@ -40,21 +40,21 @@ internal class AdsCoordinatorImpl @Inject constructor(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val consentInformation: ConsentInformation =
         UserMessagingPlatform.getConsentInformation(context)
-    private val mutableState = MutableStateFlow(AdsState())
+    private val _state = MutableStateFlow(AdsState())
     private var isConsentRequestInFlight = false
     private var isMobileAdsInitialized = false
     private var isInterstitialLoading = false
     private var isInterstitialShowing = false
     private var interstitialAd: InterstitialAd? = null
 
-    override val state: StateFlow<AdsState> = mutableState.asStateFlow()
+    override val state: StateFlow<AdsState> = _state.asStateFlow()
 
     init {
         scope.launch {
             subscriptionProvider.status.collectLatest { status ->
                 if (status == SubscriptionStatus.Premium) {
                     interstitialAd = null
-                    mutableState.value = AdsState()
+                    _state.value = AdsState()
                 } else if (status == SubscriptionStatus.Free && consentInformation.canRequestAds()) {
                     enableAds()
                 }
@@ -149,7 +149,7 @@ internal class AdsCoordinatorImpl @Inject constructor(
     }
 
     private fun updatePrivacyState(canShowAds: Boolean = false) {
-        mutableState.value = AdsState(
+        _state.value = AdsState(
             canShowAds = canShowAds && subscriptionProvider.status.value == SubscriptionStatus.Free,
             isPrivacyOptionsRequired = consentInformation.privacyOptionsRequirementStatus ==
                 ConsentInformation.PrivacyOptionsRequirementStatus.REQUIRED,

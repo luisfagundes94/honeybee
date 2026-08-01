@@ -4,45 +4,48 @@
 
 Do not use hardcoded dp values, colors, strings, or `@PreviewLightDark` in Compose screens.
 
-| Forbidden | Required                                     |
-|-----------|----------------------------------------------|
-| `16.dp` | `MaterialTheme.spacing.default`                |
-| `Color.White` | `MaterialTheme.colorScheme...`          |
-| `"Text"` | `stringResource(R.string...)`                |
+| Forbidden | Required |
+|-----------|----------|
+| `16.dp` | `MaterialTheme.spacing.default` |
+| `Color.White` | `MaterialTheme.colorScheme...` |
+| `"Text"` | `stringResource(R.string...)` |
 | `@Preview` | `@PreviewLightDark` + `@PreviewWrapper(wrapper = HoneybeeThemeWrapper::class)` |
 
 Remediation: Replace it with the corresponding token. See the Tokens section in `compose-structure.md`.
 
-## Sealed Classes for States
+## State Modeling
 
-`UiState`, `UiEvent`, and `UiEffect` MUST be sealed interfaces or sealed classes.
-Open data classes for states allow inconsistent state combinations.
+Use sealed interfaces or sealed classes when a UI model has finite, mutually exclusive
+variants such as loading, content, and error. Use a data class when the state is one
+evolving immutable snapshot whose fields are valid together. Keep the snapshot
+immutable and update it through `setState { }` or `setStateOf<T> { }`.
 
 ```kotlin
-// ✅ CORRECT
+// Correct for finite, mutually exclusive variants
 sealed class FeatureUiState : UiState {
     data object Loading : FeatureUiState()
     data class Success(val data: Data) : FeatureUiState()
     data class Error(val message: String) : FeatureUiState()
 }
 
-// ❌ WRONG
+// Also correct for one evolving snapshot
 data class FeatureUiState(
     val isLoading: Boolean = false,
     val data: Data? = null,
-    val error: String? = null
+    val error: String? = null,
 ) : UiState
 ```
 
-Remediation: Convert it to a sealed class following the Cookbook MVI pattern.
+Do not use an open mutable class or combine nullable fields that represent mutually
+exclusive variants. When those variants exist, model them with the sealed pattern above.
 
 ## ViewModel Hierarchy
 
 Three base classes in `core/presentation/arch/viewmodel/`:
 
-- `ViewModel<State : UiState, Event : UiEvent, Effect : UiEffect>` — use when the screen needs MVI events and one-shot side effects like navigation (effects sent via `Channel`, collected as `uiEffect`).
-- `StateViewModel<State : UiState, Event : UiEvent>` — use when MVI events are needed but no side effects are required; exposes only `uiState` and handles incoming `UiEvent`s.
-- `EffectViewModel<Effect : UiEffect>` — use when no MVI events are needed but one-shot side effects are required; exposes only `uiEffect` and handles incoming `UiEffect`s.`
+- `ViewModel<State : UiState, Event : UiEvent, Effect : UiEffect>` - use when the screen needs MVI events and one-shot side effects like navigation (effects sent via `Channel`, collected as `uiEffect`).
+- `StateViewModel<State : UiState, Event : UiEvent>` - use when MVI events are needed but no side effects are required; exposes only `uiState` and handles incoming `UiEvent`s.
+- `EffectViewModel<Effect : UiEffect>` - use when no MVI events are needed but one-shot side effects are required; exposes only `uiEffect` and handles incoming `UiEffect`s.
 
 Data flow:
 1. **User Action / Events**: The Compose screen dispatches immutable events implementing `UiEvent` by calling `viewModel.dispatchEvent(event)`. All public business methods on the ViewModel are kept `private`, exposing only `dispatchEvent`.

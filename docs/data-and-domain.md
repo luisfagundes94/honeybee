@@ -101,7 +101,9 @@ Remediation: Add `.onFailure` with `UiState.Error`.
 ## Do Not Use Data Classes for Domain and Data Entities
 
 Entities in the domain and data layers MUST use `class`, NOT `data class`.
-`data class` is allowed only in the presentation layer for UI models, `UiState`, and Args.
+`data class` is allowed for presentation UI models, `UiState`, and Args, as well as
+immutable state snapshots or value objects when generated `copy()` and equality are
+meaningful. Domain and data entities must remain `class`.
 
 The vast majority of data classes in the domain and data layers do not use the generated `copy()`, `componentN()`, `toString()`, or `equals()`/`hashCode()` methods, causing unnecessary binary-size and build-time overhead.
 
