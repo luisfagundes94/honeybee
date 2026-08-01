@@ -1,7 +1,6 @@
 package com.luisfagundes.honeybee.data.repository
 
 import com.luisfagundes.core.testing.MainDispatcherRule
-import com.luisfagundes.honeybee.domain.model.HoneybeeNotification
 import com.luisfagundes.honeybee.domain.model.NotificationType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -43,16 +42,11 @@ internal class NotificationRepositoryImplTest {
         val notification = repository.processIncomingPayload(rawData)
 
         // Then
-        assertEquals(
-            HoneybeeNotification(
-                id = "123",
-                title = "Test Title",
-                body = "Test Body",
-                type = NotificationType.NEW_MESSAGE,
-                deepLinkUrl = "https://honeybee.com/promo"
-            ),
-            notification
-        )
+        assertEquals("123", notification.id)
+        assertEquals("Test Title", notification.title)
+        assertEquals("Test Body", notification.body)
+        assertEquals(NotificationType.NEW_MESSAGE, notification.type)
+        assertEquals("https://honeybee.com/promo", notification.deepLinkUrl)
     }
 
     @Test

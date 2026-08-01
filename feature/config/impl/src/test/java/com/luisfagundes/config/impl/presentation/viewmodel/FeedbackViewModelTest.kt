@@ -29,19 +29,22 @@ internal class FeedbackViewModelTest {
     @Test
     fun `dispatchEvent UpdateFeedbackText should update feedbackText and enable submit button when not blank`() = runTest {
         viewModel.uiState.test {
-            assertEquals(FeedbackUiState(), awaitItem())
+            assertEquals(FeedbackUiState.Content(), awaitItem())
 
             // When
             viewModel.dispatchEvent(FeedbackUiEvent.UpdateFeedbackText("Great app!"))
 
             // Then
-            assertEquals(FeedbackUiState(feedbackText = "Great app!", isSubmitButtonEnabled = true), awaitItem())
+            assertEquals(
+                FeedbackUiState.Content(feedbackText = "Great app!", isSubmitButtonEnabled = true),
+                awaitItem()
+            )
 
             // When
             viewModel.dispatchEvent(FeedbackUiEvent.UpdateFeedbackText(""))
 
             // Then
-            assertEquals(FeedbackUiState(), awaitItem())
+            assertEquals(FeedbackUiState.Content(), awaitItem())
         }
     }
 

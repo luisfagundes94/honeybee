@@ -2,6 +2,7 @@ package com.luisfagundes.library.impl.presentation.viewmodel
 
 import app.cash.turbine.test
 import com.luisfagundes.core.testing.MainDispatcherRule
+import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.api.domain.repository.LibraryRepository
 import com.luisfagundes.library.impl.presentation.effect.MediaDetailsUiEffect
 import com.luisfagundes.library.impl.presentation.event.MediaDetailsUiEvent
@@ -46,8 +47,20 @@ internal class MediaDetailsViewModelTest {
         // Given
         val mediaList = listOf(
             fakeMedia,
-            fakeMedia.copy(id = 2L, dateAdded = 1_100L, size = 2_100L, isVideo = true),
-            fakeMedia.copy(id = 3L, dateAdded = 1_200L, size = 2_200L)
+            Media(
+                id = 2L,
+                uri = fakeMedia.uri,
+                dateAdded = 1_100L,
+                size = 2_100L,
+                isVideo = true
+            ),
+            Media(
+                id = 3L,
+                uri = fakeMedia.uri,
+                dateAdded = 1_200L,
+                size = 2_200L,
+                isVideo = false
+            )
         )
         val trashCount = 2
 
@@ -115,7 +128,13 @@ internal class MediaDetailsViewModelTest {
     fun `dispatchEvent SwipeUp should move media to trash and update state when other media remain`() = runTest {
         // Given
         val media1 = fakeMedia
-        val media2 = fakeMedia.copy(id = 2L, dateAdded = 1_100L, size = 2_100L, isVideo = true)
+        val media2 = Media(
+            id = 2L,
+            uri = fakeMedia.uri,
+            dateAdded = 1_100L,
+            size = 2_100L,
+            isVideo = true
+        )
         val mediaList = listOf(media1, media2)
         val trashCountBefore = 2
         val trashCountAfter = 3
@@ -221,8 +240,21 @@ internal class MediaDetailsViewModelTest {
     @Test
     fun `dispatchEvent LoadDetails success with favorites albumId should scope to favorited media only`() = runTest {
         // Given
-        val media1 = fakeMedia.copy(isFavorite = true)
-        val media2 = fakeMedia.copy(id = 2L, dateAdded = 1_100L, size = 2_100L, isVideo = true)
+        val media1 = Media(
+            id = fakeMedia.id,
+            uri = fakeMedia.uri,
+            dateAdded = fakeMedia.dateAdded,
+            size = fakeMedia.size,
+            isVideo = fakeMedia.isVideo,
+            isFavorite = true
+        )
+        val media2 = Media(
+            id = 2L,
+            uri = fakeMedia.uri,
+            dateAdded = 1_100L,
+            size = 2_100L,
+            isVideo = true
+        )
         val mediaList = listOf(media1, media2)
         val trashCount = 1
 
@@ -249,7 +281,13 @@ internal class MediaDetailsViewModelTest {
     fun `dispatchEvent LoadDetails success with videos albumId should scope to videos only`() = runTest {
         // Given
         val media1 = fakeMedia
-        val media2 = fakeMedia.copy(id = 2L, dateAdded = 1_100L, size = 2_100L, isVideo = true)
+        val media2 = Media(
+            id = 2L,
+            uri = fakeMedia.uri,
+            dateAdded = 1_100L,
+            size = 2_100L,
+            isVideo = true
+        )
         val mediaList = listOf(media1, media2)
         val trashCount = 1
 
@@ -275,8 +313,22 @@ internal class MediaDetailsViewModelTest {
     @Test
     fun `dispatchEvent LoadDetails success with physical albumId should scope to that bucketId only`() = runTest {
         // Given
-        val media1 = fakeMedia.copy(bucketId = "downloads")
-        val media2 = fakeMedia.copy(id = 2L, dateAdded = 1_100L, size = 2_100L, bucketId = "camera")
+        val media1 = Media(
+            id = fakeMedia.id,
+            uri = fakeMedia.uri,
+            dateAdded = fakeMedia.dateAdded,
+            size = fakeMedia.size,
+            isVideo = fakeMedia.isVideo,
+            bucketId = "downloads"
+        )
+        val media2 = Media(
+            id = 2L,
+            uri = fakeMedia.uri,
+            dateAdded = 1_100L,
+            size = 2_100L,
+            isVideo = false,
+            bucketId = "camera"
+        )
         val mediaList = listOf(media1, media2)
         val trashCount = 1
 

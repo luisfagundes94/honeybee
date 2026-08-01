@@ -2,19 +2,18 @@ package com.luisfagundes.albums.impl.tools
 
 import com.luisfagundes.albums.impl.domain.model.Album
 import com.luisfagundes.albums.impl.domain.model.AlbumMedia
-import io.mockk.mockk
 
 internal val fakeAlbum = Album.Physical(
     id = "camera_id",
     name = "Camera",
     count = 10,
-    coverUri = mockk(),
+    coverUri = "content://media/external/images/media/1",
     isVideo = false
 )
 
 internal val fakeAlbumMedia = AlbumMedia(
     id = 1L,
-    uri = mockk(),
+    uri = "content://media/external/images/media/1",
     dateAdded = 1_000L,
     isVideo = false
 )

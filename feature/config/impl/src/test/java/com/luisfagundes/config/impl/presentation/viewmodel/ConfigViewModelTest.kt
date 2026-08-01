@@ -1,8 +1,7 @@
 package com.luisfagundes.config.impl.presentation.viewmodel
 
 import app.cash.turbine.test
-import com.luisfagundes.config.impl.domain.usecase.ObserveNotificationsEnabledUseCase
-import com.luisfagundes.config.impl.domain.usecase.SetNotificationsEnabledUseCase
+import com.luisfagundes.config.impl.domain.repository.ConfigRepository
 import com.luisfagundes.config.impl.presentation.effect.ConfigUiEffect
 import com.luisfagundes.config.impl.presentation.event.ConfigUiEvent
 import com.luisfagundes.config.impl.presentation.state.ConfigUiState
@@ -30,8 +29,7 @@ internal class ConfigViewModelTest {
     val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
 
     private val notificationsEnabled = MutableStateFlow(true)
-    private val observeNotificationsEnabled: ObserveNotificationsEnabledUseCase = mockk()
-    private val setNotificationsEnabled: SetNotificationsEnabledUseCase = mockk()
+    private val repository: ConfigRepository = mockk()
     private val adsCoordinator: AdsCoordinator = mockk {
         every { state } returns MutableStateFlow(AdsState())
     }
@@ -40,11 +38,10 @@ internal class ConfigViewModelTest {
 
     @BeforeEach
     fun setUp() {
-        every { observeNotificationsEnabled() } returns notificationsEnabled
-        coEvery { setNotificationsEnabled(any()) } returns Result.success(Unit)
+        every { repository.notificationsEnabled() } returns notificationsEnabled
+        coEvery { repository.setNotificationsEnabled(any()) } returns Result.success(Unit)
         viewModel = ConfigViewModel(
-            observeNotificationsEnabled,
-            setNotificationsEnabled,
+            repository,
             adsCoordinator,
             adsConfig,
         )
@@ -52,13 +49,13 @@ internal class ConfigViewModelTest {
 
     @Test
     fun `preference changes should update state`() = runTest {
-        assertEquals(ConfigUiState(), viewModel.uiState.value)
+        assertEquals(ConfigUiState.Content(), viewModel.uiState.value)
 
         // When
         notificationsEnabled.value = false
 
         // Then
-        assertEquals(ConfigUiState(isNotificationsEnabled = false), viewModel.uiState.value)
+        assertEquals(ConfigUiState.Content(isNotificationsEnabled = false), viewModel.uiState.value)
     }
 
     @Test
@@ -67,20 +64,20 @@ internal class ConfigViewModelTest {
         viewModel.dispatchEvent(ConfigUiEvent.NotificationsToggled(enabled = false))
 
         // Then
-        coVerify(exactly = 1) { setNotificationsEnabled(false) }
-        assertEquals(ConfigUiState(), viewModel.uiState.value)
+        coVerify(exactly = 1) { repository.setNotificationsEnabled(false) }
+        assertEquals(ConfigUiState.Content(), viewModel.uiState.value)
     }
 
     @Test
     fun `failed preference update should leave current state unchanged`() = runTest {
         // Given
-        coEvery { setNotificationsEnabled(false) } returns Result.failure(IllegalStateException())
+        coEvery { repository.setNotificationsEnabled(false) } returns Result.failure(IllegalStateException())
 
         // When
         viewModel.dispatchEvent(ConfigUiEvent.NotificationsToggled(enabled = false))
 
         // Then
-        assertEquals(ConfigUiState(), viewModel.uiState.value)
+        assertEquals(ConfigUiState.Content(), viewModel.uiState.value)
     }
 
     @Test

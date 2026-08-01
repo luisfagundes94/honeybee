@@ -1,6 +1,7 @@
 package com.luisfagundes.library.impl.data.repository
 
 import android.content.Context
+import android.content.ContentUris
 import android.net.Uri
 import com.luisfagundes.core.testing.MainDispatcherRule
 import com.luisfagundes.library.api.domain.model.Media
@@ -8,21 +9,21 @@ import com.luisfagundes.library.impl.data.database.dao.StatisticsDao
 import com.luisfagundes.library.impl.data.database.entity.StatisticsEntity
 import com.luisfagundes.library.impl.data.datasource.LibraryDataSource
 import com.luisfagundes.library.impl.data.datasource.LibraryPreferences
-import com.luisfagundes.library.impl.data.mapper.MediaMapper
-import com.luisfagundes.library.impl.data.mapper.StatisticsMapper
+import com.luisfagundes.library.impl.data.model.MediaDto
 import com.luisfagundes.library.impl.tools.fakeMedia
-import com.luisfagundes.library.impl.tools.fakeMediaDto
-import com.luisfagundes.library.impl.tools.fakeStatistics
 import com.luisfagundes.library.impl.tools.fakeStatisticsEntity
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.Instant
@@ -34,25 +35,28 @@ internal class LibraryRepositoryImplTest {
     val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
 
     private val dataSource: LibraryDataSource = mockk()
-    private val mediaMapper = MediaMapper()
     private val preferences: LibraryPreferences = mockk()
     private val context: Context = mockk()
     private val statisticsDao: StatisticsDao = mockk(relaxed = true)
-    private val statisticsMapper = StatisticsMapper()
 
     private lateinit var repository: LibraryRepositoryImpl
 
     @BeforeEach
     fun setUp() {
+        mockkStatic(ContentUris::class)
+        every { ContentUris.withAppendedId(any<Uri>(), any<Long>()) } returns mockk()
         repository = LibraryRepositoryImpl(
             dataSource = dataSource,
-            mediaMapper = mediaMapper,
             preferences = preferences,
             statisticsDao = statisticsDao,
-            statisticsMapper = statisticsMapper,
             context = context,
             dispatcher = dispatcherRule.testDispatcher
         )
+    }
+
+    @AfterEach
+    fun tearDown() {
+        unmockkStatic(ContentUris::class)
     }
 
     @Test
@@ -67,9 +71,9 @@ internal class LibraryRepositoryImplTest {
         val june10Time = Instant.parse("2026-06-10T10:00:00Z").epochSecond
 
         val mediaDtos = listOf(
-            fakeMediaDto.copy(id = 1L, uri = mockUri1, dateAdded = may15Time, size = 100L),
-            fakeMediaDto.copy(id = 2L, uri = mockUri2, dateAdded = june10Time, size = 200L, isVideo = true),
-            fakeMediaDto.copy(id = 3L, uri = mockUri3, dateAdded = may1Time, size = 300L)
+            MediaDto(id = 1L, uri = mockUri1, dateAdded = may15Time, size = 100L, isVideo = false),
+            MediaDto(id = 2L, uri = mockUri2, dateAdded = june10Time, size = 200L, isVideo = true),
+            MediaDto(id = 3L, uri = mockUri3, dateAdded = may1Time, size = 300L, isVideo = false)
         )
 
         coEvery { dataSource.fetchMediaList() } returns Result.success(mediaDtos)
@@ -77,7 +81,10 @@ internal class LibraryRepositoryImplTest {
         every { preferences.getDeletedPhotoIds() } returns emptySet()
 
         // When
-        val media = repository.getActiveMedia().getOrThrow()
+        val media = repository.getActiveMedia().fold(
+            onSuccess = { it },
+            onFailure = { error("Expected active media, got ${it.message}") }
+        )
 
         // Then
         assertEquals(3, media.size)
@@ -88,8 +95,14 @@ internal class LibraryRepositoryImplTest {
         // Given
         val mediaId = 1L
         val mockUri: Uri = mockk()
-        val mediaDto = fakeMediaDto.copy(id = mediaId, uri = mockUri, dateAdded = 0L, size = 100L)
-        val media = fakeMedia.copy(id = mediaId, uri = mockUri, dateAdded = 0L, size = 100L)
+        val mediaDto = MediaDto(id = mediaId, uri = mockUri, dateAdded = 0L, size = 100L, isVideo = false)
+        val media = Media(
+            id = mediaId,
+            uri = mockUri.toString(),
+            dateAdded = 0L,
+            size = 100L,
+            isVideo = false
+        )
 
         coEvery { dataSource.fetchMediaList() } returns Result.success(listOf(mediaDto))
         every { preferences.getTrashedPhotoIds() } returns setOf(mediaId)
@@ -107,22 +120,21 @@ internal class LibraryRepositoryImplTest {
 
         // Then
         verify {
-            statisticsDao.insertOrUpdate(
-                StatisticsEntity(
-                    id = 1,
-                    memoryCleared = 100L,
-                    mediaDeleted = 1,
-                    photosDeleted = 1,
-                    videosDeleted = 0
-                )
-            )
+            statisticsDao.insertOrUpdate(match { entity ->
+                entity.id == 1 &&
+                    entity.memoryCleared == 100L &&
+                    entity.mediaDeleted == 1 &&
+                    entity.photosDeleted == 1 &&
+                    entity.videosDeleted == 0
+            })
         }
     }
 
     @Test
     fun `getStatistics should return statistics successfully`() = runTest {
         // Given
-        val expectedEntity = fakeStatisticsEntity.copy(
+        val expectedEntity = StatisticsEntity(
+            id = fakeStatisticsEntity.id,
             memoryCleared = 200L,
             mediaDeleted = 2,
             photosDeleted = 1,
@@ -134,16 +146,14 @@ internal class LibraryRepositoryImplTest {
         val result = repository.getStatistics()
 
         // Then
-        assertEquals(
-            Result.success(
-                fakeStatistics.copy(
-                    memoryCleared = 200L,
-                    mediaDeleted = 2,
-                    photosDeleted = 1,
-                    videosDeleted = 1
-                )
-            ),
-            result
+        result.fold(
+            onSuccess = {
+                assertEquals(expectedEntity.memoryCleared, it.memoryCleared)
+                assertEquals(expectedEntity.mediaDeleted, it.mediaDeleted)
+                assertEquals(expectedEntity.photosDeleted, it.photosDeleted)
+                assertEquals(expectedEntity.videosDeleted, it.videosDeleted)
+            },
+            onFailure = { error("Expected statistics, got ${it.message}") }
         )
     }
 }

@@ -4,11 +4,12 @@ import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.api.domain.model.Statistics
 import com.luisfagundes.library.impl.data.database.entity.StatisticsEntity
 import com.luisfagundes.library.impl.data.model.MediaDto
+import android.net.Uri
 import io.mockk.mockk
 
 internal val fakeMedia = Media(
     id = 1L,
-    uri = mockk(),
+    uri = "content://media/external/images/media/1",
     dateAdded = 1_000L,
     size = 2_000L,
     isVideo = false
@@ -16,7 +17,7 @@ internal val fakeMedia = Media(
 
 internal val fakeMediaDto = MediaDto(
     id = 1L,
-    uri = mockk(),
+    uri = mockk<Uri>(),
     dateAdded = 1_000L,
     size = 2_000L,
     isVideo = false

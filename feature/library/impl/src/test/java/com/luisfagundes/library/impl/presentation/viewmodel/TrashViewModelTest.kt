@@ -1,10 +1,9 @@
 package com.luisfagundes.library.impl.presentation.viewmodel
 
-import android.app.PendingIntent
-import android.content.IntentSender
 import app.cash.turbine.test
 import com.luisfagundes.core.testing.MainDispatcherRule
 import com.luisfagundes.library.api.domain.model.Media
+import com.luisfagundes.library.api.domain.model.MediaDeleteRequest
 import com.luisfagundes.library.api.domain.repository.LibraryRepository
 import com.luisfagundes.library.impl.presentation.effect.TrashUiEffect
 import com.luisfagundes.library.impl.presentation.event.TrashUiEvent
@@ -89,7 +88,13 @@ internal class TrashViewModelTest {
     fun `dispatchEvent RestoreMedia should restore media and update Content state`() = runTest {
         // Given
         val media1 = fakeMedia
-        val media2 = fakeMedia.copy(id = 2L, dateAdded = 1_100L, size = 3_000L, isVideo = true)
+        val media2 = Media(
+            id = 2L,
+            uri = fakeMedia.uri,
+            dateAdded = 1_100L,
+            size = 3_000L,
+            isVideo = true
+        )
         val mediaList = listOf(media1, media2)
 
         coEvery { repository.getTrashMedia() } returns Result.success(mediaList)
@@ -140,12 +145,10 @@ internal class TrashViewModelTest {
     fun `dispatchEvent ConfirmDeletion with pending intent should show delete confirmation effect`() = runTest {
         // Given
         val mediaList = listOf(fakeMedia)
-        val mockPendingIntent = mockk<PendingIntent>()
-        val mockIntentSender = mockk<IntentSender>()
+        val deleteRequest = MediaDeleteRequest(listOf(fakeMedia.uri))
 
         coEvery { repository.getTrashMedia() } returns Result.success(mediaList)
-        coEvery { repository.createDeleteRequest(listOf(1L)) } returns mockPendingIntent
-        every { mockPendingIntent.intentSender } returns mockIntentSender
+        coEvery { repository.createDeleteRequest(listOf(1L)) } returns Result.success(deleteRequest)
 
         viewModel.uiState.test {
             assertEquals(TrashUiState.Loading, awaitItem())
@@ -159,7 +162,7 @@ internal class TrashViewModelTest {
                 viewModel.dispatchEvent(TrashUiEvent.ConfirmDeletion)
 
                 // Then
-                assertEquals(TrashUiEffect.ShowDeleteConfirmation(mockIntentSender), awaitItem())
+                assertEquals(TrashUiEffect.ShowDeleteConfirmation(deleteRequest), awaitItem())
             }
 
             coVerify(exactly = 1) { repository.createDeleteRequest(listOf(1L)) }
@@ -168,14 +171,44 @@ internal class TrashViewModelTest {
     }
 
     @Test
+    fun `dispatchEvent ConfirmDeletion failure should set Error state`() = runTest {
+        // Given
+        val exception = IllegalStateException("Unable to create delete request")
+        coEvery { repository.getTrashMedia() } returns Result.success(listOf(fakeMedia))
+        coEvery { repository.createDeleteRequest(listOf(1L)) } returns Result.failure(exception)
+
+        viewModel.uiState.test {
+            assertEquals(TrashUiState.Loading, awaitItem())
+
+            // When
+            viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
+
+            // Then
+            awaitItem()
+
+            // When
+            viewModel.dispatchEvent(TrashUiEvent.ConfirmDeletion)
+
+            // Then
+            assertEquals(TrashUiState.Error, awaitItem())
+        }
+    }
+
+    @Test
     fun `dispatchEvent ConfirmDeletion without pending intent should permanently delete media and navigate to congratulations`() = runTest {
         // Given
         val media1 = fakeMedia
-        val media2 = fakeMedia.copy(id = 2L, dateAdded = 1_100L, size = 3_000L, isVideo = true)
+        val media2 = Media(
+            id = 2L,
+            uri = fakeMedia.uri,
+            dateAdded = 1_100L,
+            size = 3_000L,
+            isVideo = true
+        )
         val mediaList = listOf(media1, media2)
 
         coEvery { repository.getTrashMedia() } returns Result.success(mediaList)
-        coEvery { repository.createDeleteRequest(listOf(1L, 2L)) } returns null
+        coEvery { repository.createDeleteRequest(listOf(1L, 2L)) } returns Result.success(null)
         coEvery { repository.permanentlyDelete(mediaList) } returns Unit
 
         viewModel.uiState.test {
@@ -202,7 +235,13 @@ internal class TrashViewModelTest {
     fun `dispatchEvent ApproveDeletion should permanently delete media and navigate to congratulations`() = runTest {
         // Given
         val media1 = fakeMedia
-        val media2 = fakeMedia.copy(id = 2L, dateAdded = 1_100L, size = 3_000L, isVideo = true)
+        val media2 = Media(
+            id = 2L,
+            uri = fakeMedia.uri,
+            dateAdded = 1_100L,
+            size = 3_000L,
+            isVideo = true
+        )
         val mediaList = listOf(media1, media2)
 
         coEvery { repository.getTrashMedia() } returns Result.success(mediaList)

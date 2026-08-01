@@ -2,7 +2,7 @@ package com.luisfagundes.onboarding.impl.presentation.viewmodel
 
 import app.cash.turbine.test
 import com.luisfagundes.core.testing.MainDispatcherRule
-import com.luisfagundes.onboarding.impl.domain.repository.OnboardingRepository
+import com.luisfagundes.onboarding.api.domain.repository.OnboardingRepository
 import com.luisfagundes.onboarding.impl.presentation.effect.PermissionUiEffect
 import com.luisfagundes.onboarding.impl.presentation.event.PermissionUiEvent
 import io.mockk.coEvery

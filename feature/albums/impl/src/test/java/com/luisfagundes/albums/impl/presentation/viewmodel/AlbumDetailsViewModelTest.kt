@@ -2,6 +2,7 @@ package com.luisfagundes.albums.impl.presentation.viewmodel
 
 import app.cash.turbine.test
 import com.luisfagundes.albums.impl.domain.usecase.GetAlbumMediaUseCase
+import com.luisfagundes.albums.impl.domain.model.AlbumMedia
 import com.luisfagundes.albums.impl.presentation.effect.AlbumDetailsUiEffect
 import com.luisfagundes.albums.impl.presentation.event.AlbumDetailsUiEvent
 import com.luisfagundes.albums.impl.presentation.state.AlbumDetailsUiState
@@ -47,7 +48,13 @@ internal class AlbumDetailsViewModelTest {
         val albumId = "camera_id"
         val mediaList = listOf(
             fakeAlbumMedia,
-            fakeAlbumMedia.copy(id = 2L, dateAdded = 2_000L, isVideo = true)
+            AlbumMedia(
+                id = 2L,
+                uri = fakeAlbumMedia.uri,
+                dateAdded = 2_000L,
+                durationMillis = fakeAlbumMedia.durationMillis,
+                isVideo = true
+            )
         )
 
         coEvery { getAlbumMediaUseCase(albumId) } returns Result.success(mediaList)
