@@ -195,7 +195,7 @@ internal class TrashViewModelTest {
     }
 
     @Test
-    fun `dispatchEvent ConfirmDeletion without pending intent should permanently delete media and navigate to congratulations`() = runTest {
+    fun `deletion without pending intent removes media and shows congratulations`() = runTest {
         // Given
         val media1 = fakeMedia
         val media2 = Media(

@@ -82,7 +82,7 @@ internal class MediaDetailsViewModelTest {
     }
 
     @Test
-    fun `dispatchEvent LoadDetails success with non-existent id should set Content state with initialIndex 0`() = runTest {
+    fun `load details with unknown id starts at first media`() = runTest {
         // Given
         val mediaList = listOf(fakeMedia)
         val trashCount = 0
@@ -164,7 +164,7 @@ internal class MediaDetailsViewModelTest {
     }
 
     @Test
-    fun `dispatchEvent SwipeUp should move media to trash and send NavigateBack effect when no media remain`() = runTest {
+    fun `swiping the last media moves it to trash and navigates back`() = runTest {
         // Given
         val mediaList = listOf(fakeMedia)
         val trashCount = 2

@@ -38,7 +38,8 @@ internal fun VideoPlayer(
             addListener(object : Player.Listener {
                 override fun onVideoSizeChanged(videoSize: VideoSize) {
                     if (videoSize.width > 0 && videoSize.height > 0) {
-                        val isRotated = videoSize.unappliedRotationDegrees == 90 || videoSize.unappliedRotationDegrees == 270
+                        val rotation = videoSize.unappliedRotationDegrees
+                        val isRotated = rotation == 90 || rotation == 270
                         val width = if (isRotated) videoSize.height else videoSize.width
                         val height = if (isRotated) videoSize.width else videoSize.height
                         onVideoSizeChanged?.invoke(width.toFloat() / height.toFloat())

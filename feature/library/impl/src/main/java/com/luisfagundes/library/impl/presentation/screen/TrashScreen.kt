@@ -192,40 +192,58 @@ private fun TrashContent(
         }
     ) { innerPadding ->
         if (mediaToBeDeleted.isEmpty()) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-            ) {
-                Text(
-                    text = stringResource(R.string.trash_is_empty),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
+            TrashEmptyContent(innerPadding)
         } else {
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = MaterialTheme.spacing.mediaTileMin),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .consumeWindowInsets(innerPadding),
-                contentPadding = PaddingValues(
-                    top = innerPadding.calculateTopPadding(),
-                    bottom = innerPadding.calculateBottomPadding(),
-                    start = MaterialTheme.spacing.default,
-                    end = MaterialTheme.spacing.default
-                ),
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall),
-                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall)
-            ) {
-                items(mediaToBeDeleted) { media ->
-                    TrashMediaItem(
-                        media = media,
-                        onItemClick = { onEvent(TrashUiEvent.RestoreMedia(media.id)) }
-                    )
-                }
-            }
+            TrashMediaGrid(
+                mediaToBeDeleted = mediaToBeDeleted,
+                innerPadding = innerPadding,
+                onEvent = onEvent
+            )
+        }
+    }
+}
+
+@Composable
+private fun TrashEmptyContent(innerPadding: PaddingValues) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+    ) {
+        Text(
+            text = stringResource(R.string.trash_is_empty),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
+}
+
+@Composable
+private fun TrashMediaGrid(
+    mediaToBeDeleted: List<Media>,
+    innerPadding: PaddingValues,
+    onEvent: (TrashUiEvent) -> Unit
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = MaterialTheme.spacing.mediaTileMin),
+        modifier = Modifier
+            .fillMaxSize()
+            .consumeWindowInsets(innerPadding),
+        contentPadding = PaddingValues(
+            top = innerPadding.calculateTopPadding(),
+            bottom = innerPadding.calculateBottomPadding(),
+            start = MaterialTheme.spacing.default,
+            end = MaterialTheme.spacing.default
+        ),
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall),
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall)
+    ) {
+        items(mediaToBeDeleted) { media ->
+            TrashMediaItem(
+                media = media,
+                onItemClick = { onEvent(TrashUiEvent.RestoreMedia(media.id)) }
+            )
         }
     }
 }

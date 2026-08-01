@@ -3,11 +3,8 @@ package com.luisfagundes.library.impl.presentation.screen
 import android.content.Intent
 import androidx.core.net.toUri
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,7 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
@@ -30,7 +26,6 @@ import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -51,10 +46,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -64,20 +56,16 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewWrapper
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.core.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.core.designsystem.components.HoneybeeLoadingTemplate
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
 import com.luisfagundes.core.designsystem.R as DesignSystemResources
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import com.luisfagundes.library.impl.R
 import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.impl.presentation.components.FullscreenPhotoViewer
 import com.luisfagundes.library.impl.presentation.components.TrashBadgedBox
-import com.luisfagundes.library.impl.presentation.components.VideoPlayer
 import com.luisfagundes.library.impl.presentation.effect.MediaDetailsUiEffect
 import com.luisfagundes.library.impl.presentation.event.MediaDetailsUiEvent
 import com.luisfagundes.library.impl.presentation.provider.MediaDetailsUiStateProvider
@@ -87,6 +75,8 @@ import com.luisfagundes.library.impl.presentation.tools.formatPhotoSize
 import com.luisfagundes.library.impl.presentation.tools.getFriendlyFileType
 import com.luisfagundes.library.impl.presentation.viewmodel.MediaDetailsViewModel
 import kotlinx.coroutines.launch
+
+
 
 @Composable
 internal fun MediaDetailsScreen(
@@ -295,7 +285,6 @@ private fun MediaPagerItem(
         )
     }
     val swipeOffset = remember(media.id) { Animatable(0f) }
-    val swipeLimit = -350f
     var showBottomSheet by remember { mutableStateOf(false) }
     var showFullscreenPhoto by remember { mutableStateOf(false) }
 
@@ -303,85 +292,21 @@ private fun MediaPagerItem(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .fillMaxSize()
-            .pointerInput(media.id) {
-                detectVerticalDragGestures(
-                    onDragEnd = {
-                        if (swipeOffset.value < swipeLimit) {
-                            coroutineScope.launch {
-                                swipeOffset.animateTo(-1500f, tween(300))
-                                onEvent(MediaDetailsUiEvent.SwipeUp(media.id))
-                            }
-                        } else {
-                            coroutineScope.launch {
-                                swipeOffset.animateTo(0f, spring())
-                            }
-                        }
-                    },
-                    onVerticalDrag = { change, dragAmount ->
-                        if (dragAmount < 0 || swipeOffset.value < 0) {
-                            change.consume()
-                            coroutineScope.launch {
-                                swipeOffset.snapTo(swipeOffset.value + dragAmount)
-                            }
-                        }
-                    }
-                )
-            }
+            .mediaSwipeGesture(
+                mediaId = media.id,
+                swipeOffset = swipeOffset,
+                coroutineScope = coroutineScope,
+                onSwipeUp = { onEvent(MediaDetailsUiEvent.SwipeUp(media.id)) }
+            )
     ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default)
-        ) {
-            val largeCornerShape = RoundedCornerShape(MaterialTheme.spacing.largeCorner)
-            Card(
-                shape = largeCornerShape,
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0f)
-                ),
-                modifier = (if (aspectRatio != null) {
-                    Modifier.aspectRatio(aspectRatio!!)
-                } else {
-                    Modifier.fillMaxSize()
-                })
-                    .graphicsLayer {
-                        translationY = swipeOffset.value
-                        alpha = (1f + (swipeOffset.value / 1200f)).coerceIn(0.2f, 1f)
-                        shape = largeCornerShape
-                        clip = true
-                    }
-            ) {
-                if (media.isVideo) {
-                    VideoPlayer(
-                        videoUri = media.uri.toUri(),
-                        isPageSelected = isPageSelected,
-                        modifier = Modifier.fillMaxSize(),
-                        onVideoSizeChanged = { ratio ->
-                            aspectRatio = ratio
-                        }
-                    )
-                } else {
-                    AsyncImage(
-                        model = media.uri,
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        onSuccess = { state ->
-                            val size = state.painter.intrinsicSize
-                            if (size.width > 0 && size.height > 0) {
-                                aspectRatio = size.width / size.height
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) {
-                                showFullscreenPhoto = true
-                            }
-                    )
-                }
-            }
-        }
+        MediaPagerCard(
+            media = media,
+            isPageSelected = isPageSelected,
+            aspectRatio = aspectRatio,
+            swipeOffset = swipeOffset,
+            onAspectRatioChanged = { aspectRatio = it },
+            onPhotoClick = { showFullscreenPhoto = true }
+        )
 
         MediaPagerItemActionsColumn(
             media = media,

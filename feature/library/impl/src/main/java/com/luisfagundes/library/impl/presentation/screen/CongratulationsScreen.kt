@@ -77,81 +77,107 @@ internal fun CongratulationsScreen(
             )
         }
     ) { innerPadding ->
-        Column(
+        CongratulationsContent(
+            composition = composition,
+            progress = progress,
+            sizeValue = sizeValue,
+            sizeUnit = sizeUnit,
+            deletedCount = deletedCount,
+            modifier = Modifier.padding(innerPadding)
+        )
+    }
+}
+
+@Composable
+private fun CongratulationsContent(
+    composition: com.airbnb.lottie.LottieComposition?,
+    progress: Float,
+    sizeValue: String,
+    sizeUnit: String,
+    deletedCount: Int,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = MaterialTheme.spacing.default),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        LottieAnimation(
+            composition = composition,
+            progress = { progress },
+            modifier = Modifier.size(MaterialTheme.spacing.illustrationSize)
+        )
+        SavedSize(sizeValue = sizeValue, sizeUnit = sizeUnit)
+        Text(
+            text = stringResource(R.string.saved),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+        )
+        Spacer(modifier = Modifier.height(MaterialTheme.spacing.large))
+        DeletedMediaCard(deletedCount = deletedCount)
+    }
+}
+
+@Composable
+private fun SavedSize(sizeValue: String, sizeUnit: String) {
+    Row(
+        verticalAlignment = Alignment.Bottom,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = sizeValue,
+            fontSize = 64.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Spacer(modifier = Modifier.width(MaterialTheme.spacing.small))
+        Text(
+            text = sizeUnit,
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.padding(bottom = MaterialTheme.spacing.content)
+        )
+    }
+}
+
+@Composable
+private fun DeletedMediaCard(deletedCount: Int) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
+        shape = RoundedCornerShape(MaterialTheme.spacing.default)
+    ) {
+        Row(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = MaterialTheme.spacing.default),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxWidth()
+                .padding(MaterialTheme.spacing.default),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            LottieAnimation(
-                composition = composition,
-                progress = { progress },
-                modifier = Modifier.size(MaterialTheme.spacing.illustrationSize)
-            )
-            Row(
-                verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = sizeValue,
-                    fontSize = 64.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.width(MaterialTheme.spacing.small))
                 Text(
-                    text = sizeUnit,
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.padding(bottom = MaterialTheme.spacing.content)
+                    text = stringResource(R.string.media_deleted),
+                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Text(
-                text = stringResource(R.string.saved),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                text = deletedCount.toString(),
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Spacer(
-                modifier = Modifier.height(MaterialTheme.spacing.large)
-            )
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                ),
-                shape = RoundedCornerShape(MaterialTheme.spacing.default)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(MaterialTheme.spacing.default),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.width(MaterialTheme.spacing.small))
-                        Text(
-                            text = stringResource(R.string.media_deleted),
-                            fontWeight = FontWeight.SemiBold,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Text(
-                        text = deletedCount.toString(),
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
         }
     }
 }

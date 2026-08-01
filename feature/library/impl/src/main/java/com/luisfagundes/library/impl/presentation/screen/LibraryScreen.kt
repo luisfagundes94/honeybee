@@ -153,62 +153,81 @@ private fun LibraryContent(
         }
     ) { innerPadding ->
         if (mediaSectionList.isEmpty()) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
+            LibraryEmptyContent(innerPadding)
+        } else {
+            LibraryMediaGrid(
+                mediaSectionList = mediaSectionList,
+                innerPadding = innerPadding,
+                onEvent = onEvent
+            )
+        }
+    }
+}
+
+@Composable
+private fun LibraryEmptyContent(innerPadding: PaddingValues) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+    ) {
+        Text(
+            text = stringResource(R.string.library_is_empty),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
+}
+
+@Composable
+private fun LibraryMediaGrid(
+    mediaSectionList: List<MediaSection>,
+    innerPadding: PaddingValues,
+    onEvent: (LibraryUiEvent) -> Unit
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = MaterialTheme.spacing.mediaTileMin),
+        modifier = Modifier
+            .fillMaxSize()
+            .consumeWindowInsets(innerPadding),
+        contentPadding = PaddingValues(
+            top = innerPadding.calculateTopPadding(),
+            bottom = innerPadding.calculateBottomPadding(),
+            start = MaterialTheme.spacing.default,
+            end = MaterialTheme.spacing.default
+        ),
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall),
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall)
+    ) {
+        mediaSectionList.forEach { mediaSection ->
+            item(
+                key = "header_${mediaSection.yearMonth}",
+                span = { GridItemSpan(maxLineSpan) },
+                contentType = "header"
             ) {
                 Text(
-                    text = stringResource(R.string.library_is_empty),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyLarge
+                    text = stringResource(
+                        R.string.media_section_header,
+                        mediaSection.yearMonth.getFormattedMonthName(),
+                        mediaSection.yearMonth.year
+                    ),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .padding(vertical = MaterialTheme.spacing.small)
+                        .semantics { heading() }
                 )
             }
-        } else {
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = MaterialTheme.spacing.mediaTileMin),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .consumeWindowInsets(innerPadding),
-                contentPadding = PaddingValues(
-                    top = innerPadding.calculateTopPadding(),
-                    bottom = innerPadding.calculateBottomPadding(),
-                    start = MaterialTheme.spacing.default,
-                    end = MaterialTheme.spacing.default
-                ),
-                horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall),
-                verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall)
-            ) {
-                mediaSectionList.forEach { mediaSection ->
-                    item(
-                        key = "header_${mediaSection.yearMonth}",
-                        span = { GridItemSpan(maxLineSpan) },
-                        contentType = "header"
-                    ) {
-                        val month = mediaSection.yearMonth.getFormattedMonthName()
-                        val year = mediaSection.yearMonth.year
-
-                        Text(
-                            text = stringResource(R.string.media_section_header, month, year),
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier
-                                .padding(vertical = MaterialTheme.spacing.small)
-                                .semantics { heading() }
-                        )
-                    }
-                    items(
-                        items = mediaSection.mediaList,
-                        key = { media -> media.id },
-                        contentType = { "media" }
-                    ) { media ->
-                        MediaGridItem(
-                            media = media,
-                            onClick = { onEvent(LibraryUiEvent.MediaClick(media.id)) }
-                        )
-                    }
-                }
+            items(
+                items = mediaSection.mediaList,
+                key = { media -> media.id },
+                contentType = { "media" }
+            ) { media ->
+                MediaGridItem(
+                    media = media,
+                    onClick = { onEvent(LibraryUiEvent.MediaClick(media.id)) }
+                )
             }
         }
     }

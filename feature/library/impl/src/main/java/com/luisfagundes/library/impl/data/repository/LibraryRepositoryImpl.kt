@@ -131,58 +131,57 @@ internal class LibraryRepositoryImpl @Inject constructor(
         }
     }
 
-    private fun getMediaUri(id: Long, videoIds: Set<Long>): Uri {
-        val isVideo = id in videoIds
-        return ContentUris.withAppendedId(
-            if (isVideo) MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-            else MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-            id
-        )
-    }
-
     override suspend fun getStatistics(): Result<Statistics> = withContext(dispatcher) {
         safeRunCatching {
             val entity = statisticsDao.getStatistics()
             entity.toDomain()
         }
     }
+}
 
-    private fun MediaDto.toDomain() = Media(
-        id = id,
-        uri = uri.toString(),
-        dateAdded = dateAdded,
-        size = size,
-        mimeType = mimeType,
-        width = width,
-        height = height,
-        durationMillis = durationMillis,
-        isVideo = isVideo,
-        bucketId = bucketId,
-        bucketDisplayName = bucketDisplayName,
-        isFavorite = isFavorite
+private fun getMediaUri(id: Long, videoIds: Set<Long>): Uri {
+    val isVideo = id in videoIds
+    return ContentUris.withAppendedId(
+        if (isVideo) MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+        else MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+        id
     )
+}
 
-    private fun StatisticsEntity?.toDomain() = Statistics(
-        memoryCleared = this?.memoryCleared ?: 0L,
-        mediaDeleted = this?.mediaDeleted ?: 0,
-        photosDeleted = this?.photosDeleted ?: 0,
-        videosDeleted = this?.videosDeleted ?: 0
+private fun MediaDto.toDomain() = Media(
+    id = id,
+    uri = uri.toString(),
+    dateAdded = dateAdded,
+    size = size,
+    mimeType = mimeType,
+    width = width,
+    height = height,
+    durationMillis = durationMillis,
+    isVideo = isVideo,
+    bucketId = bucketId,
+    bucketDisplayName = bucketDisplayName,
+    isFavorite = isFavorite
+)
+
+private fun StatisticsEntity?.toDomain() = Statistics(
+    memoryCleared = this?.memoryCleared ?: 0L,
+    mediaDeleted = this?.mediaDeleted ?: 0,
+    photosDeleted = this?.photosDeleted ?: 0,
+    videosDeleted = this?.videosDeleted ?: 0
+)
+
+private fun StatisticsEntity?.toUpdatedEntity(deletedMedia: List<Media>): StatisticsEntity {
+    val current = this ?: StatisticsEntity(
+        memoryCleared = 0L,
+        mediaDeleted = 0,
+        photosDeleted = 0,
+        videosDeleted = 0
     )
-
-    private fun StatisticsEntity?.toUpdatedEntity(deletedMedia: List<Media>): StatisticsEntity {
-        val current = this ?: StatisticsEntity(
-            memoryCleared = 0L,
-            mediaDeleted = 0,
-            photosDeleted = 0,
-            videosDeleted = 0
-        )
-        return StatisticsEntity(
-            id = current.id,
-            memoryCleared = current.memoryCleared + deletedMedia.sumOf { it.size },
-            mediaDeleted = current.mediaDeleted + deletedMedia.size,
-            photosDeleted = current.photosDeleted + deletedMedia.count { !it.isVideo },
-            videosDeleted = current.videosDeleted + deletedMedia.count { it.isVideo }
-        )
-    }
-
+    return StatisticsEntity(
+        id = current.id,
+        memoryCleared = current.memoryCleared + deletedMedia.sumOf { it.size },
+        mediaDeleted = current.mediaDeleted + deletedMedia.size,
+        photosDeleted = current.photosDeleted + deletedMedia.count { !it.isVideo },
+        videosDeleted = current.videosDeleted + deletedMedia.count { it.isVideo }
+    )
 }
