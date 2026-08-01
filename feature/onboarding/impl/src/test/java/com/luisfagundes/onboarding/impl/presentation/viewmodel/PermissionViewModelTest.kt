@@ -48,7 +48,7 @@ internal class PermissionViewModelTest {
     }
 
     @Test
-    fun `dispatchEvent PermissionsDenied with shouldShowRationale true should send ShowDeniedMessage effect`() = runTest {
+    fun `denied permissions with rationale sends denied message`() = runTest {
         viewModel.uiEffect.test {
             // When
             viewModel.dispatchEvent(PermissionUiEvent.PermissionsDenied(shouldShowRationale = true))
@@ -59,7 +59,7 @@ internal class PermissionViewModelTest {
     }
 
     @Test
-    fun `dispatchEvent PermissionsDenied with shouldShowRationale false should send ShowSettingsDialog effect`() = runTest {
+    fun `denied permissions without rationale opens settings`() = runTest {
         viewModel.uiEffect.test {
             // When
             viewModel.dispatchEvent(PermissionUiEvent.PermissionsDenied(shouldShowRationale = false))
