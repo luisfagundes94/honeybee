@@ -19,17 +19,12 @@ import javax.inject.Inject
 internal class LibraryViewModel @Inject constructor(
     private val getMediaByMonthUseCase: GetMediaByMonthUseCase,
     private val repository: LibraryRepository,
-    subscriptionProvider: SubscriptionProvider,
+    private val subscriptionProvider: SubscriptionProvider,
 ) : ViewModel<LibraryUiState, LibraryUiEvent, LibraryUiEffect>(
     LibraryUiState.Loading
 ) {
     init {
-        viewModelScope.launch {
-            subscriptionProvider.status
-                .filter { it != SubscriptionStatus.Loading }
-                .distinctUntilChanged()
-                .collect { loadMedia() }
-        }
+        observeSubscriptionStatus()
     }
 
     override fun dispatchEvent(event: LibraryUiEvent) {
@@ -37,6 +32,15 @@ internal class LibraryViewModel @Inject constructor(
             is LibraryUiEvent.LoadMedia -> loadMedia()
             is LibraryUiEvent.TrashClick -> navigateToTrash()
             is LibraryUiEvent.MediaClick -> navigateToMediaDetail(event.mediaId)
+        }
+    }
+
+    private fun observeSubscriptionStatus() {
+        viewModelScope.launch {
+            subscriptionProvider.status
+                .filter { it != SubscriptionStatus.Loading }
+                .distinctUntilChanged()
+                .collect { loadMedia() }
         }
     }
 

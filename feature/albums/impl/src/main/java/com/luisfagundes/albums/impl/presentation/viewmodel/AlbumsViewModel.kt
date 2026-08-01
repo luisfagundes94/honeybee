@@ -17,9 +17,25 @@ import javax.inject.Inject
 @HiltViewModel
 internal class AlbumsViewModel @Inject constructor(
     private val getAlbumsUseCase: GetAlbumsUseCase,
-    subscriptionProvider: SubscriptionProvider,
-) : ViewModel<AlbumsUiState, AlbumsUiEvent, AlbumsUiEffect>(AlbumsUiState.Loading) {
+    private val subscriptionProvider: SubscriptionProvider,
+) : ViewModel<AlbumsUiState, AlbumsUiEvent, AlbumsUiEffect>(
+    initialState = AlbumsUiState.Loading
+) {
     init {
+        observeSubscriptionStatus()
+    }
+
+    override fun dispatchEvent(event: AlbumsUiEvent) {
+        when (event) {
+            is AlbumsUiEvent.LoadAlbums -> loadAlbums()
+            is AlbumsUiEvent.AlbumClick -> navigateToAlbumDetails(
+                albumId = event.albumId,
+                albumName = event.albumName
+            )
+        }
+    }
+
+    private fun observeSubscriptionStatus() {
         viewModelScope.launch {
             subscriptionProvider.status
                 .filter { it != SubscriptionStatus.Loading }
@@ -28,16 +44,9 @@ internal class AlbumsViewModel @Inject constructor(
         }
     }
 
-
-    override fun dispatchEvent(event: AlbumsUiEvent) {
-        when (event) {
-            is AlbumsUiEvent.LoadAlbums -> loadAlbums()
-            is AlbumsUiEvent.AlbumClick -> navigateToAlbumDetails(event.albumId, event.albumName)
-        }
-    }
-
     private fun loadAlbums() = viewModelScope.launch {
         setState { AlbumsUiState.Loading }
+
         getAlbumsUseCase().fold(
             onSuccess = { albums ->
                 setState { AlbumsUiState.Content(albums) }

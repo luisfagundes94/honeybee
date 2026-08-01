@@ -25,7 +25,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,11 +39,11 @@ import androidx.compose.ui.tooling.preview.PreviewWrapper
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.luisfagundes.albums.impl.R.string.albums
 import com.luisfagundes.albums.impl.R.string.error_loading_albums_description
 import com.luisfagundes.albums.impl.R.string.error_loading_albums_title
-import com.luisfagundes.albums.impl.R.string.albums
-import com.luisfagundes.albums.impl.R.string.no_albums
 import com.luisfagundes.albums.impl.R.string.favorites
+import com.luisfagundes.albums.impl.R.string.no_albums
 import com.luisfagundes.albums.impl.R.string.videos
 import com.luisfagundes.albums.impl.domain.model.Album
 import com.luisfagundes.albums.impl.presentation.effect.AlbumsUiEffect
@@ -52,15 +51,15 @@ import com.luisfagundes.albums.impl.presentation.event.AlbumsUiEvent
 import com.luisfagundes.albums.impl.presentation.provider.AlbumsUiStateProvider
 import com.luisfagundes.albums.impl.presentation.state.AlbumsUiState
 import com.luisfagundes.albums.impl.presentation.tools.getAlbumStyle
-import com.luisfagundes.albums.impl.presentation.tools.getDisplayName
 import com.luisfagundes.albums.impl.presentation.tools.getCountText
+import com.luisfagundes.albums.impl.presentation.tools.getDisplayName
 import com.luisfagundes.albums.impl.presentation.viewmodel.AlbumsViewModel
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
+import com.luisfagundes.core.designsystem.R.string.retry
 import com.luisfagundes.core.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.core.designsystem.components.HoneybeeLoadingTemplate
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
-import com.luisfagundes.core.designsystem.R.string.retry
 
 @Composable
 internal fun AlbumsScreen(
@@ -76,10 +75,6 @@ internal fun AlbumsScreen(
                 effect.albumName
             )
         }
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.dispatchEvent(AlbumsUiEvent.LoadAlbums)
     }
 
     AlbumsScreen(
