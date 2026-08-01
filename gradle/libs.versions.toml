@@ -34,6 +34,7 @@ room = "2.8.4"
 playBilling = "9.1.0"
 googleMobileAds = "25.4.0"
 ump = "4.0.0"
+detekt = "2.0.0-alpha.5"
 
 [libraries]
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
@@ -94,5 +95,6 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }
 android-test = { id = "com.android.test", version.ref = "agp" }
 baselineprofile = { id = "androidx.baselineprofile", version.ref = "baselineprofile" }
+detekt = { id = "dev.detekt", version.ref = "detekt" }
 
 
