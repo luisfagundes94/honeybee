@@ -20,7 +20,8 @@ internal class LocalLibraryDataSource @Inject constructor(
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher,
     private val subscriptionProvider: SubscriptionProvider
 ) : LibraryDataSource {
-    private val sortOrder = "${MediaStore.Files.FileColumns.DATE_ADDED} DESC"
+    private val sortOrder = "${MediaStore.Files.FileColumns.DATE_ADDED} DESC, " +
+        "${MediaStore.Files.FileColumns._ID} DESC"
 
     override suspend fun fetchMediaList(): Result<List<MediaDto>> = withContext(dispatcher) {
         safeRunCatching { queryMedia() }

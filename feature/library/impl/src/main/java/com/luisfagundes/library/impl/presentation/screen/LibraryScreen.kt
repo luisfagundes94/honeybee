@@ -26,11 +26,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -42,9 +46,8 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewWrapper
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImagePainter
-import coil.compose.SubcomposeAsyncImage
-import coil.compose.SubcomposeAsyncImageContent
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.core.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.core.designsystem.components.HoneybeeLoadingTemplate
@@ -234,6 +237,14 @@ private fun MediaGridItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val imageRequest = remember(media.uri, context) {
+        ImageRequest.Builder(context)
+            .data(media.uri)
+            .crossfade(false)
+            .build()
+    }
+    var imageLoadFailed by remember(media.uri) { mutableStateOf(false) }
     val mediaContentDescription = stringResource(
         if (media.isVideo) R.string.open_video else R.string.open_photo
     )
@@ -250,35 +261,24 @@ private fun MediaGridItem(
                 contentDescription = mediaContentDescription
             }
     ) {
-        SubcomposeAsyncImage(
-            model = media.uri,
+        AsyncImage(
+            model = imageRequest,
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            when (painter.state) {
-                is AsyncImagePainter.State.Loading -> Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                ) {}
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+            onSuccess = { imageLoadFailed = false },
+            onError = { imageLoadFailed = true }
+        )
 
-                is AsyncImagePainter.State.Error -> Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.BrokenImage,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                else -> SubcomposeAsyncImageContent()
-            }
+        if (imageLoadFailed) {
+            Icon(
+                imageVector = Icons.Default.BrokenImage,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.align(Alignment.Center)
+            )
         }
 
         if (media.isVideo) {
