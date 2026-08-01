@@ -18,6 +18,7 @@ This file is the quick-reference guide for agents and contributors working in th
 - DataSources must add meaningful behavior; pass-through wrappers are not allowed.
 - Default new types to `internal`; only navigation routes are public unless an explicit `api`/`impl` split is needed.
 - Use Hilt for dependency injection and the project dispatcher qualifiers.
+- Always run detekt after adding new code or before commiting to validate changes
 
 ## Detailed guidance
 
