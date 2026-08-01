@@ -1,4 +1,6 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+import dev.detekt.gradle.extensions.DetektExtension
+import dev.detekt.gradle.extensions.FailOnSeverity
+
 plugins {
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.android.application) apply false
@@ -10,5 +12,21 @@ plugins {
     alias(libs.plugins.android.test) apply false
     alias(libs.plugins.baselineprofile) apply false
     alias(libs.plugins.detekt) apply false
+}
+
+val detektAll = tasks.register("detektAll") {
+    group = "verification"
+    description = "Runs Detekt for every module."
+    dependsOn(subprojects.map { "${it.path}:detekt" })
+}
+
+subprojects {
+    plugins.withId("dev.detekt") {
+        extensions.configure<DetektExtension> {
+            config.setFrom(rootProject.file("config/detekt/detekt.yml"))
+            ignoreFailures = false
+            failOnSeverity = FailOnSeverity.Warning
+        }
+    }
 }
 
