@@ -9,4 +9,5 @@ internal sealed interface PremiumUiEvent : UiEvent {
     data object PurchaseClick : PremiumUiEvent
     data object RestoreClick : PremiumUiEvent
     data object ManageSubscriptionClick : PremiumUiEvent
+    data object PaywallClick : PremiumUiEvent
 }

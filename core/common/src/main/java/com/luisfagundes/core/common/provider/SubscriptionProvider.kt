@@ -13,9 +13,3 @@ interface SubscriptionProvider {
 
     suspend fun refresh()
 }
-
-data class SubscriptionConfig(
-    val productId: String,
-    val monthlyBasePlanId: String,
-    val annualBasePlanId: String,
-)

@@ -26,6 +26,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -44,36 +47,61 @@ import com.luisfagundes.premium.impl.presentation.effect.PremiumUiEffect
 import com.luisfagundes.premium.impl.presentation.event.PremiumUiEvent
 import com.luisfagundes.premium.impl.presentation.state.PremiumUiState
 import com.luisfagundes.premium.impl.presentation.viewmodel.PremiumViewModel
+import com.revenuecat.purchases.ui.revenuecatui.ExperimentalPreviewRevenueCatUIPurchasesAPI
+import com.revenuecat.purchases.ui.revenuecatui.Paywall
+import com.revenuecat.purchases.ui.revenuecatui.PaywallOptions
+import com.revenuecat.purchases.ui.revenuecatui.customercenter.CustomerCenter
 
+@OptIn(ExperimentalPreviewRevenueCatUIPurchasesAPI::class)
 @Composable
 internal fun PremiumScreen(
     onNavigateBack: () -> Unit,
     onLaunchPurchase: (Activity, String) -> Unit,
-    onOpenSubscriptionManagement: (Activity) -> Unit,
     viewModel: PremiumViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val activity = LocalActivity.current
+    var showPaywall by remember { mutableStateOf(false) }
+    var showCustomerCenter by remember { mutableStateOf(false) }
 
     CollectUiEffects(viewModel.uiEffect) { effect ->
         when (effect) {
             PremiumUiEffect.NavigateBack -> onNavigateBack()
-            PremiumUiEffect.OpenSubscriptionManagement -> activity?.let {
-                onOpenSubscriptionManagement(it)
-            }
+            PremiumUiEffect.OpenCustomerCenter -> showCustomerCenter = true
+            PremiumUiEffect.ShowPaywall -> showPaywall = true
             is PremiumUiEffect.LaunchPurchase -> activity?.let {
-                onLaunchPurchase(it, effect.offerToken)
+                onLaunchPurchase(it, effect.productId)
             }
         }
     }
 
     LaunchedEffect(Unit) { viewModel.dispatchEvent(PremiumUiEvent.Load) }
-    PremiumScreen(uiState = uiState, onEvent = viewModel::dispatchEvent)
+
+    when {
+        showPaywall -> Paywall(
+            options = PaywallOptions.Builder(
+                dismissRequest = {
+                    showPaywall = false
+                    viewModel.dispatchEvent(PremiumUiEvent.Load)
+                },
+            ).build(),
+        )
+
+        showCustomerCenter -> CustomerCenter(
+            modifier = Modifier.fillMaxSize(),
+            onDismiss = {
+                showCustomerCenter = false
+                viewModel.dispatchEvent(PremiumUiEvent.Load)
+            },
+        )
+
+        else -> PremiumContent(uiState = uiState, onEvent = viewModel::dispatchEvent)
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PremiumScreen(
+private fun PremiumContent(
     uiState: PremiumUiState,
     onEvent: (PremiumUiEvent) -> Unit,
 ) {
@@ -108,6 +136,12 @@ private fun PremiumScreen(
                 text = stringResource(R.string.premium_description),
                 style = MaterialTheme.typography.bodyLarge,
             )
+            if (uiState.errorMessage != null) {
+                Text(
+                    text = stringResource(R.string.premium_error),
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
             when (uiState.subscriptionStatus) {
                 SubscriptionStatus.Premium -> PremiumActiveContent(onEvent)
                 SubscriptionStatus.Loading -> Text(stringResource(R.string.premium_loading))
@@ -125,7 +159,7 @@ private fun PremiumActiveContent(onEvent: (PremiumUiEvent) -> Unit) {
     )
     HoneybeePrimaryButton(
         label = stringResource(R.string.premium_manage),
-        onClick = { onEvent(PremiumUiEvent.ManageSubscriptionClick) }
+        onClick = { onEvent(PremiumUiEvent.ManageSubscriptionClick) },
     )
 }
 
@@ -134,25 +168,26 @@ private fun PremiumOffersContent(
     uiState: PremiumUiState,
     onEvent: (PremiumUiEvent) -> Unit,
 ) {
+    HoneybeePrimaryButton(
+        label = stringResource(R.string.premium_paywall),
+        onClick = { onEvent(PremiumUiEvent.PaywallClick) },
+        modifier = Modifier.fillMaxWidth(),
+    )
+
     if (uiState.isPurchasePending) {
-        Text(
-            text =
-                stringResource(R.string.premium_pending)
-        )
+        Text(text = stringResource(R.string.premium_pending))
         HoneybeePrimaryButton(
             label = stringResource(R.string.premium_restore),
-            onClick = { onEvent(PremiumUiEvent.RestoreClick) }
+            onClick = { onEvent(PremiumUiEvent.RestoreClick) },
         )
         return
     }
 
     if (uiState.offers.isEmpty()) {
-        Text(
-            text = stringResource(R.string.premium_no_offers)
-        )
+        Text(text = stringResource(R.string.premium_no_offers))
         HoneybeePrimaryButton(
             label = stringResource(R.string.premium_restore),
-            onClick = { onEvent(PremiumUiEvent.RestoreClick) }
+            onClick = { onEvent(PremiumUiEvent.RestoreClick) },
         )
         return
     }
@@ -204,7 +239,11 @@ private fun OfferCard(
             Spacer(modifier = Modifier.width(MaterialTheme.spacing.small))
             Text(
                 text = stringResource(
-                    if (offer.plan == SubscriptionPlan.ANNUAL) R.string.premium_annual else R.string.premium_monthly,
+                    if (offer.plan == SubscriptionPlan.YEARLY) {
+                        R.string.premium_yearly
+                    } else {
+                        R.string.premium_monthly
+                    },
                 ),
                 modifier = Modifier.weight(1f),
             )

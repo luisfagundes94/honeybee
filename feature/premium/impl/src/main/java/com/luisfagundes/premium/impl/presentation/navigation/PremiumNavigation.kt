@@ -9,14 +9,12 @@ import com.luisfagundes.premium.impl.presentation.screen.PremiumScreen
 
 internal fun EntryProviderScope<NavKey>.premiumEntries(
     onLaunchPurchase: (Activity, String) -> Unit,
-    onOpenSubscriptionManagement: (Activity) -> Unit,
 ) {
     entry<PremiumRoute> {
         val backStack = LocalNavBackStack.current
         PremiumScreen(
             onNavigateBack = { backStack?.removeLastOrNull() },
             onLaunchPurchase = onLaunchPurchase,
-            onOpenSubscriptionManagement = onOpenSubscriptionManagement,
         )
     }
 }

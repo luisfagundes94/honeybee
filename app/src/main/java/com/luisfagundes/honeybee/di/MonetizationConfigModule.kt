@@ -1,7 +1,6 @@
 package com.luisfagundes.honeybee.di
 
 import com.luisfagundes.core.ads.AdsConfig
-import com.luisfagundes.core.common.provider.SubscriptionConfig
 import com.luisfagundes.honeybee.BuildConfig
 import dagger.Module
 import dagger.Provides
@@ -19,11 +18,4 @@ internal object MonetizationConfigModule {
         cleanupInterstitialAdUnitId = BuildConfig.ADMOB_CLEANUP_INTERSTITIAL_AD_UNIT_ID,
     )
 
-    @Provides
-    @Singleton
-    fun provideSubscriptionConfig(): SubscriptionConfig = SubscriptionConfig(
-        productId = BuildConfig.PREMIUM_PRODUCT_ID,
-        monthlyBasePlanId = BuildConfig.PREMIUM_MONTHLY_BASE_PLAN_ID,
-        annualBasePlanId = BuildConfig.PREMIUM_ANNUAL_BASE_PLAN_ID,
-    )
 }

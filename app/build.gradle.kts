@@ -15,6 +15,11 @@ abstract class ValidateReleaseMonetizationConfig : DefaultTask() {
             require(!value.contains("ca-app-pub-3940256099942544")) {
                 "$name must not use a Google test ad identifier"
             }
+            if (name == "HONEYBEE_REVENUECAT_API_KEY") {
+                require(!value.startsWith("test_")) {
+                    "$name must use a production RevenueCat public SDK key"
+                }
+            }
         }
     }
 }
@@ -56,9 +61,7 @@ android {
             manifestPlaceholders["admobAppId"] = "ca-app-pub-3940256099942544~3347511713"
             buildConfigField("String", "ADMOB_SETTINGS_BANNER_AD_UNIT_ID", "\"ca-app-pub-3940256099942544/9214589741\"")
             buildConfigField("String", "ADMOB_CLEANUP_INTERSTITIAL_AD_UNIT_ID", "\"ca-app-pub-3940256099942544/1033173712\"")
-            buildConfigField("String", "PREMIUM_PRODUCT_ID", "\"premium\"")
-            buildConfigField("String", "PREMIUM_MONTHLY_BASE_PLAN_ID", "\"monthly\"")
-            buildConfigField("String", "PREMIUM_ANNUAL_BASE_PLAN_ID", "\"annual\"")
+            buildConfigField("String", "REVENUECAT_API_KEY", "\"test_YmqIBYWSDBUDWuETPsPAKyTgCcg\"")
         }
         release {
             isMinifyEnabled = true
@@ -71,9 +74,7 @@ android {
             manifestPlaceholders["admobAppId"] = admobAppId
             buildConfigField("String", "ADMOB_SETTINGS_BANNER_AD_UNIT_ID", quotedReleaseValue("HONEYBEE_SETTINGS_BANNER_AD_UNIT_ID"))
             buildConfigField("String", "ADMOB_CLEANUP_INTERSTITIAL_AD_UNIT_ID", quotedReleaseValue("HONEYBEE_CLEANUP_INTERSTITIAL_AD_UNIT_ID"))
-            buildConfigField("String", "PREMIUM_PRODUCT_ID", quotedReleaseValue("HONEYBEE_PREMIUM_PRODUCT_ID"))
-            buildConfigField("String", "PREMIUM_MONTHLY_BASE_PLAN_ID", quotedReleaseValue("HONEYBEE_PREMIUM_MONTHLY_BASE_PLAN_ID"))
-            buildConfigField("String", "PREMIUM_ANNUAL_BASE_PLAN_ID", quotedReleaseValue("HONEYBEE_PREMIUM_ANNUAL_BASE_PLAN_ID"))
+            buildConfigField("String", "REVENUECAT_API_KEY", quotedReleaseValue("HONEYBEE_REVENUECAT_API_KEY"))
         }
         create("benchmark") {
             initWith(buildTypes.getByName("release"))
@@ -135,6 +136,7 @@ dependencies {
     implementation(libs.firebase.messaging)
     implementation(libs.coil.compose)
     implementation(libs.coil.video)
+    implementation(libs.revenuecat.purchases)
 
     // Hilt
     implementation(libs.hilt.android)
@@ -176,18 +178,14 @@ val requiredReleaseMonetizationValues = listOf(
     "HONEYBEE_ADMOB_APP_ID",
     "HONEYBEE_SETTINGS_BANNER_AD_UNIT_ID",
     "HONEYBEE_CLEANUP_INTERSTITIAL_AD_UNIT_ID",
-    "HONEYBEE_PREMIUM_PRODUCT_ID",
-    "HONEYBEE_PREMIUM_MONTHLY_BASE_PLAN_ID",
-    "HONEYBEE_PREMIUM_ANNUAL_BASE_PLAN_ID",
+    "HONEYBEE_REVENUECAT_API_KEY",
 )
 
 val releaseMonetizationValues = mapOf(
     "HONEYBEE_ADMOB_APP_ID" to releaseValue("HONEYBEE_ADMOB_APP_ID"),
     "HONEYBEE_SETTINGS_BANNER_AD_UNIT_ID" to releaseValue("HONEYBEE_SETTINGS_BANNER_AD_UNIT_ID"),
     "HONEYBEE_CLEANUP_INTERSTITIAL_AD_UNIT_ID" to releaseValue("HONEYBEE_CLEANUP_INTERSTITIAL_AD_UNIT_ID"),
-    "HONEYBEE_PREMIUM_PRODUCT_ID" to releaseValue("HONEYBEE_PREMIUM_PRODUCT_ID"),
-    "HONEYBEE_PREMIUM_MONTHLY_BASE_PLAN_ID" to releaseValue("HONEYBEE_PREMIUM_MONTHLY_BASE_PLAN_ID"),
-    "HONEYBEE_PREMIUM_ANNUAL_BASE_PLAN_ID" to releaseValue("HONEYBEE_PREMIUM_ANNUAL_BASE_PLAN_ID"),
+    "HONEYBEE_REVENUECAT_API_KEY" to releaseValue("HONEYBEE_REVENUECAT_API_KEY"),
 )
 
 val validateReleaseMonetizationConfig = tasks.register<ValidateReleaseMonetizationConfig>("validateReleaseMonetizationConfig") {

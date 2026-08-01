@@ -16,7 +16,7 @@ Honeybee is an Android photo and video library management application developed 
 - Honeybee accesses photos, videos, and related media information on your device so you can browse, organize, review, and delete media.
 - Honeybee processes your media library on your device. Honeybee does not upload your photos or videos to a server operated by us.
 - The free version uses Google AdMob to display ads. Google’s advertising services may collect and share device identifiers, IP address, approximate location derived from IP address, app interactions, and diagnostic information.
-- Honeybee uses Firebase Cloud Messaging for notifications and Google Play Billing for subscriptions and purchases.
+- Honeybee uses Firebase Cloud Messaging for notifications and RevenueCat to manage subscriptions and purchases processed through Google Play.
 - Honeybee does not require you to create an account.
 
 ## Information Honeybee accesses or collects
@@ -60,7 +60,7 @@ You can disable Honeybee notifications in the app or in Android settings.
 
 ### Purchases and subscriptions
 
-If you purchase a Honeybee subscription or premium feature, Google Play processes the transaction and payment information under Google’s privacy practices. Honeybee receives purchase and subscription information needed to show available plans, launch the purchase flow, acknowledge a purchase, and determine whether premium features should be enabled. Honeybee does not receive or store your full payment-card details.
+If you purchase a Honeybee subscription or premium feature, Google Play processes the transaction and payment information under Google’s privacy practices. RevenueCat receives subscription and purchase information needed to show available plans, launch the purchase flow, restore purchases, and determine whether premium features should be enabled. Honeybee does not receive or store your full payment-card details.
 
 ## How information is used
 
@@ -81,6 +81,7 @@ Honeybee does not sell your photos or videos. Information may be processed by or
 - **Google AdMob and advertising partners**, to request, deliver, personalize where permitted, measure, and protect ads;
 - **Google User Messaging Platform**, to collect and apply advertising consent and privacy choices;
 - **Firebase Cloud Messaging**, to route notifications;
+- **RevenueCat**, to manage subscription products, purchase state, entitlements, and customer self-service;
 - **Google Play**, to process purchases, subscriptions, app distribution, and related fraud prevention;
 - **Android and your backup provider**, if app backup or device transfer is enabled; and
 - authorities or other parties when required by law, necessary to protect rights and safety, or involved in a business transfer.

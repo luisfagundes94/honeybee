@@ -2,8 +2,9 @@
     <string name="premium_title">Honeybee Premium</string>
     <string name="premium_description">Limpe fotos e vídeos sem anúncios.</string>
     <string name="premium_monthly">Mensal</string>
-    <string name="premium_annual">Anual</string>
+    <string name="premium_yearly">Anual</string>
     <string name="premium_purchase">Assinar o Premium</string>
+    <string name="premium_paywall">Ver planos premium</string>
     <string name="premium_active">O Premium está ativo</string>
     <string name="premium_manage">Gerenciar assinatura</string>
     <string name="premium_restore">Restaurar compras</string>
@@ -11,4 +12,5 @@
     <string name="premium_no_offers">Os planos Premium não estão disponíveis no momento. Tente novamente.</string>
     <string name="premium_pending">Seu pagamento está pendente. O Premium será desbloqueado depois que o Google Play confirmá-lo.</string>
     <string name="premium_back">Voltar</string>
+    <string name="premium_error">N&#227;o foi poss&#237;vel carregar as assinaturas. Tente novamente.</string>
 </resources>

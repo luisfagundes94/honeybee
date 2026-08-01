@@ -31,12 +31,12 @@ media3 = "1.10.1"
 baselineprofile = "1.5.0-alpha07"
 profileinstaller = "1.4.1"
 room = "2.8.4"
-playBilling = "9.1.0"
 googleMobileAds = "25.4.0"
 ump = "4.0.0"
 detekt = "2.0.0-alpha.5"
 firebaseCrashlytics = "20.1.0"
 googleFirebaseCrashlytics = "3.0.7"
+revenuecat = "10.16.0"
 
 [libraries]
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
@@ -83,10 +83,11 @@ androidx-benchmark-macro-junit4 = { group = "androidx.benchmark", name = "benchm
 androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
 androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3" }
 androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "profileinstaller" }
-play-billing-ktx = { module = "com.android.billingclient:billing-ktx", version.ref = "playBilling" }
 google-mobile-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "googleMobileAds" }
 google-ump = { module = "com.google.android.ump:user-messaging-platform", version.ref = "ump" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics", version.ref = "firebaseCrashlytics" }
+revenuecat-purchases = { group = "com.revenuecat.purchases", name = "purchases", version.ref = "revenuecat" }
+revenuecat-purchases-ui = { group = "com.revenuecat.purchases", name = "purchases-ui", version.ref = "revenuecat" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

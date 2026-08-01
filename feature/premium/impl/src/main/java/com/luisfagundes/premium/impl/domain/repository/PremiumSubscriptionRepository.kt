@@ -1,13 +1,13 @@
 package com.luisfagundes.premium.impl.domain.repository
 
-import com.luisfagundes.core.common.provider.SubscriptionStatus
-import com.luisfagundes.premium.impl.domain.model.SubscriptionOffer
+import com.luisfagundes.premium.impl.domain.model.CustomerInfoSnapshot
+import com.luisfagundes.premium.impl.domain.model.PremiumSubscriptionState
 import kotlinx.coroutines.flow.StateFlow
 
 internal interface PremiumSubscriptionRepository {
-    val status: StateFlow<SubscriptionStatus>
-    val offers: StateFlow<List<SubscriptionOffer>>
-    val isPurchasePending: StateFlow<Boolean>
+    val state: StateFlow<PremiumSubscriptionState>
 
     suspend fun refresh()
+    suspend fun restorePurchases(): Result<Unit>
+    suspend fun getCustomerInfo(): Result<CustomerInfoSnapshot>
 }

@@ -1,7 +1,7 @@
 package com.luisfagundes.premium.impl.di
 
 import com.luisfagundes.core.common.provider.SubscriptionProvider
-import com.luisfagundes.premium.impl.data.PlayBillingSubscriptionProvider
+import com.luisfagundes.premium.impl.data.RevenueCatSubscriptionProvider
 import com.luisfagundes.premium.impl.domain.repository.PremiumSubscriptionRepository
 import dagger.Binds
 import dagger.Module
@@ -15,12 +15,12 @@ internal abstract class SubscriptionModule {
     @Binds
     @Singleton
     abstract fun bindSubscriptionProvider(
-        impl: PlayBillingSubscriptionProvider,
+        impl: RevenueCatSubscriptionProvider,
     ): SubscriptionProvider
 
     @Binds
     @Singleton
     abstract fun bindPremiumSubscriptionRepository(
-        impl: PlayBillingSubscriptionProvider,
+        impl: RevenueCatSubscriptionProvider,
     ): PremiumSubscriptionRepository
 }
