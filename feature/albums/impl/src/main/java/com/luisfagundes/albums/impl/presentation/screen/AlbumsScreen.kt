@@ -115,7 +115,7 @@ private fun AlbumsScreen(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun AlbumsContent(
     uiState: AlbumsUiState,
-    innerPadding: androidx.compose.foundation.layout.PaddingValues,
+    innerPadding: PaddingValues,
     onEvent: (AlbumsUiEvent) -> Unit
 ) {
     when (uiState) {
@@ -142,7 +142,7 @@ private fun AlbumsContent(
 }
 
 @Composable
-private fun EmptyAlbums(innerPadding: androidx.compose.foundation.layout.PaddingValues) {
+private fun EmptyAlbums(innerPadding: PaddingValues) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -160,7 +160,7 @@ private fun EmptyAlbums(innerPadding: androidx.compose.foundation.layout.Padding
 @Composable
 private fun AlbumsGrid(
     albums: List<Album>,
-    innerPadding: androidx.compose.foundation.layout.PaddingValues,
+    innerPadding: PaddingValues,
     onEvent: (AlbumsUiEvent) -> Unit
 ) {
     val favoritesName = stringResource(favorites)
