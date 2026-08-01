@@ -111,47 +111,67 @@ private fun FeedbackScreen(
             )
         }
     ) { innerPadding ->
-        Column(
-            verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.default),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = MaterialTheme.spacing.default)
-        ) {
-            Text(
-                text = stringResource(R.string.feedback_title),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            TextField(
-                value = uiState.feedbackText,
-                onValueChange = { onEvent(FeedbackUiEvent.UpdateFeedbackText(it)) },
-                placeholder = {
-                    Text(
-                        text = stringResource(R.string.feedback_placeholder),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(MaterialTheme.spacing.feedbackFieldHeight),
-                shape = RoundedCornerShape(MaterialTheme.spacing.default),
-                singleLine = false,
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    focusedIndicatorColor = MaterialTheme.colorScheme.surface.copy(alpha = 0f),
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.surface.copy(alpha = 0f),
-                    disabledIndicatorColor = MaterialTheme.colorScheme.surface.copy(alpha = 0f),
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface
-                )
-            )
-        }
+        FeedbackContent(
+            uiState = uiState,
+            onEvent = onEvent,
+            modifier = Modifier.padding(innerPadding)
+        )
     }
+}
+
+@Composable
+private fun FeedbackContent(
+    uiState: FeedbackUiState,
+    onEvent: (FeedbackUiEvent) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.default),
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = MaterialTheme.spacing.default)
+    ) {
+        Text(
+            text = stringResource(R.string.feedback_title),
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        FeedbackTextField(uiState = uiState, onEvent = onEvent)
+    }
+}
+
+@Composable
+private fun FeedbackTextField(
+    uiState: FeedbackUiState,
+    onEvent: (FeedbackUiEvent) -> Unit
+) {
+    TextField(
+        value = uiState.feedbackText,
+        onValueChange = { onEvent(FeedbackUiEvent.UpdateFeedbackText(it)) },
+        placeholder = {
+            Text(
+                text = stringResource(R.string.feedback_placeholder),
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+            )
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(MaterialTheme.spacing.feedbackFieldHeight),
+        shape = RoundedCornerShape(MaterialTheme.spacing.default),
+        singleLine = false,
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+            disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+            focusedIndicatorColor = MaterialTheme.colorScheme.surface.copy(alpha = 0f),
+            unfocusedIndicatorColor = MaterialTheme.colorScheme.surface.copy(alpha = 0f),
+            disabledIndicatorColor = MaterialTheme.colorScheme.surface.copy(alpha = 0f),
+            cursorColor = MaterialTheme.colorScheme.primary,
+            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface
+        )
+    )
 }
 
 @PreviewLightDark

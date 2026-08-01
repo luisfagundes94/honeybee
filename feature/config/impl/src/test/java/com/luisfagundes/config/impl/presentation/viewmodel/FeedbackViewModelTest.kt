@@ -27,7 +27,7 @@ internal class FeedbackViewModelTest {
     }
 
     @Test
-    fun `dispatchEvent UpdateFeedbackText should update feedbackText and enable submit button when not blank`() = runTest {
+    fun `feedback text updates and enables submit when not blank`() = runTest {
         viewModel.uiState.test {
             assertEquals(FeedbackUiState.Content(), awaitItem())
 
@@ -71,7 +71,7 @@ internal class FeedbackViewModelTest {
     }
 
     @Test
-    fun `dispatchEvent SubmitFeedback with valid text should dispatch OpenEmailClient and NavigateBack effects`() = runTest {
+    fun `valid feedback dispatches email and navigate effects`() = runTest {
         // Given
         val feedbackText = "This app is wonderful!"
         viewModel.dispatchEvent(FeedbackUiEvent.UpdateFeedbackText(feedbackText))

@@ -4,10 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import com.luisfagundes.config.impl.R
 import androidx.core.net.toUri
 
 private const val RECIPIENT_EMAIL = "lf.android.dev@gmail.com"
+private const val TAG = "FeedbackIntent"
 
 internal fun launchFeedbackEmailIntent(
     context: Context,
@@ -17,6 +19,7 @@ internal fun launchFeedbackEmailIntent(
         val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
         packageInfo.versionName ?: "Unknown"
     } catch (e: PackageManager.NameNotFoundException) {
+        Log.w(TAG, "Unable to read the application version", e)
         "Unknown"
     }
 

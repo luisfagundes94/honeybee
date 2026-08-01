@@ -112,69 +112,90 @@ private fun AlbumsScreen(
             )
         }
     ) { innerPadding ->
-        when (uiState) {
-            is AlbumsUiState.Loading -> {
-                HoneybeeLoadingTemplate(
-                    modifier = Modifier.padding(innerPadding)
-                )
-            }
-            is AlbumsUiState.Error -> {
-                HoneybeeErrorTemplate(
-                    title = stringResource(error_loading_albums_title),
-                    description = stringResource(error_loading_albums_description),
-                    primaryButtonLabel = stringResource(retry),
-                    onPrimaryButtonClick = { onEvent(AlbumsUiEvent.LoadAlbums) },
-                    modifier = Modifier.padding(innerPadding)
-                )
-            }
-            is AlbumsUiState.Content -> {
-                if (uiState.albums.isEmpty()) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = stringResource(no_albums),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                } else {
-                    LazyVerticalGrid(
-                        columns = GridCells.Adaptive(minSize = MaterialTheme.spacing.albumTileMin),
-                        contentPadding = PaddingValues(
-                            top = innerPadding.calculateTopPadding() + MaterialTheme.spacing.default,
-                            bottom = innerPadding.calculateBottomPadding() + MaterialTheme.spacing.default,
-                            start = MaterialTheme.spacing.default,
-                            end = MaterialTheme.spacing.default
-                        ),
-                        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.default),
-                        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.default),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .consumeWindowInsets(innerPadding)
-                    ) {
-                        items(uiState.albums, key = { it.id }) { album ->
-                            val favoritesName = stringResource(favorites)
-                            val videosName = stringResource(videos)
+        AlbumsContent(uiState = uiState, innerPadding = innerPadding, onEvent = onEvent)
+    }
+}
 
-                            AlbumCard(
-                                album = album,
-                                onClick = {
-                                    val displayName = when (album) {
-                                        is Album.Physical -> album.name
-                                        is Album.Virtual.Favorites -> favoritesName
-                                        is Album.Virtual.Videos -> videosName
-                                    }
-                                    onEvent(AlbumsUiEvent.AlbumClick(album.id, displayName))
-                                }
-                            )
-                        }
-                    }
-                }
+@Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+private fun AlbumsContent(
+    uiState: AlbumsUiState,
+    innerPadding: androidx.compose.foundation.layout.PaddingValues,
+    onEvent: (AlbumsUiEvent) -> Unit
+) {
+    when (uiState) {
+        is AlbumsUiState.Loading -> HoneybeeLoadingTemplate(Modifier.padding(innerPadding))
+        is AlbumsUiState.Error -> HoneybeeErrorTemplate(
+            title = stringResource(error_loading_albums_title),
+            description = stringResource(error_loading_albums_description),
+            primaryButtonLabel = stringResource(retry),
+            onPrimaryButtonClick = { onEvent(AlbumsUiEvent.LoadAlbums) },
+            modifier = Modifier.padding(innerPadding)
+        )
+        is AlbumsUiState.Content -> {
+            if (uiState.albums.isEmpty()) {
+                EmptyAlbums(innerPadding)
+            } else {
+                AlbumsGrid(
+                    albums = uiState.albums,
+                    innerPadding = innerPadding,
+                    onEvent = onEvent
+                )
             }
+        }
+    }
+}
+
+@Composable
+private fun EmptyAlbums(innerPadding: androidx.compose.foundation.layout.PaddingValues) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = stringResource(no_albums),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun AlbumsGrid(
+    albums: List<Album>,
+    innerPadding: androidx.compose.foundation.layout.PaddingValues,
+    onEvent: (AlbumsUiEvent) -> Unit
+) {
+    val favoritesName = stringResource(favorites)
+    val videosName = stringResource(videos)
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = MaterialTheme.spacing.albumTileMin),
+        contentPadding = PaddingValues(
+            top = innerPadding.calculateTopPadding() + MaterialTheme.spacing.default,
+            bottom = innerPadding.calculateBottomPadding() + MaterialTheme.spacing.default,
+            start = MaterialTheme.spacing.default,
+            end = MaterialTheme.spacing.default
+        ),
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.default),
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.default),
+        modifier = Modifier
+            .fillMaxSize()
+            .consumeWindowInsets(innerPadding)
+    ) {
+        items(albums, key = { it.id }) { album ->
+            AlbumCard(
+                album = album,
+                onClick = {
+                    val displayName = when (album) {
+                        is Album.Physical -> album.name
+                        is Album.Virtual.Favorites -> favoritesName
+                        is Album.Virtual.Videos -> videosName
+                    }
+                    onEvent(AlbumsUiEvent.AlbumClick(album.id, displayName))
+                }
+            )
         }
     }
 }

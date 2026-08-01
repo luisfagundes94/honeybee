@@ -58,6 +58,7 @@ import com.luisfagundes.core.designsystem.components.HoneybeeLoadingTemplate
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
 import com.luisfagundes.core.designsystem.R as DesignSystemResources
+import com.luisfagundes.library.api.domain.model.Statistics
 
 @Composable
 internal fun StatisticsScreen(
@@ -138,47 +139,54 @@ private fun StatisticsScreen(
                 )
             }
             is StatisticsUiState.Content -> {
-                val stats = uiState.statistics
-                val (memoryVal, memoryUnit) = if (stats.memoryCleared == 0L) {
-                    "0" to "MB"
-                } else {
-                    formatSize(stats.memoryCleared)
-                }
-
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding + PaddingValues(MaterialTheme.spacing.default))
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    StatCard(
-                        title = stringResource(R.string.memory_cleared),
-                        value = memoryVal,
-                        unit = memoryUnit,
-                        icon = Icons.Default.Eco
-                    )
-
-                    StatCard(
-                        title = stringResource(R.string.media_deleted),
-                        value = stats.mediaDeleted.toString(),
-                        icon = Icons.Default.Delete
-                    )
-
-                    StatCard(
-                        title = stringResource(R.string.photos_deleted),
-                        value = stats.photosDeleted.toString(),
-                        icon = Icons.Default.Image
-                    )
-
-                    StatCard(
-                        title = stringResource(R.string.videos_deleted),
-                        value = stats.videosDeleted.toString(),
-                        icon = Icons.Default.Videocam
-                    )
-                }
+                StatisticsContent(
+                    statistics = uiState.statistics,
+                    modifier = Modifier.padding(innerPadding)
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun StatisticsContent(
+    statistics: Statistics,
+    modifier: Modifier = Modifier
+) {
+    val (memoryVal, memoryUnit) = if (statistics.memoryCleared == 0L) {
+        "0" to "MB"
+    } else {
+        formatSize(statistics.memoryCleared)
+    }
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small),
+        modifier = modifier
+            .fillMaxSize()
+            .padding(PaddingValues(MaterialTheme.spacing.default))
+            .verticalScroll(rememberScrollState())
+    ) {
+        StatCard(
+            title = stringResource(R.string.memory_cleared),
+            value = memoryVal,
+            unit = memoryUnit,
+            icon = Icons.Default.Eco
+        )
+        StatCard(
+            title = stringResource(R.string.media_deleted),
+            value = statistics.mediaDeleted.toString(),
+            icon = Icons.Default.Delete
+        )
+        StatCard(
+            title = stringResource(R.string.photos_deleted),
+            value = statistics.photosDeleted.toString(),
+            icon = Icons.Default.Image
+        )
+        StatCard(
+            title = stringResource(R.string.videos_deleted),
+            value = statistics.videosDeleted.toString(),
+            icon = Icons.Default.Videocam
+        )
     }
 }
 
