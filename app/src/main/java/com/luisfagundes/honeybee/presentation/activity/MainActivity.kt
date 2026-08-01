@@ -44,6 +44,8 @@ import com.luisfagundes.albums.api.presentation.navigation.AlbumsRoute
 import com.luisfagundes.config.api.presentation.navigation.ConfigRoute
 import com.luisfagundes.honeybee.presentation.navigation.AppNavDisplay
 import com.luisfagundes.honeybee.presentation.navigation.TopLevelDestination
+import com.luisfagundes.honeybee.presentation.navigation.TopLevelNavigationState
+import com.luisfagundes.honeybee.presentation.navigation.rememberTopLevelNavigationState
 import com.luisfagundes.honeybee.presentation.event.MainUiEvent
 import com.luisfagundes.honeybee.presentation.state.MainUiState
 import com.luisfagundes.honeybee.presentation.viewmodel.MainViewModel
@@ -84,12 +86,22 @@ class MainActivity : ComponentActivity() {
                 }
 
                 val startRoute = if (onboardingCompleted) LibraryRoute else OnboardingRoute
-                val backStack = rememberNavBackStack(startRoute)
+                val onboardingBackStack = rememberNavBackStack(OnboardingRoute)
+                val navigationState = rememberTopLevelNavigationState()
 
-                MainContent(
-                    backStack = backStack,
-                    entryBuilders = entryBuilders
-                )
+                if (startRoute == OnboardingRoute) {
+                    OnboardingContent(
+                        backStack = onboardingBackStack,
+                        entryBuilders = entryBuilders,
+                        onExit = ::finish,
+                    )
+                } else {
+                    MainContent(
+                        navigationState = navigationState,
+                        entryBuilders = entryBuilders,
+                        onExit = ::finish,
+                    )
+                }
             }
         }
     }
@@ -102,94 +114,121 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun MainContent(
-    backStack: NavBackStack<NavKey>,
+    navigationState: TopLevelNavigationState,
     entryBuilders: Set<(EntryProviderScope<NavKey>) -> Unit>,
+    onExit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    CompositionLocalProvider(LocalNavBackStack provides backStack) {
-        Surface(
-            modifier = modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            val currentRoute = backStack.lastOrNull()
-            val topLevelRoutes = remember {
-                setOf(LibraryRoute, AlbumsRoute, ConfigRoute)
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        val currentRoute = navigationState.currentBackStack.lastOrNull()
+        val topLevelRoutes = remember {
+            setOf(LibraryRoute, AlbumsRoute, ConfigRoute)
+        }
+        val shouldShowNavBar = currentRoute in topLevelRoutes
+
+        val adaptiveInfo = currentWindowAdaptiveInfo()
+        val layoutType = NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(adaptiveInfo)
+        val isBottomBar = layoutType == NavigationSuiteType.NavigationBar
+
+        val scrollState = rememberScaffoldScrollState(
+            currentRoute = currentRoute,
+            isBottomBar = isBottomBar,
+        )
+
+        val isScrollVisible = currentRoute != LibraryRoute || scrollState.isScrolledVisible
+        val isNavBarVisible = shouldShowNavBar && isScrollVisible
+        val scaffoldVisibilityState = rememberNavigationSuiteScaffoldState()
+
+        LaunchedEffect(isNavBarVisible) {
+            if (isNavBarVisible) {
+                scaffoldVisibilityState.show()
+            } else {
+                scaffoldVisibilityState.hide()
             }
-            val shouldShowNavBar = currentRoute in topLevelRoutes
+        }
 
-            val adaptiveInfo = currentWindowAdaptiveInfo()
-            val layoutType = NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(adaptiveInfo)
-            val isBottomBar = layoutType == NavigationSuiteType.NavigationBar
+        MainNavigationSuite(
+            navigationState = navigationState,
+            entryBuilders = entryBuilders,
+            scaffoldVisibilityState = scaffoldVisibilityState,
+            scrollState = scrollState,
+            onExit = onExit,
+        )
+    }
+}
 
-            val scrollState = rememberScaffoldScrollState(
-                currentRoute = currentRoute,
-                isBottomBar = isBottomBar,
-            )
-
-            val isScrollVisible = currentRoute != LibraryRoute || scrollState.isScrolledVisible
-            val isNavBarVisible = shouldShowNavBar && isScrollVisible
-            val scaffoldVisibilityState = rememberNavigationSuiteScaffoldState()
-
-            LaunchedEffect(isNavBarVisible) {
-                if (isNavBarVisible) {
-                    scaffoldVisibilityState.show()
-                } else {
-                    scaffoldVisibilityState.hide()
+@Composable
+private fun MainNavigationSuite(
+    navigationState: TopLevelNavigationState,
+    entryBuilders: Set<(EntryProviderScope<NavKey>) -> Unit>,
+    scaffoldVisibilityState: androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldState,
+    scrollState: ScaffoldScrollState,
+    onExit: () -> Unit,
+) {
+    CompositionLocalProvider(LocalNavBackStack provides navigationState.currentBackStack) {
+        NavigationSuiteScaffold(
+            state = scaffoldVisibilityState,
+            navigationSuiteItems = {
+                TopLevelDestination.entries.forEach { destination ->
+                    item(
+                        selected = navigationState.selectedRoute == destination.route,
+                        onClick = { navigationState.select(destination.route) },
+                        icon = {
+                            Icon(
+                                imageVector = destination.icon,
+                                contentDescription = stringResource(destination.labelRes)
+                            )
+                        },
+                        label = { Text(text = stringResource(destination.labelRes)) }
+                    )
                 }
-            }
-
-            MainNavigationSuite(
-                backStack = backStack,
-                entryBuilders = entryBuilders,
-                currentRoute = currentRoute,
-                scaffoldVisibilityState = scaffoldVisibilityState,
-                scrollState = scrollState,
+            },
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(scrollState.nestedScrollConnection)
+        ) {
+            AppNavDisplay(
+                navigationState = navigationState,
+                entryProvider = entryProvider {
+                    entryBuilders.forEach { it(this) }
+                },
+                onExit = onExit,
+                modifier = Modifier.fillMaxSize()
             )
         }
     }
 }
 
 @Composable
-private fun MainNavigationSuite(
+private fun OnboardingContent(
     backStack: NavBackStack<NavKey>,
     entryBuilders: Set<(EntryProviderScope<NavKey>) -> Unit>,
-    currentRoute: NavKey?,
-    scaffoldVisibilityState: androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldState,
-    scrollState: ScaffoldScrollState,
+    onExit: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    NavigationSuiteScaffold(
-        state = scaffoldVisibilityState,
-        navigationSuiteItems = {
-            TopLevelDestination.entries.forEach { destination ->
-                item(
-                    selected = currentRoute == destination.route,
-                    onClick = {
-                        if (currentRoute != destination.route) {
-                            backStack.clear()
-                            backStack.add(destination.route)
-                        }
-                    },
-                    icon = {
-                        Icon(
-                            imageVector = destination.icon,
-                            contentDescription = stringResource(destination.labelRes)
-                        )
-                    },
-                    label = { Text(text = stringResource(destination.labelRes)) }
-                )
-            }
-        },
-        modifier = Modifier
-            .fillMaxSize()
-            .nestedScroll(scrollState.nestedScrollConnection)
-    ) {
-        AppNavDisplay(
-            backStack = backStack,
-            entryProvider = entryProvider {
-                entryBuilders.forEach { it(this) }
-            },
-            modifier = Modifier.fillMaxSize()
-        )
+    CompositionLocalProvider(LocalNavBackStack provides backStack) {
+        Surface(
+            modifier = modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background,
+        ) {
+            AppNavDisplay(
+                backStack = backStack,
+                entryProvider = entryProvider {
+                    entryBuilders.forEach { it(this) }
+                },
+                onBack = {
+                    if (backStack.size > 1) {
+                        backStack.removeAt(backStack.lastIndex)
+                    } else {
+                        onExit()
+                    }
+                },
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
     }
 }
 
