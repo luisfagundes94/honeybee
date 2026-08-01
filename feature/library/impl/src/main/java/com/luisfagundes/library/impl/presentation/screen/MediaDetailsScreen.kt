@@ -1,6 +1,7 @@
 package com.luisfagundes.library.impl.presentation.screen
 
 import android.content.Intent
+import androidx.core.net.toUri
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -50,7 +51,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
@@ -62,7 +62,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewWrapper
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
@@ -333,9 +332,12 @@ private fun MediaPagerItem(
             contentAlignment = Alignment.Center,
             modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default)
         ) {
+            val largeCornerShape = RoundedCornerShape(MaterialTheme.spacing.largeCorner)
             Card(
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+                shape = largeCornerShape,
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0f)
+                ),
                 modifier = (if (aspectRatio != null) {
                     Modifier.aspectRatio(aspectRatio!!)
                 } else {
@@ -344,13 +346,13 @@ private fun MediaPagerItem(
                     .graphicsLayer {
                         translationY = swipeOffset.value
                         alpha = (1f + (swipeOffset.value / 1200f)).coerceIn(0.2f, 1f)
-                        shape = RoundedCornerShape(24.dp)
+                        shape = largeCornerShape
                         clip = true
                     }
             ) {
                 if (media.isVideo) {
                     VideoPlayer(
-                        videoUri = media.uri,
+                        videoUri = media.uri.toUri(),
                         isPageSelected = isPageSelected,
                         modifier = Modifier.fillMaxSize(),
                         onVideoSizeChanged = { ratio ->
@@ -387,7 +389,7 @@ private fun MediaPagerItem(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(MaterialTheme.spacing.default)
-                .background(Color.Black.copy(alpha = 0.3f), CircleShape)
+                .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.3f), CircleShape)
         )
 
         if (showBottomSheet) {
@@ -399,7 +401,7 @@ private fun MediaPagerItem(
 
         if (showFullscreenPhoto) {
             FullscreenPhotoViewer(
-                photoUri = media.uri,
+                        photoUri = media.uri.toUri(),
                 onDismissRequest = { showFullscreenPhoto = false }
             )
         }
@@ -425,14 +427,14 @@ private fun MediaPagerItemActionsColumn(
             Icon(
                 imageVector = Icons.Default.Info,
                 contentDescription = stringResource(R.string.info),
-                tint = Color.White
+                tint = MaterialTheme.colorScheme.onSurface
             )
         }
         IconButton(
             onClick = {
                 val shareIntent = Intent(Intent.ACTION_SEND).apply {
                     type = if (media.isVideo) "video/*" else "image/*"
-                    putExtra(Intent.EXTRA_STREAM, media.uri)
+                    putExtra(Intent.EXTRA_STREAM, media.uri.toUri())
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
                 context.startActivity(
@@ -446,7 +448,7 @@ private fun MediaPagerItemActionsColumn(
             Icon(
                 imageVector = Icons.Default.Share,
                 contentDescription = stringResource(R.string.share),
-                tint = Color.White
+                tint = MaterialTheme.colorScheme.onSurface
             )
         }
     }
@@ -478,9 +480,9 @@ private fun MediaInfoBottomSheetContent(
     val formattedSize = formatPhotoSize(media.size)
     val fileType = getFriendlyFileType(media.mimeType)
     val dimensions = if (media.width > 0 && media.height > 0) {
-        "${media.width} x ${media.height}"
+        stringResource(R.string.media_dimensions_format, media.width, media.height)
     } else {
-        "Unknown"
+        stringResource(R.string.media_unknown)
     }
 
     Column(
@@ -498,25 +500,25 @@ private fun MediaInfoBottomSheetContent(
 
         InfoRow(
             icon = Icons.Outlined.CalendarToday,
-            label = "Date added",
+            label = stringResource(R.string.media_info_date_added),
             value = formattedDate
         )
 
         InfoRow(
             icon = Icons.Outlined.Storage,
-            label = "File size",
+            label = stringResource(R.string.media_info_file_size),
             value = formattedSize
         )
 
         InfoRow(
             icon = Icons.Outlined.Info,
-            label = "File type",
+            label = stringResource(R.string.media_info_file_type),
             value = fileType
         )
 
         InfoRow(
             icon = Icons.Outlined.AspectRatio,
-            label = "Dimensions",
+            label = stringResource(R.string.media_info_dimensions),
             value = dimensions
         )
     }
@@ -541,7 +543,7 @@ private fun InfoRow(
             tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier
                 .padding(end = MaterialTheme.spacing.default)
-                .size(24.dp)
+                .size(MaterialTheme.spacing.iconLarge)
         )
         Column {
             Text(

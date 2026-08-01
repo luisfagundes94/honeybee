@@ -1,6 +1,5 @@
 package com.luisfagundes.library.impl.presentation.provider
 
-import android.net.Uri
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.api.domain.model.MediaSection
@@ -28,14 +27,14 @@ private val mediaSections = listOf(
         mediaList = listOf(
             Media(
                 id = 1L,
-                uri = Uri.EMPTY,
+                uri = "",
                 dateAdded = 0L,
                 size = 0L,
                 isVideo = false
             ),
             Media(
                 id = 2L,
-                uri = Uri.EMPTY,
+                uri = "",
                 dateAdded = 0L,
                 size = 0L,
                 durationMillis = 65_000L,
@@ -43,7 +42,7 @@ private val mediaSections = listOf(
             ),
             Media(
                 id = 3L,
-                uri = Uri.EMPTY,
+                uri = "",
                 dateAdded = 0L,
                 size = 0L,
                 isVideo = false
@@ -55,7 +54,7 @@ private val mediaSections = listOf(
         mediaList = listOf(
             Media(
                 id = 4L,
-                uri = Uri.EMPTY,
+                uri = "",
                 dateAdded = 0L,
                 size = 0L,
                 durationMillis = 3_725_000L,
@@ -63,7 +62,7 @@ private val mediaSections = listOf(
             ),
             Media(
                 id = 5L,
-                uri = Uri.EMPTY,
+                uri = "",
                 dateAdded = 0L,
                 size = 0L,
                 isVideo = false

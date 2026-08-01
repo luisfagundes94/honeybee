@@ -1,10 +1,13 @@
 package com.luisfagundes.library.impl.presentation.screen
 
 import android.app.Activity
+import android.os.Build
+import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toUri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -39,7 +42,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
@@ -48,7 +50,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewWrapper
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
@@ -91,8 +92,15 @@ internal fun TrashScreen(
         when (effect) {
             TrashUiEffect.NavigateBack -> onNavigateBack()
             is TrashUiEffect.ShowDeleteConfirmation -> {
-                val request = IntentSenderRequest.Builder(effect.intentSender).build()
-                deleteLauncher.launch(request)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    val pendingIntent = MediaStore.createDeleteRequest(
+                        context.contentResolver,
+                        effect.request.mediaUris.map(String::toUri),
+                    )
+                    deleteLauncher.launch(
+                        IntentSenderRequest.Builder(pendingIntent.intentSender).build()
+                    )
+                }
             }
             is TrashUiEffect.NavigateToCongratulations -> {
                 onNavigateToCongratulations(effect.deletedCount, effect.deletedSize)
@@ -192,13 +200,13 @@ private fun TrashContent(
             ) {
                 Text(
                     text = stringResource(R.string.trash_is_empty),
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodyLarge
                 )
             }
         } else {
             LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 100.dp),
+                columns = GridCells.Adaptive(minSize = MaterialTheme.spacing.mediaTileMin),
                 modifier = Modifier
                     .fillMaxSize()
                     .consumeWindowInsets(innerPadding),
@@ -229,7 +237,7 @@ private fun TrashMediaItem(
 ) {
     Box(
         modifier = Modifier
-            .width(108.dp)
+            .width(MaterialTheme.spacing.mediaTileWidth)
             .aspectRatio(1f)
             .clip(RoundedCornerShape(MaterialTheme.spacing.small))
             .clickable(onClick = onItemClick)
@@ -256,7 +264,7 @@ private fun TrashMediaItem(
                         DesignSystemResources.string.video_content_description
                     ),
                     tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(10.dp)
+                    modifier = Modifier.size(MaterialTheme.spacing.iconTiny)
                 )
             }
         }
@@ -266,14 +274,14 @@ private fun TrashMediaItem(
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(MaterialTheme.spacing.verySmall)
-                .size(24.dp)
+                .size(MaterialTheme.spacing.iconLarge)
                 .background(MaterialTheme.colorScheme.primary, CircleShape)
         ) {
             Icon(
                 imageVector = Icons.Default.Delete,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.size(14.dp)
+                modifier = Modifier.size(MaterialTheme.spacing.iconSmall)
             )
         }
     }

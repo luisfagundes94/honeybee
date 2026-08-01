@@ -21,7 +21,6 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewWrapper
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.unit.dp
 import com.luisfagundes.core.designsystem.R
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
@@ -29,25 +28,30 @@ import com.luisfagundes.core.designsystem.theme.spacing
 @Composable
 fun HoneybeeLogo(
     modifier: Modifier = Modifier,
-    size: Dp = 150.dp,
-    backgroundColor: Color = Color.White,
+    size: Dp? = null,
+    backgroundColor: Color? = null,
     contentScale: ContentScale = ContentScale.Fit
 ) {
+    val resolvedSize = size ?: MaterialTheme.spacing.logoSize
+    val resolvedBackgroundColor = backgroundColor ?: MaterialTheme.colorScheme.surface
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
-            .size(size)
+            .size(resolvedSize)
             .dropShadow(
                 shape = CircleShape,
                 shadow = Shadow(
-                    radius = 1.dp,
-                    spread = 1.dp,
-                    color = Color(0x40000000),
-                    offset = DpOffset(x = 2.dp, y = 2.dp)
+                    radius = MaterialTheme.spacing.logoShadowRadius,
+                    spread = MaterialTheme.spacing.logoShadowSpread,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
+                    offset = DpOffset(
+                        x = MaterialTheme.spacing.logoShadowOffset,
+                        y = MaterialTheme.spacing.logoShadowOffset
+                    )
                 )
             )
             .background(
-                color = backgroundColor,
+                color = resolvedBackgroundColor,
                 shape = CircleShape
             )
             .padding(MaterialTheme.spacing.default)

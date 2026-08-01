@@ -11,11 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewWrapper
-import androidx.compose.ui.unit.dp
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
-
-private const val PRIMARY_BUTTON_HEIGHT = 56
 
 @Composable
 fun HoneybeeTertiaryButton(
@@ -27,7 +24,7 @@ fun HoneybeeTertiaryButton(
         onClick = onClick,
         modifier = modifier
             .navigationBarsPadding()
-            .height(PRIMARY_BUTTON_HEIGHT.dp)
+            .height(MaterialTheme.spacing.primaryButtonHeight)
     ) {
         Text(
             text = label,

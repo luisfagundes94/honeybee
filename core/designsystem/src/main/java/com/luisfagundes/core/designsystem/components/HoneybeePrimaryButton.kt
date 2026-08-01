@@ -17,11 +17,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewWrapper
-import androidx.compose.ui.unit.dp
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
-
-private const val PRIMARY_BUTTON_HEIGHT = 56
 
 @Composable
 fun HoneybeePrimaryButton(
@@ -37,13 +34,13 @@ fun HoneybeePrimaryButton(
         enabled = enabled,
         modifier = modifier
             .navigationBarsPadding()
-            .height(PRIMARY_BUTTON_HEIGHT.dp)
+            .height(MaterialTheme.spacing.primaryButtonHeight)
     ) {
         icon?.let {
             Icon(
                 imageVector = icon,
                 contentDescription = iconContentDescription,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(MaterialTheme.spacing.iconMedium)
             )
             Spacer(
                 modifier = Modifier.width(MaterialTheme.spacing.small)

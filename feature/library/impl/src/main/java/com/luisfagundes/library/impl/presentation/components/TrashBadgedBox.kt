@@ -12,7 +12,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.material3.MaterialTheme
+import com.luisfagundes.core.designsystem.theme.spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,7 +27,10 @@ internal fun TrashBadgedBox(
         badge = {
             if (itemsInTrash > 0) {
                 Badge(
-                    modifier = Modifier.offset(x = (-12).dp, y = 12.dp)
+                    modifier = Modifier.offset(
+                        x = -MaterialTheme.spacing.content,
+                        y = MaterialTheme.spacing.content
+                    )
                 ) {
                     val displayCount = if (itemsInTrash > 99) "99+" else itemsInTrash.toString()
                     Text(text = displayCount)

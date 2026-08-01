@@ -6,9 +6,9 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.VideoLibrary
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.luisfagundes.albums.impl.R
 import com.luisfagundes.albums.impl.domain.model.Album
@@ -27,38 +27,40 @@ internal fun Album.getCountText(): String = when (this.count) {
     else -> androidx.compose.ui.res.pluralStringResource(R.plurals.items_count, this.count, this.count)
 }
 
+@Composable
 internal fun Album.getAlbumStyle(): AlbumStyle {
+    val colors = MaterialTheme.colorScheme
     return when (this) {
         is Album.Virtual.Favorites -> AlbumStyle(
             icon = Icons.Default.Favorite,
-            gradient = Brush.linearGradient(listOf(Color(0xFFFF80AB), Color(0xFFFF4081)))
+            gradient = Brush.linearGradient(listOf(colors.tertiaryContainer, colors.tertiary))
         )
         is Album.Virtual.Videos -> AlbumStyle(
             icon = Icons.Default.VideoLibrary,
-            gradient = Brush.linearGradient(listOf(Color(0xFFB388FF), Color(0xFF7C4DFF)))
+            gradient = Brush.linearGradient(listOf(colors.primaryContainer, colors.primary))
         )
         is Album.Physical -> {
             val lowerName = this.name.lowercase()
             when {
                 lowerName.contains("camera") -> AlbumStyle(
                     icon = Icons.Default.Camera,
-                    gradient = Brush.linearGradient(listOf(Color(0xFFFF8A80), Color(0xFFFF5252)))
+                    gradient = Brush.linearGradient(listOf(colors.errorContainer, colors.error))
                 )
                 lowerName.contains("screenshot") -> AlbumStyle(
                     icon = Icons.Default.Image,
-                    gradient = Brush.linearGradient(listOf(Color(0xFF82B1FF), Color(0xFF448AFF)))
+                    gradient = Brush.linearGradient(listOf(colors.secondaryContainer, colors.secondary))
                 )
                 lowerName.contains("download") -> AlbumStyle(
                     icon = Icons.Default.Folder,
-                    gradient = Brush.linearGradient(listOf(Color(0xFF84FFFF), Color(0xFF18FFFF)))
+                    gradient = Brush.linearGradient(listOf(colors.tertiaryContainer, colors.tertiary))
                 )
                 lowerName.contains("whatsapp") -> AlbumStyle(
                     icon = Icons.Default.Folder,
-                    gradient = Brush.linearGradient(listOf(Color(0xFFB9F6CA), Color(0xFF69F0AE)))
+                    gradient = Brush.linearGradient(listOf(colors.primaryContainer, colors.primary))
                 )
                 else -> AlbumStyle(
                     icon = Icons.Default.Folder,
-                    gradient = Brush.linearGradient(listOf(Color(0xFFCFD8DC), Color(0xFF90A4AE)))
+                    gradient = Brush.linearGradient(listOf(colors.surfaceVariant, colors.onSurfaceVariant))
                 )
             }
         }

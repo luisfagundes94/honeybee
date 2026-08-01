@@ -41,7 +41,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewWrapper
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImagePainter
@@ -65,7 +64,6 @@ import com.luisfagundes.library.impl.presentation.tools.getFormattedMonthName
 import com.luisfagundes.library.impl.presentation.viewmodel.LibraryViewModel
 import com.luisfagundes.core.designsystem.R as DesignSystemResources
 
-private val MinimumMediaTileSize = 100.dp
 private const val SquareAspectRatio = 1f
 
 @Composable
@@ -169,7 +167,7 @@ private fun LibraryContent(
             }
         } else {
             LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = MinimumMediaTileSize),
+                columns = GridCells.Adaptive(minSize = MaterialTheme.spacing.mediaTileMin),
                 modifier = Modifier
                     .fillMaxSize()
                     .consumeWindowInsets(innerPadding),

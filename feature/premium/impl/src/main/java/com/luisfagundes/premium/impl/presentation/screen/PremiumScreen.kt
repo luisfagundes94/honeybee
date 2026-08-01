@@ -1,5 +1,6 @@
 package com.luisfagundes.premium.impl.presentation.screen
 
+import android.app.Activity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -37,7 +38,6 @@ import com.luisfagundes.core.common.provider.SubscriptionStatus
 import com.luisfagundes.core.designsystem.components.HoneybeePrimaryButton
 import com.luisfagundes.core.designsystem.theme.spacing
 import com.luisfagundes.premium.impl.R
-import com.luisfagundes.premium.impl.data.PlayBillingSubscriptionProvider
 import com.luisfagundes.premium.impl.domain.model.SubscriptionOffer
 import com.luisfagundes.premium.impl.domain.model.SubscriptionPlan
 import com.luisfagundes.premium.impl.presentation.effect.PremiumUiEffect
@@ -48,7 +48,8 @@ import com.luisfagundes.premium.impl.presentation.viewmodel.PremiumViewModel
 @Composable
 internal fun PremiumScreen(
     onNavigateBack: () -> Unit,
-    subscriptionProvider: PlayBillingSubscriptionProvider,
+    onLaunchPurchase: (Activity, String) -> Unit,
+    onOpenSubscriptionManagement: (Activity) -> Unit,
     viewModel: PremiumViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -58,10 +59,10 @@ internal fun PremiumScreen(
         when (effect) {
             PremiumUiEffect.NavigateBack -> onNavigateBack()
             PremiumUiEffect.OpenSubscriptionManagement -> activity?.let {
-                subscriptionProvider.openSubscriptionManagement(it)
+                onOpenSubscriptionManagement(it)
             }
             is PremiumUiEffect.LaunchPurchase -> activity?.let {
-                subscriptionProvider.launchPurchase(it, effect.offerToken)
+                onLaunchPurchase(it, effect.offerToken)
             }
         }
     }

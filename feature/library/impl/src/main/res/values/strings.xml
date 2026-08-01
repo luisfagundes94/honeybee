@@ -23,6 +23,12 @@
     <string name="info">Info</string>
     <string name="share_photo">Share media</string>
     <string name="share">Share</string>
+    <string name="media_info_date_added">Date added</string>
+    <string name="media_info_file_size">File size</string>
+    <string name="media_info_file_type">File type</string>
+    <string name="media_info_dimensions">Dimensions</string>
+    <string name="media_dimensions_format">%1$d x %2$d</string>
+    <string name="media_unknown">Unknown</string>
     <string name="favorite">Favorite</string>
     <string name="trash">Trash</string>
     <string name="deletion_not_allowed">You didn\'t allow media deletion</string>

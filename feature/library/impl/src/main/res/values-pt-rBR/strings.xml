@@ -23,6 +23,12 @@
     <string name="info">Informações</string>
     <string name="share_photo">Compartilhar mídia</string>
     <string name="share">Compartilhar</string>
+    <string name="media_info_date_added">Data de adiÃ§Ã£o</string>
+    <string name="media_info_file_size">Tamanho do arquivo</string>
+    <string name="media_info_file_type">Tipo de arquivo</string>
+    <string name="media_info_dimensions">DimensÃµes</string>
+    <string name="media_dimensions_format">%1$d x %2$d</string>
+    <string name="media_unknown">Desconhecido</string>
     <string name="favorite">Favorito</string>
     <string name="trash">Lixeira</string>
     <string name="deletion_not_allowed">Você não permitiu a exclusão de mídia</string>

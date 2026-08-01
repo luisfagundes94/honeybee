@@ -23,13 +23,11 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewWrapper
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.luisfagundes.config.impl.R
@@ -137,16 +135,16 @@ private fun FeedbackScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(240.dp),
+                    .height(MaterialTheme.spacing.feedbackFieldHeight),
                 shape = RoundedCornerShape(MaterialTheme.spacing.default),
                 singleLine = false,
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                     unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
                     disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent,
+                    focusedIndicatorColor = MaterialTheme.colorScheme.surface.copy(alpha = 0f),
+                    unfocusedIndicatorColor = MaterialTheme.colorScheme.surface.copy(alpha = 0f),
+                    disabledIndicatorColor = MaterialTheme.colorScheme.surface.copy(alpha = 0f),
                     cursorColor = MaterialTheme.colorScheme.primary,
                     focusedTextColor = MaterialTheme.colorScheme.onSurface,
                     unfocusedTextColor = MaterialTheme.colorScheme.onSurface
@@ -161,7 +159,7 @@ private fun FeedbackScreen(
 @Composable
 private fun FeedbackScreenPreview() {
     FeedbackScreen(
-        uiState = FeedbackUiState(feedbackText = "This is a feedback"),
+        uiState = FeedbackUiState.Content(feedbackText = "This is a feedback"),
         onEvent = {}
     )
 }

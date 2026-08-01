@@ -30,7 +30,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewWrapper
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieClipSpec
@@ -88,7 +87,7 @@ internal fun CongratulationsScreen(
             LottieAnimation(
                 composition = composition,
                 progress = { progress },
-                modifier = Modifier.size(240.dp)
+                modifier = Modifier.size(MaterialTheme.spacing.illustrationSize)
             )
             Row(
                 verticalAlignment = Alignment.Bottom,
@@ -106,7 +105,7 @@ internal fun CongratulationsScreen(
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.padding(bottom = 12.dp)
+                    modifier = Modifier.padding(bottom = MaterialTheme.spacing.content)
                 )
             }
             Text(

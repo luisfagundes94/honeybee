@@ -38,7 +38,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -318,7 +317,7 @@ private fun ConfigItem(
         overlineContent = null,
         supportingContent = null,
         colors = ListItemDefaults.colors(
-            containerColor = Color.Transparent
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0f)
         ),
         content = {
             Text(
@@ -334,7 +333,7 @@ private fun ConfigItem(
 @Composable
 private fun ConfigScreenPreview() {
     ConfigScreen(
-        uiState = ConfigUiState(),
+        uiState = ConfigUiState.Content(),
         onEvent = {}
     )
 }

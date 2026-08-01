@@ -22,7 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -51,7 +50,7 @@ internal fun FullscreenPhotoViewer(
         BoxWithConstraints(
             modifier = modifier
                 .fillMaxSize()
-                .background(Color.Black)
+                .background(MaterialTheme.colorScheme.scrim)
         ) {
             val scale = remember { Animatable(1f) }
             val offsetX = remember { Animatable(0f) }
@@ -134,12 +133,12 @@ internal fun FullscreenPhotoViewer(
                         .align(Alignment.TopStart)
                         .statusBarsPadding()
                         .padding(MaterialTheme.spacing.default)
-                        .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                        .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.5f), CircleShape)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = stringResource(R.string.close),
-                        tint = Color.White
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
