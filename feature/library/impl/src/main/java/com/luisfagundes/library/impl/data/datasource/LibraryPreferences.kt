@@ -7,6 +7,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import androidx.core.content.edit
 
+private const val KEY_TRASHED = "trashed_photo_ids"
+private const val KEY_DELETED = "deleted_photo_ids"
+
 @Singleton
 internal class LibraryPreferences @Inject constructor(
     @param:ApplicationContext private val context: Context
@@ -32,8 +35,4 @@ internal class LibraryPreferences @Inject constructor(
         prefs.edit { putStringSet(KEY_DELETED, ids.map { it.toString() }.toSet()) }
     }
 
-    companion object {
-        private const val KEY_TRASHED = "trashed_photo_ids"
-        private const val KEY_DELETED = "deleted_photo_ids"
-    }
 }

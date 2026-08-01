@@ -1,7 +1,7 @@
 package com.luisfagundes.library.api.domain.repository
 
-import android.app.PendingIntent
 import com.luisfagundes.library.api.domain.model.Media
+import com.luisfagundes.library.api.domain.model.MediaDeleteRequest
 import com.luisfagundes.library.api.domain.model.Statistics
 
 interface LibraryRepository {
@@ -11,6 +11,6 @@ interface LibraryRepository {
     suspend fun moveToTrash(mediaId: Long)
     suspend fun restoreFromTrash(mediaIds: List<Long>)
     suspend fun permanentlyDelete(mediaList: List<Media>)
-    suspend fun createDeleteRequest(mediaIds: List<Long>): PendingIntent?
+    suspend fun createDeleteRequest(mediaIds: List<Long>): Result<MediaDeleteRequest?>
     suspend fun getStatistics(): Result<Statistics>
 }

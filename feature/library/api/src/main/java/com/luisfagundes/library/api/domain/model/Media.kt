@@ -1,10 +1,8 @@
 package com.luisfagundes.library.api.domain.model
 
-import android.net.Uri
-
-data class Media(
+class Media(
     val id: Long,
-    val uri: Uri,
+    val uri: String,
     val dateAdded: Long,
     val size: Long,
     val mimeType: String? = null,

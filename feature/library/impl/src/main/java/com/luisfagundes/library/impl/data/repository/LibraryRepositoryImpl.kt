@@ -1,32 +1,34 @@
 package com.luisfagundes.library.impl.data.repository
 
-import android.app.PendingIntent
 import android.content.ContentUris
 import android.content.Context
+import android.database.sqlite.SQLiteException
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import android.util.Log
 import com.luisfagundes.core.common.di.DefaultDispatcher
 import com.luisfagundes.core.common.tools.safeRunCatching
 import com.luisfagundes.library.api.domain.model.Media
+import com.luisfagundes.library.api.domain.model.MediaDeleteRequest
 import com.luisfagundes.library.api.domain.model.Statistics
 import com.luisfagundes.library.api.domain.repository.LibraryRepository
 import com.luisfagundes.library.impl.data.database.dao.StatisticsDao
 import com.luisfagundes.library.impl.data.datasource.LibraryDataSource
 import com.luisfagundes.library.impl.data.datasource.LibraryPreferences
-import com.luisfagundes.library.impl.data.mapper.MediaMapper
-import com.luisfagundes.library.impl.data.mapper.StatisticsMapper
+import com.luisfagundes.library.impl.data.database.entity.StatisticsEntity
+import com.luisfagundes.library.impl.data.model.MediaDto
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+private const val TAG = "LibraryRepository"
+
 internal class LibraryRepositoryImpl @Inject constructor(
     private val dataSource: LibraryDataSource,
-    private val mediaMapper: MediaMapper,
     private val preferences: LibraryPreferences,
     private val statisticsDao: StatisticsDao,
-    private val statisticsMapper: StatisticsMapper,
     @param:ApplicationContext private val context: Context,
     @param:DefaultDispatcher private val dispatcher: CoroutineDispatcher
 ) : LibraryRepository {
@@ -37,7 +39,7 @@ internal class LibraryRepositoryImpl @Inject constructor(
             val deletedIds = preferences.getDeletedPhotoIds()
             mediaList.filter { media ->
                 media.id !in trashedIds && media.id !in deletedIds
-            }.map { mediaMapper.mapToDomain(it) }
+            }.map { it.toDomain() }
         }
     }
 
@@ -47,7 +49,7 @@ internal class LibraryRepositoryImpl @Inject constructor(
             val deletedIds = preferences.getDeletedPhotoIds()
             mediaList.filter { media ->
                 media.id in trashedIds && media.id !in deletedIds
-            }.map { mediaMapper.mapToDomain(it) }
+            }.map { it.toDomain() }
         }
     }
 
@@ -79,15 +81,20 @@ internal class LibraryRepositoryImpl @Inject constructor(
         deleteFromMediaStore(mediaIds, videoIds)
     }
 
-    override suspend fun createDeleteRequest(mediaIds: List<Long>): PendingIntent? =
+    override suspend fun createDeleteRequest(mediaIds: List<Long>): Result<MediaDeleteRequest?> =
         withContext(dispatcher) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                val allMedia = dataSource.fetchMediaList().getOrNull() ?: emptyList()
-                val videoIds = allMedia.filter { it.isVideo }.map { it.id }.toSet()
-                val uris = mediaIds.map { getMediaUri(it, videoIds) }
-                return@withContext MediaStore.createDeleteRequest(context.contentResolver, uris)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+                return@withContext Result.success(null)
             }
-            return@withContext null
+
+            dataSource.fetchMediaList().fold(
+                onSuccess = { allMedia ->
+                    val videoIds = allMedia.filter { it.isVideo }.map { it.id }.toSet()
+                    val mediaUris = mediaIds.map { getMediaUri(it, videoIds).toString() }
+                    Result.success(MediaDeleteRequest(mediaUris))
+                },
+                onFailure = { Result.failure(it) }
+            )
         }
 
     private fun updatePreferencesForDeletion(mediaIds: List<Long>) {
@@ -104,10 +111,10 @@ internal class LibraryRepositoryImpl @Inject constructor(
         try {
             if (mediaList.isEmpty()) return
             val currentStats = statisticsDao.getStatistics()
-            val updatedStats = statisticsMapper.mapToUpdatedEntity(currentStats, mediaList)
+            val updatedStats = currentStats.toUpdatedEntity(mediaList)
             statisticsDao.insertOrUpdate(updatedStats)
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (e: SQLiteException) {
+            Log.e(TAG, "Failed to update library statistics", e)
         }
     }
 
@@ -116,8 +123,10 @@ internal class LibraryRepositoryImpl @Inject constructor(
             try {
                 val uri = getMediaUri(id, videoIds)
                 context.contentResolver.delete(uri, null, null)
-            } catch (e: Exception) {
-                e.printStackTrace()
+            } catch (e: SecurityException) {
+                Log.e(TAG, "Unable to delete media id=$id due to missing permission", e)
+            } catch (e: IllegalArgumentException) {
+                Log.e(TAG, "Unable to delete media id=$id due to an invalid URI", e)
             }
         }
     }
@@ -134,7 +143,46 @@ internal class LibraryRepositoryImpl @Inject constructor(
     override suspend fun getStatistics(): Result<Statistics> = withContext(dispatcher) {
         safeRunCatching {
             val entity = statisticsDao.getStatistics()
-            statisticsMapper.mapToDomain(entity)
+            entity.toDomain()
         }
     }
+
+    private fun MediaDto.toDomain() = Media(
+        id = id,
+        uri = uri.toString(),
+        dateAdded = dateAdded,
+        size = size,
+        mimeType = mimeType,
+        width = width,
+        height = height,
+        durationMillis = durationMillis,
+        isVideo = isVideo,
+        bucketId = bucketId,
+        bucketDisplayName = bucketDisplayName,
+        isFavorite = isFavorite
+    )
+
+    private fun StatisticsEntity?.toDomain() = Statistics(
+        memoryCleared = this?.memoryCleared ?: 0L,
+        mediaDeleted = this?.mediaDeleted ?: 0,
+        photosDeleted = this?.photosDeleted ?: 0,
+        videosDeleted = this?.videosDeleted ?: 0
+    )
+
+    private fun StatisticsEntity?.toUpdatedEntity(deletedMedia: List<Media>): StatisticsEntity {
+        val current = this ?: StatisticsEntity(
+            memoryCleared = 0L,
+            mediaDeleted = 0,
+            photosDeleted = 0,
+            videosDeleted = 0
+        )
+        return StatisticsEntity(
+            id = current.id,
+            memoryCleared = current.memoryCleared + deletedMedia.sumOf { it.size },
+            mediaDeleted = current.mediaDeleted + deletedMedia.size,
+            photosDeleted = current.photosDeleted + deletedMedia.count { !it.isVideo },
+            videosDeleted = current.videosDeleted + deletedMedia.count { it.isVideo }
+        )
+    }
+
 }
