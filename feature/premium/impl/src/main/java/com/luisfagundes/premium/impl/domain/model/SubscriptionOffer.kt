@@ -2,7 +2,7 @@ package com.luisfagundes.premium.impl.domain.model
 
 internal enum class SubscriptionPlan { MONTHLY, ANNUAL }
 
-internal data class SubscriptionOffer(
+internal class SubscriptionOffer(
     val id: String,
     val plan: SubscriptionPlan,
     val formattedPrice: String,

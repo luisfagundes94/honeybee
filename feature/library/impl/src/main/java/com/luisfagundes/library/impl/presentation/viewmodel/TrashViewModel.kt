@@ -53,12 +53,18 @@ internal class TrashViewModel @Inject constructor(
 
             viewModelScope.launch {
                 val deleteIds = mediaList.map { it.id }
-                val pendingIntent = repository.createDeleteRequest(deleteIds)
-                if (pendingIntent != null) {
-                    sendEffect { TrashUiEffect.ShowDeleteConfirmation(pendingIntent.intentSender) }
-                } else {
-                    deleteMediaPermanently(mediaList)
-                }
+                repository.createDeleteRequest(deleteIds).fold(
+                    onSuccess = { request ->
+                        if (request != null) {
+                            sendEffect { TrashUiEffect.ShowDeleteConfirmation(request) }
+                        } else {
+                            deleteMediaPermanently(mediaList)
+                        }
+                    },
+                    onFailure = {
+                        setState { TrashUiState.Error }
+                    }
+                )
             }
         }
     }

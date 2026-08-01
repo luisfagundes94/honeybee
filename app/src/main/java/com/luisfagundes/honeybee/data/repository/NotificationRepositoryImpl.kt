@@ -8,6 +8,8 @@ import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
+private const val TAG = "NotificationRepo"
+
 @Singleton
 internal class NotificationRepositoryImpl @Inject constructor() : NotificationRepository {
 
@@ -41,7 +43,4 @@ internal class NotificationRepositoryImpl @Inject constructor() : NotificationRe
         )
     }
 
-    companion object {
-        private const val TAG = "NotificationRepo"
-    }
 }

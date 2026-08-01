@@ -1,6 +1,6 @@
 package com.luisfagundes.honeybee.domain.model
 
-internal data class HoneybeeNotification(
+internal class HoneybeeNotification(
     val id: String,
     val title: String,
     val body: String,

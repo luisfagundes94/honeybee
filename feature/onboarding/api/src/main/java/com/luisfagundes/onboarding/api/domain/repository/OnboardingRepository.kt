@@ -1,8 +1,8 @@
-package com.luisfagundes.onboarding.impl.domain.repository
+package com.luisfagundes.onboarding.api.domain.repository
 
 import kotlinx.coroutines.flow.Flow
 
-internal interface OnboardingRepository {
+interface OnboardingRepository {
     fun getOnboardingStatus(): Flow<Boolean>
     suspend fun completeOnboarding()
 }

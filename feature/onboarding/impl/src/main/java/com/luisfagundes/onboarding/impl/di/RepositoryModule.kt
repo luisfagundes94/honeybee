@@ -1,7 +1,7 @@
 package com.luisfagundes.onboarding.impl.di
 
 import com.luisfagundes.onboarding.impl.data.repository.OnboardingRepositoryImpl
-import com.luisfagundes.onboarding.impl.domain.repository.OnboardingRepository
+import com.luisfagundes.onboarding.api.domain.repository.OnboardingRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

@@ -9,7 +9,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class FeedbackViewModel @Inject constructor() :
-    ViewModel<FeedbackUiState, FeedbackUiEvent, FeedbackUiEffect>(FeedbackUiState()) {
+    ViewModel<FeedbackUiState, FeedbackUiEvent, FeedbackUiEffect>(FeedbackUiState.Content()) {
     override fun dispatchEvent(event: FeedbackUiEvent) {
         when (event) {
             is FeedbackUiEvent.UpdateFeedbackText -> updateFeedbackText(event.text)
@@ -19,7 +19,9 @@ internal class FeedbackViewModel @Inject constructor() :
     }
 
     private fun updateFeedbackText(text: String) {
-        setState { it.copy(feedbackText = text, isSubmitButtonEnabled = text.isNotBlank()) }
+        setStateOf<FeedbackUiState.Content> {
+            it.copy(feedbackText = text, isSubmitButtonEnabled = text.isNotBlank())
+        }
     }
 
     private fun submitFeedback() {

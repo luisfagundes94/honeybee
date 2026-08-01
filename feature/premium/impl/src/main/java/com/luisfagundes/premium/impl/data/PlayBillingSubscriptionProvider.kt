@@ -20,6 +20,7 @@ import com.luisfagundes.core.common.provider.SubscriptionProvider
 import com.luisfagundes.core.common.provider.SubscriptionStatus
 import com.luisfagundes.premium.impl.domain.model.SubscriptionOffer
 import com.luisfagundes.premium.impl.domain.model.SubscriptionPlan
+import com.luisfagundes.premium.impl.domain.repository.PremiumSubscriptionRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,7 +32,7 @@ import javax.inject.Singleton
 internal class PlayBillingSubscriptionProvider @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val config: SubscriptionConfig,
-) : SubscriptionProvider, PurchasesUpdatedListener {
+) : SubscriptionProvider, PremiumSubscriptionRepository, PurchasesUpdatedListener {
     private val mutableStatus = MutableStateFlow<SubscriptionStatus>(SubscriptionStatus.Loading)
     private val mutableOffers = MutableStateFlow<List<SubscriptionOffer>>(emptyList())
     private val mutablePurchasePending = MutableStateFlow(false)
@@ -50,8 +51,8 @@ internal class PlayBillingSubscriptionProvider @Inject constructor(
         .build()
 
     override val status: StateFlow<SubscriptionStatus> = mutableStatus.asStateFlow()
-    val offers: StateFlow<List<SubscriptionOffer>> = mutableOffers.asStateFlow()
-    val isPurchasePending: StateFlow<Boolean> = mutablePurchasePending.asStateFlow()
+    override val offers: StateFlow<List<SubscriptionOffer>> = mutableOffers.asStateFlow()
+    override val isPurchasePending: StateFlow<Boolean> = mutablePurchasePending.asStateFlow()
 
     init {
         connect()

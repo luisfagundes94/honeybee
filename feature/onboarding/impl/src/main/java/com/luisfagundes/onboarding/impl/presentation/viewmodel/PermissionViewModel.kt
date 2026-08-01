@@ -2,7 +2,7 @@ package com.luisfagundes.onboarding.impl.presentation.viewmodel
 
 import androidx.lifecycle.viewModelScope
 import com.luisfagundes.core.common.presentation.arch.viewmodel.EffectViewModel
-import com.luisfagundes.onboarding.impl.domain.repository.OnboardingRepository
+import com.luisfagundes.onboarding.api.domain.repository.OnboardingRepository
 import com.luisfagundes.onboarding.impl.presentation.effect.PermissionUiEffect
 import com.luisfagundes.onboarding.impl.presentation.event.PermissionUiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel

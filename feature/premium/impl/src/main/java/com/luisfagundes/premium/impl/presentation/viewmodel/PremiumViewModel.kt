@@ -2,8 +2,8 @@ package com.luisfagundes.premium.impl.presentation.viewmodel
 
 import androidx.lifecycle.viewModelScope
 import com.luisfagundes.core.common.presentation.arch.viewmodel.ViewModel
-import com.luisfagundes.premium.impl.data.PlayBillingSubscriptionProvider
 import com.luisfagundes.premium.impl.domain.model.SubscriptionPlan
+import com.luisfagundes.premium.impl.domain.repository.PremiumSubscriptionRepository
 import com.luisfagundes.premium.impl.presentation.effect.PremiumUiEffect
 import com.luisfagundes.premium.impl.presentation.event.PremiumUiEvent
 import com.luisfagundes.premium.impl.presentation.state.PremiumUiState
@@ -13,19 +13,21 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class PremiumViewModel @Inject constructor(
-    private val subscriptionProvider: PlayBillingSubscriptionProvider,
+    private val subscriptionRepository: PremiumSubscriptionRepository,
 ) : ViewModel<PremiumUiState, PremiumUiEvent, PremiumUiEffect>(
-    initialState = PremiumUiState()
+    initialState = PremiumUiState.Content()
 ) {
     init {
         viewModelScope.launch {
-            subscriptionProvider.status.collect { status ->
-                setState { it.copy(subscriptionStatus = status) }
+            subscriptionRepository.status.collect { status ->
+                setStateOf<PremiumUiState.Content> {
+                    it.copy(subscriptionStatus = status)
+                }
             }
         }
         viewModelScope.launch {
-            subscriptionProvider.offers.collect { offers ->
-                setState {
+            subscriptionRepository.offers.collect { offers ->
+                setStateOf<PremiumUiState.Content> {
                     val selected = it.selectedOfferId
                         ?.takeIf { id -> offers.any { offer -> offer.id == id } }
                         ?: offers.firstOrNull { offer -> offer.plan == SubscriptionPlan.ANNUAL }?.id
@@ -35,8 +37,10 @@ internal class PremiumViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
-            subscriptionProvider.isPurchasePending.collect { isPending ->
-                setState { it.copy(isPurchasePending = isPending) }
+            subscriptionRepository.isPurchasePending.collect { isPending ->
+                setStateOf<PremiumUiState.Content> {
+                    it.copy(isPurchasePending = isPending)
+                }
             }
         }
     }
@@ -45,13 +49,15 @@ internal class PremiumViewModel @Inject constructor(
         when (event) {
             PremiumUiEvent.Load, PremiumUiEvent.RestoreClick -> refresh()
             PremiumUiEvent.BackClick -> sendEffect { PremiumUiEffect.NavigateBack }
-            is PremiumUiEvent.OfferSelected -> setState { it.copy(selectedOfferId = event.offerId) }
+            is PremiumUiEvent.OfferSelected -> setStateOf<PremiumUiState.Content> {
+                it.copy(selectedOfferId = event.offerId)
+            }
             PremiumUiEvent.PurchaseClick -> launchPurchase()
             PremiumUiEvent.ManageSubscriptionClick -> sendEffect { PremiumUiEffect.OpenSubscriptionManagement }
         }
     }
 
-    private fun refresh() = viewModelScope.launch { subscriptionProvider.refresh() }
+    private fun refresh() = viewModelScope.launch { subscriptionRepository.refresh() }
 
     private fun launchPurchase() {
         val currentState = getCurrentState()

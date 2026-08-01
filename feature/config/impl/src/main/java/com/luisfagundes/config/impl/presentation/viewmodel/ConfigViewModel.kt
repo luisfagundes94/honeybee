@@ -1,8 +1,7 @@
 package com.luisfagundes.config.impl.presentation.viewmodel
 
 import androidx.lifecycle.viewModelScope
-import com.luisfagundes.config.impl.domain.usecase.ObserveNotificationsEnabledUseCase
-import com.luisfagundes.config.impl.domain.usecase.SetNotificationsEnabledUseCase
+import com.luisfagundes.config.impl.domain.repository.ConfigRepository
 import com.luisfagundes.config.impl.presentation.effect.ConfigUiEffect
 import com.luisfagundes.config.impl.presentation.event.ConfigUiEvent
 import com.luisfagundes.config.impl.presentation.state.ConfigUiState
@@ -15,12 +14,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 internal class ConfigViewModel @Inject constructor(
-    private val observeNotificationsEnabledUseCase: ObserveNotificationsEnabledUseCase,
-    private val setNotificationsEnabledUseCase: SetNotificationsEnabledUseCase,
+    private val repository: ConfigRepository,
     private val adsCoordinator: AdsCoordinator,
     adsConfig: AdsConfig,
 ) : ViewModel<ConfigUiState, ConfigUiEvent, ConfigUiEffect>(
-    initialState = ConfigUiState()
+    initialState = ConfigUiState.Content()
 ) {
     init {
         observeNotificationsEnabled()
@@ -38,13 +36,21 @@ internal class ConfigViewModel @Inject constructor(
     }
 
     private fun observeNotificationsEnabled() = viewModelScope.launch {
-        observeNotificationsEnabledUseCase().collect { enabled ->
-            setState { it.copy(isNotificationsEnabled = enabled) }
+        repository.notificationsEnabled().collect { enabled ->
+            setStateOf<ConfigUiState.Content> {
+                it.copy(isNotificationsEnabled = enabled)
+            }
         }
     }
 
     private fun updateNotificationsEnabled(enabled: Boolean) = viewModelScope.launch {
-        setNotificationsEnabledUseCase(enabled)
+        val previousState = getCurrentState()
+        repository.setNotificationsEnabled(enabled).fold(
+            onSuccess = {},
+            onFailure = {
+                setState { previousState }
+            }
+        )
     }
 
     private fun navigateToStatistics() {
@@ -61,7 +67,7 @@ internal class ConfigViewModel @Inject constructor(
 
     private fun observeAds(adsConfig: AdsConfig) = viewModelScope.launch {
         adsCoordinator.state.collect { adsState ->
-            setState {
+            setStateOf<ConfigUiState.Content> {
                 it.copy(
                     canShowSettingsBanner = adsState.canShowAds,
                     isPrivacyOptionsRequired = adsState.isPrivacyOptionsRequired,

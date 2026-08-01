@@ -16,6 +16,9 @@ import kotlinx.coroutines.withContext
 import java.io.IOException
 import javax.inject.Inject
 
+private val notificationsEnabledKey = booleanPreferencesKey("notifications_enabled")
+private const val DEFAULT_NOTIFICATIONS_ENABLED = true
+
 internal class UserPreferencesImpl @Inject constructor(
     @param:UserPreferencesDataStore private val dataStore: DataStore<Preferences>,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
@@ -30,20 +33,16 @@ internal class UserPreferencesImpl @Inject constructor(
             }
         }
         .map { preferences ->
-            preferences[NOTIFICATIONS_ENABLED] ?: DEFAULT_NOTIFICATIONS_ENABLED
+            preferences[notificationsEnabledKey] ?: DEFAULT_NOTIFICATIONS_ENABLED
         }
         .flowOn(dispatcher)
 
     override suspend fun setNotificationsEnabled(enabled: Boolean) {
         withContext(dispatcher) {
             dataStore.edit { preferences ->
-                preferences[NOTIFICATIONS_ENABLED] = enabled
+                preferences[notificationsEnabledKey] = enabled
             }
         }
     }
 
-    private companion object {
-        val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
-        const val DEFAULT_NOTIFICATIONS_ENABLED = true
-    }
 }

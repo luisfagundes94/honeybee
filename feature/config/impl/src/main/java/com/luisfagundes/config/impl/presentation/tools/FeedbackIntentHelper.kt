@@ -2,7 +2,7 @@ package com.luisfagundes.config.impl.presentation.tools
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
+import android.content.pm.PackageManager
 import android.os.Build
 import com.luisfagundes.config.impl.R
 import androidx.core.net.toUri
@@ -16,7 +16,7 @@ internal fun launchFeedbackEmailIntent(
     val appVersionName = try {
         val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
         packageInfo.versionName ?: "Unknown"
-    } catch (e: Exception) {
+    } catch (e: PackageManager.NameNotFoundException) {
         "Unknown"
     }
 

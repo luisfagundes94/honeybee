@@ -44,6 +44,8 @@ import com.luisfagundes.albums.api.presentation.navigation.AlbumsRoute
 import com.luisfagundes.config.api.presentation.navigation.ConfigRoute
 import com.luisfagundes.honeybee.presentation.navigation.AppNavDisplay
 import com.luisfagundes.honeybee.presentation.navigation.TopLevelDestination
+import com.luisfagundes.honeybee.presentation.event.MainUiEvent
+import com.luisfagundes.honeybee.presentation.state.MainUiState
 import com.luisfagundes.honeybee.presentation.viewmodel.MainViewModel
 import com.luisfagundes.library.api.presentation.navigation.LibraryRoute
 import com.luisfagundes.onboarding.api.presentation.navigation.OnboardingRoute
@@ -67,12 +69,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val onboardingCompleted by viewModel.isOnboardingCompleted()
-                .collectAsStateWithLifecycle(initialValue = null)
+            val mainUiState by viewModel.uiState.collectAsStateWithLifecycle()
             val subscriptionStatus by subscriptionProvider.status.collectAsStateWithLifecycle()
-            
+
             HoneybeeTheme {
-                if (onboardingCompleted == null) return@HoneybeeTheme
+                val onboardingCompleted = (mainUiState as? MainUiState.Content)
+                    ?.isOnboardingCompleted
+                    ?: return@HoneybeeTheme
 
                 LaunchedEffect(subscriptionStatus) {
                     if (subscriptionStatus == SubscriptionStatus.Free) {
@@ -93,7 +96,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        viewModel.refreshSubscription()
+        viewModel.dispatchEvent(MainUiEvent.RefreshSubscription)
     }
 }
 

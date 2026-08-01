@@ -1,23 +1,21 @@
 package com.luisfagundes.albums.impl.domain.usecase
 
-import com.luisfagundes.albums.impl.domain.mapper.AlbumMapper
-import com.luisfagundes.albums.impl.domain.model.Album
-import com.luisfagundes.albums.impl.domain.model.AlbumMedia
+import com.luisfagundes.albums.impl.domain.model.FavoritesAlbumId
+import com.luisfagundes.albums.impl.domain.model.VideosAlbumId
 import com.luisfagundes.library.api.domain.repository.LibraryRepository
 import javax.inject.Inject
 
 internal class GetAlbumMediaUseCase @Inject constructor(
-    private val libraryRepository: LibraryRepository,
-    private val albumMapper: AlbumMapper
+    private val libraryRepository: LibraryRepository
 ) {
-    suspend operator fun invoke(albumId: String): Result<List<AlbumMedia>> =
+    suspend operator fun invoke(albumId: String) =
         libraryRepository.getActiveMedia().map { activeMedia ->
             val filteredMedia = when (albumId) {
-                Album.Virtual.Favorites.ID -> activeMedia.filter { it.isFavorite }
-                Album.Virtual.Videos.ID -> activeMedia.filter { it.isVideo }
+                FavoritesAlbumId -> activeMedia.filter { it.isFavorite }
+                VideosAlbumId -> activeMedia.filter { it.isVideo }
                 else -> activeMedia.filter { it.bucketId == albumId }
             }
 
-            filteredMedia.map { albumMapper.mapToAlbumMedia(it) }
+            filteredMedia.map { it.toAlbumMedia() }
         }
 }

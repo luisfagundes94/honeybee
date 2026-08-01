@@ -18,6 +18,9 @@ internal object NavigationModule {
     fun providePremiumEntries(
         subscriptionProvider: PlayBillingSubscriptionProvider,
     ): @JvmSuppressWildcards (EntryProviderScope<NavKey>) -> Unit = { scope ->
-        scope.premiumEntries(subscriptionProvider)
+        scope.premiumEntries(
+            onLaunchPurchase = subscriptionProvider::launchPurchase,
+            onOpenSubscriptionManagement = subscriptionProvider::openSubscriptionManagement,
+        )
     }
 }
