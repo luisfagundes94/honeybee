@@ -2,6 +2,7 @@
 layout: default
 title: Honeybee Privacy Policy
 description: Privacy information for the Honeybee Android application
+permalink: /privacy-policy/
 ---
 
 # Honeybee Privacy Policy
