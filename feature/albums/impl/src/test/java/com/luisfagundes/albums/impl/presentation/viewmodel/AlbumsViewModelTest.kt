@@ -116,7 +116,10 @@ internal class AlbumsViewModelTest {
             viewModel.dispatchEvent(AlbumsUiEvent.AlbumClick(albumId, albumName))
 
             // Then
-            assertEquals(AlbumsUiEffect.NavigateToAlbumDetails(albumId, albumName), awaitItem())
+            assertEquals(
+                AlbumsUiEffect.NavigateToAlbumDetails(albumId, albumName),
+                awaitItem()
+            )
         }
     }
 }
