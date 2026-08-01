@@ -81,10 +81,6 @@ internal fun LibraryScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.dispatchEvent(LibraryUiEvent.LoadMedia)
-    }
-
     LibraryScreen(
         uiState = uiState,
         onEvent = viewModel::dispatchEvent
