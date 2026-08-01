@@ -83,7 +83,7 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                val startRoute = if (onboardingCompleted == true) LibraryRoute else OnboardingRoute
+                val startRoute = if (onboardingCompleted) LibraryRoute else OnboardingRoute
                 val backStack = rememberNavBackStack(startRoute)
 
                 MainContent(
