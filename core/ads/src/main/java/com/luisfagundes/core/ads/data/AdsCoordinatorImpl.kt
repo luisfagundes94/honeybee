@@ -99,43 +99,42 @@ internal class AdsCoordinatorImpl @Inject constructor(
         deletedCount: Int,
         onComplete: () -> Unit,
     ) {
-        if (
-            deletedCount < MINIMUM_DELETED_ITEMS_FOR_INTERSTITIAL ||
-            subscriptionProvider.status.value != SubscriptionStatus.Free ||
-            !state.value.canShowAds ||
-            isInterstitialShowing
-        ) {
+        if (!canShowCleanupInterstitial(deletedCount)) {
             onComplete()
-            return
-        }
-
-        scope.launch {
+        } else scope.launch {
             val ad = interstitialAd
             if (ad == null) {
                 onComplete()
-                return@launch
-            }
-
-            isInterstitialShowing = true
-            interstitialAd = null
-            var completed = false
-            fun completeOnce() {
-                if (!completed) {
-                    completed = true
-                    isInterstitialShowing = false
-                    loadInterstitial()
-                    onComplete()
+            } else {
+                isInterstitialShowing = true
+                interstitialAd = null
+                var completed = false
+                fun completeOnce() {
+                    if (!completed) {
+                        completed = true
+                        isInterstitialShowing = false
+                        loadInterstitial()
+                        onComplete()
+                    }
                 }
-            }
 
-            ad.fullScreenContentCallback = object : FullScreenContentCallback() {
-                override fun onAdDismissedFullScreenContent() = completeOnce()
+                ad.fullScreenContentCallback = object : FullScreenContentCallback() {
+                    override fun onAdDismissedFullScreenContent() = completeOnce()
 
-                override fun onAdFailedToShowFullScreenContent(adError: AdError) = completeOnce()
+                    override fun onAdFailedToShowFullScreenContent(adError: AdError) = completeOnce()
+                }
+                ad.setImmersiveMode(true)
+                ad.show(activity)
             }
-            ad.setImmersiveMode(true)
-            ad.show(activity)
         }
+    }
+
+    private fun canShowCleanupInterstitial(deletedCount: Int): Boolean {
+        var canShow = deletedCount >= MINIMUM_DELETED_ITEMS_FOR_INTERSTITIAL
+        if (canShow) canShow = subscriptionProvider.status.value == SubscriptionStatus.Free
+        if (canShow) canShow = state.value.canShowAds
+        if (canShow) canShow = !isInterstitialShowing
+        return canShow
     }
 
     private fun enableAds() {
@@ -158,28 +157,31 @@ internal class AdsCoordinatorImpl @Inject constructor(
     }
 
     private fun loadInterstitial() {
-        if (
-            subscriptionProvider.status.value != SubscriptionStatus.Free ||
-            !state.value.canShowAds ||
-            interstitialAd != null ||
-            isInterstitialLoading
-        ) return
+        if (canLoadInterstitial()) {
+            isInterstitialLoading = true
+            InterstitialAd.load(
+                context,
+                adsConfig.cleanupInterstitialAdUnitId,
+                AdRequest.Builder().build(),
+                object : InterstitialAdLoadCallback() {
+                    override fun onAdLoaded(ad: InterstitialAd) {
+                        isInterstitialLoading = false
+                        interstitialAd = ad
+                    }
 
-        isInterstitialLoading = true
-        InterstitialAd.load(
-            context,
-            adsConfig.cleanupInterstitialAdUnitId,
-            AdRequest.Builder().build(),
-            object : InterstitialAdLoadCallback() {
-                override fun onAdLoaded(ad: InterstitialAd) {
-                    isInterstitialLoading = false
-                    interstitialAd = ad
-                }
+                    override fun onAdFailedToLoad(loadAdError: LoadAdError) {
+                        isInterstitialLoading = false
+                    }
+                },
+            )
+        }
+    }
 
-                override fun onAdFailedToLoad(loadAdError: LoadAdError) {
-                    isInterstitialLoading = false
-                }
-            },
-        )
+    private fun canLoadInterstitial(): Boolean {
+        var canLoad = subscriptionProvider.status.value == SubscriptionStatus.Free
+        if (canLoad) canLoad = state.value.canShowAds
+        if (canLoad) canLoad = interstitialAd == null
+        if (canLoad) canLoad = !isInterstitialLoading
+        return canLoad
     }
 }
