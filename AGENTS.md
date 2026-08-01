@@ -410,6 +410,8 @@ Each feature module must have its own `data/`, `domain/`, `presentation/`, and `
 
 **Visibility convention**: All domain models, use cases, repositories, ViewModels, and DI modules are `internal`. Only navigation routes are public. Default to `internal` for new types.
 
+When a feature needs to expose functionality to another feature, split the exposed surface into `api/` and `impl/`. Keep only the minimum contracts and types required by consumers in `api/`; keep implementations and internal details in `impl/`. Other features must depend on the feature's `api`, never its `impl`.
+
 ---
 
 ## ViewModel Hierarchy
