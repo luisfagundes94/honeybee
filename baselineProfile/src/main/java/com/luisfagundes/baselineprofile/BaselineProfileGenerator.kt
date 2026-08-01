@@ -11,6 +11,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+private const val TARGET_APP_ID_ARGUMENT = "targetAppId"
+private const val UI_IDLE_TIMEOUT_MILLIS = 5_000L
+private const val GESTURE_MARGIN_DIVISOR = 10
+
 /**
  * This test class generates a basic startup baseline profile for the target package.
  *
@@ -45,8 +49,8 @@ class BaselineProfileGenerator {
     fun generate() {
         // The application id for the running build variant is read from the instrumentation arguments.
         rule.collect(
-            packageName = InstrumentationRegistry.getArguments().getString("targetAppId")
-                ?: throw Exception("targetAppId not passed as instrumentation runner arg"),
+            packageName = InstrumentationRegistry.getArguments().getString(TARGET_APP_ID_ARGUMENT)
+                ?: throw IllegalStateException("targetAppId not passed as instrumentation runner arg"),
 
             // See: https://d.android.com/topic/performance/baselineprofiles/dex-layout-optimizations
             includeInStartupProfile = true
@@ -60,11 +64,11 @@ class BaselineProfileGenerator {
 
             // Wait until the content is asynchronously loaded and scrollable grid appears
             device.waitForIdle()
-            device.wait(Until.hasObject(By.scrollable(true)), 5_000)
+            device.wait(Until.hasObject(By.scrollable(true)), UI_IDLE_TIMEOUT_MILLIS)
 
             val scrollableGrid = device.findObject(By.scrollable(true))
             if (scrollableGrid != null) {
-                scrollableGrid.setGestureMargin(device.displayWidth / 10)
+                scrollableGrid.setGestureMargin(device.displayWidth / GESTURE_MARGIN_DIVISOR)
                 // Scroll down
                 scrollableGrid.scroll(Direction.DOWN, 1.0f)
                 device.waitForIdle()

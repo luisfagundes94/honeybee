@@ -12,6 +12,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+private const val TARGET_APP_ID_ARGUMENT = "targetAppId"
+
 /**
  * This test class benchmarks the speed of app startup.
  * Run this benchmark to verify how effective a Baseline Profile is.
@@ -50,8 +52,8 @@ class StartupBenchmarks {
     private fun benchmark(compilationMode: CompilationMode) {
         // The application id for the running build variant is read from the instrumentation arguments.
         rule.measureRepeated(
-            packageName = InstrumentationRegistry.getArguments().getString("targetAppId")
-                ?: throw Exception("targetAppId not passed as instrumentation runner arg"),
+            packageName = InstrumentationRegistry.getArguments().getString(TARGET_APP_ID_ARGUMENT)
+                ?: throw IllegalStateException("targetAppId not passed as instrumentation runner arg"),
             metrics = listOf(StartupTimingMetric()),
             compilationMode = compilationMode,
             startupMode = StartupMode.COLD,

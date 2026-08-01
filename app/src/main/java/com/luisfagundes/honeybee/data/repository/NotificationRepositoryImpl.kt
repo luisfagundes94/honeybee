@@ -30,6 +30,7 @@ internal class NotificationRepositoryImpl @Inject constructor() : NotificationRe
                 NotificationType.SYSTEM_ALERT
             }
         } catch (e: IllegalArgumentException) {
+            Log.w(TAG, "Unknown notification type: $typeStr", e)
             NotificationType.SYSTEM_ALERT
         }
         val deepLinkUrl = rawData["deepLinkUrl"]

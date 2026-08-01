@@ -138,43 +138,58 @@ private fun MainContent(
                 }
             }
 
-            NavigationSuiteScaffold(
-                state = scaffoldVisibilityState,
-                navigationSuiteItems = {
-                    TopLevelDestination.entries.forEach { destination ->
-                        item(
-                            selected = currentRoute == destination.route,
-                            onClick = {
-                                if (currentRoute != destination.route) {
-                                    backStack.clear()
-                                    backStack.add(destination.route)
-                                }
-                            },
-                            icon = {
-                                Icon(
-                                    imageVector = destination.icon,
-                                    contentDescription = stringResource(destination.labelRes)
-                                )
-                            },
-                            label = {
-                                Text(text = stringResource(destination.labelRes))
-                            }
-                        )
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxSize()
-                    .nestedScroll(scrollState.nestedScrollConnection)
-            ) {
-                AppNavDisplay(
-                    backStack = backStack,
-                    entryProvider = entryProvider {
-                        entryBuilders.forEach { it(this) }
+            MainNavigationSuite(
+                backStack = backStack,
+                entryBuilders = entryBuilders,
+                currentRoute = currentRoute,
+                scaffoldVisibilityState = scaffoldVisibilityState,
+                scrollState = scrollState,
+            )
+        }
+    }
+}
+
+@Composable
+private fun MainNavigationSuite(
+    backStack: NavBackStack<NavKey>,
+    entryBuilders: Set<(EntryProviderScope<NavKey>) -> Unit>,
+    currentRoute: NavKey?,
+    scaffoldVisibilityState: androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldState,
+    scrollState: ScaffoldScrollState,
+) {
+    NavigationSuiteScaffold(
+        state = scaffoldVisibilityState,
+        navigationSuiteItems = {
+            TopLevelDestination.entries.forEach { destination ->
+                item(
+                    selected = currentRoute == destination.route,
+                    onClick = {
+                        if (currentRoute != destination.route) {
+                            backStack.clear()
+                            backStack.add(destination.route)
+                        }
                     },
-                    modifier = Modifier.fillMaxSize()
+                    icon = {
+                        Icon(
+                            imageVector = destination.icon,
+                            contentDescription = stringResource(destination.labelRes)
+                        )
+                    },
+                    label = { Text(text = stringResource(destination.labelRes)) }
                 )
             }
-        }
+        },
+        modifier = Modifier
+            .fillMaxSize()
+            .nestedScroll(scrollState.nestedScrollConnection)
+    ) {
+        AppNavDisplay(
+            backStack = backStack,
+            entryProvider = entryProvider {
+                entryBuilders.forEach { it(this) }
+            },
+            modifier = Modifier.fillMaxSize()
+        )
     }
 }
 
