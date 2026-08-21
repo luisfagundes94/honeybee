@@ -9,12 +9,10 @@ import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Direction
-import androidx.test.uiautomator.Until
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-private const val GRID_LOAD_TIMEOUT_MILLIS = 5_000L
 private const val GESTURE_MARGIN_DIVISOR = 10
 private const val SCROLL_COUNT = 3
 private const val SCROLL_PERCENT = 0.5f
@@ -45,8 +43,9 @@ class LibraryScrollBenchmarks {
             iterations = 5,
             setupBlock = {
                 pressHome()
+                device.grantLibraryRuntimePermissions(packageName)
                 startActivityAndWait()
-                device.wait(Until.hasObject(By.scrollable(true)), GRID_LOAD_TIMEOUT_MILLIS)
+                device.prepareLibrary()
             },
             measureBlock = {
                 val grid = device.findObject(By.scrollable(true)) ?: error("Grid not found")

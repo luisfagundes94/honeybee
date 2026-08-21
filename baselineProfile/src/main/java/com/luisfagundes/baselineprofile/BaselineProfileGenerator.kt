@@ -4,15 +4,12 @@ import androidx.benchmark.macro.junit4.BaselineProfileRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Direction
-import androidx.test.uiautomator.Until
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 private const val TARGET_APP_ID_ARGUMENT = "targetAppId"
-private const val UI_IDLE_TIMEOUT_MILLIS = 5_000L
 private const val GESTURE_MARGIN_DIVISOR = 10
 
 /**
@@ -60,22 +57,17 @@ class BaselineProfileGenerator {
 
             // Start default activity for your app
             pressHome()
+            device.grantLibraryRuntimePermissions(packageName)
             startActivityAndWait()
 
-            // Wait until the content is asynchronously loaded and scrollable grid appears
+            val scrollableGrid = device.prepareLibrary()
+            scrollableGrid.setGestureMargin(device.displayWidth / GESTURE_MARGIN_DIVISOR)
+            // Scroll down
+            scrollableGrid.scroll(Direction.DOWN, 1.0f)
             device.waitForIdle()
-            device.wait(Until.hasObject(By.scrollable(true)), UI_IDLE_TIMEOUT_MILLIS)
-
-            val scrollableGrid = device.findObject(By.scrollable(true))
-            if (scrollableGrid != null) {
-                scrollableGrid.setGestureMargin(device.displayWidth / GESTURE_MARGIN_DIVISOR)
-                // Scroll down
-                scrollableGrid.scroll(Direction.DOWN, 1.0f)
-                device.waitForIdle()
-                // Scroll up
-                scrollableGrid.scroll(Direction.UP, 1.0f)
-                device.waitForIdle()
-            }
+            // Scroll up
+            scrollableGrid.scroll(Direction.UP, 1.0f)
+            device.waitForIdle()
         }
     }
 }
