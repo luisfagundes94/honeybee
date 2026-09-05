@@ -4,6 +4,11 @@ import org.gradle.api.provider.MapProperty
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 
+private val testAdMobApplicationId = "ca-app-pub-3940256099942544~3347511713"
+private val testAdMobSettingsBannerAdUnitId = "ca-app-pub-3940256099942544/9214589741"
+private val testAdMobCleanupInterstitialAdUnitId = "ca-app-pub-3940256099942544/1033173712"
+private val testRevenueCatApiKey = "test_YmqIBYWSDBUDWuETPsPAKyTgCcg"
+
 abstract class ValidateReleaseMonetizationConfig : DefaultTask() {
     @get:Input
     abstract val values: MapProperty<String, String>
@@ -58,10 +63,10 @@ android {
 
     buildTypes {
         debug {
-            manifestPlaceholders["admobAppId"] = "ca-app-pub-3940256099942544~3347511713"
-            buildConfigField("String", "ADMOB_SETTINGS_BANNER_AD_UNIT_ID", "\"ca-app-pub-3940256099942544/9214589741\"")
-            buildConfigField("String", "ADMOB_CLEANUP_INTERSTITIAL_AD_UNIT_ID", "\"ca-app-pub-3940256099942544/1033173712\"")
-            buildConfigField("String", "REVENUECAT_API_KEY", "\"test_YmqIBYWSDBUDWuETPsPAKyTgCcg\"")
+            manifestPlaceholders["admobAppId"] = testAdMobApplicationId
+            buildConfigField("String", "ADMOB_SETTINGS_BANNER_AD_UNIT_ID", "\"$testAdMobSettingsBannerAdUnitId\"")
+            buildConfigField("String", "ADMOB_CLEANUP_INTERSTITIAL_AD_UNIT_ID", "\"$testAdMobCleanupInterstitialAdUnitId\"")
+            buildConfigField("String", "REVENUECAT_API_KEY", "\"$testRevenueCatApiKey\"")
         }
         release {
             isMinifyEnabled = true
@@ -81,6 +86,11 @@ android {
             signingConfig = signingConfigs.getByName("debug")
             matchingFallbacks += listOf("release")
             isDebuggable = false
+            // Benchmark builds run without production credentials, so use the SDK test values.
+            manifestPlaceholders["admobAppId"] = testAdMobApplicationId
+            buildConfigField("String", "ADMOB_SETTINGS_BANNER_AD_UNIT_ID", "\"$testAdMobSettingsBannerAdUnitId\"")
+            buildConfigField("String", "ADMOB_CLEANUP_INTERSTITIAL_AD_UNIT_ID", "\"$testAdMobCleanupInterstitialAdUnitId\"")
+            buildConfigField("String", "REVENUECAT_API_KEY", "\"$testRevenueCatApiKey\"")
         }
     }
     compileOptions {
