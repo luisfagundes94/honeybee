@@ -1,11 +1,8 @@
 package com.luisfagundes.library.impl.presentation.screen
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,12 +11,9 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -27,18 +21,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -47,12 +33,10 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewWrapper
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.core.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.core.designsystem.components.HoneybeeLoadingTemplate
-import com.luisfagundes.core.designsystem.components.VideoDurationBadge
+import com.luisfagundes.core.designsystem.components.MediaThumbnail
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
 import com.luisfagundes.library.api.domain.model.Media
@@ -66,8 +50,6 @@ import com.luisfagundes.library.impl.presentation.state.LibraryUiState
 import com.luisfagundes.library.impl.presentation.tools.getFormattedMonthName
 import com.luisfagundes.library.impl.presentation.viewmodel.LibraryViewModel
 import com.luisfagundes.core.designsystem.R as DesignSystemResources
-
-private const val SquareAspectRatio = 1f
 
 @Composable
 internal fun LibraryScreen(
@@ -242,59 +224,18 @@ private fun MediaGridItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-    val imageRequest = remember(media.uri, context) {
-        ImageRequest.Builder(context)
-            .data(media.uri)
-            .crossfade(false)
-            .build()
-    }
-    var imageLoadFailed by remember(media.uri) { mutableStateOf(false) }
     val mediaContentDescription = stringResource(
         if (media.isVideo) R.string.open_video else R.string.open_photo
     )
 
-    Box(
+    MediaThumbnail(
+        uri = media.uri,
+        isVideo = media.isVideo,
+        durationMillis = media.durationMillis,
+        contentDescription = mediaContentDescription,
+        onClick = onClick,
         modifier = modifier
-            .aspectRatio(SquareAspectRatio)
-            .clip(MaterialTheme.shapes.small)
-            .clickable(
-                role = Role.Button,
-                onClick = onClick
-            )
-            .semantics {
-                contentDescription = mediaContentDescription
-            }
-    ) {
-        AsyncImage(
-            model = imageRequest,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-            onSuccess = { imageLoadFailed = false },
-            onError = { imageLoadFailed = true }
-        )
-
-        if (imageLoadFailed) {
-            Icon(
-                imageVector = Icons.Default.BrokenImage,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.align(Alignment.Center)
-            )
-        }
-
-        if (media.isVideo) {
-            VideoDurationBadge(
-                durationMillis = media.durationMillis,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(MaterialTheme.spacing.verySmall)
-            )
-        }
-    }
+    )
 }
 
 @PreviewLightDark

@@ -1,7 +1,6 @@
 package com.luisfagundes.albums.impl.domain.usecase
 
 import com.luisfagundes.albums.impl.domain.model.Album
-import com.luisfagundes.albums.impl.domain.model.AlbumMedia
 import com.luisfagundes.library.api.domain.model.Media
 
 private const val UNKNOWN_ALBUM_NAME = "Unknown"
@@ -20,14 +19,6 @@ internal fun List<Media>.toAlbums(): List<Album> {
     }.sortedBy { it.sortName().lowercase() }
 }
 
-internal fun Media.toAlbumMedia() = AlbumMedia(
-    id = id,
-    uri = uri,
-    dateAdded = dateAdded,
-    durationMillis = durationMillis,
-    isVideo = isVideo
-)
-
 private fun List<Media>.toPhysicalAlbums(): List<Album.Physical> = groupBy { it.bucketId }
     .mapNotNull { (bucketId, items) ->
         if (bucketId == null) return@mapNotNull null
@@ -36,8 +27,7 @@ private fun List<Media>.toPhysicalAlbums(): List<Album.Physical> = groupBy { it.
             id = bucketId,
             name = first.bucketDisplayName ?: UNKNOWN_ALBUM_NAME,
             count = items.size,
-            coverUri = first.uri,
-            isVideo = first.isVideo
+            coverUri = first.uri
         )
     }
 
@@ -48,8 +38,7 @@ private fun List<Media>.toFavoritesAlbum(): Album.Virtual.Favorites? {
     val first = favoritesItems.first()
     return Album.Virtual.Favorites(
         count = favoritesItems.size,
-        coverUri = first.uri,
-        isVideo = first.isVideo
+        coverUri = first.uri
     )
 }
 
@@ -59,8 +48,7 @@ private fun List<Media>.toVideosAlbum(): Album.Virtual.Videos? {
 
     return Album.Virtual.Videos(
         count = videoItems.size,
-        coverUri = videoItems.first().uri,
-        isVideo = true
+        coverUri = videoItems.first().uri
     )
 }
 

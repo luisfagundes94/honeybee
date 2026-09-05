@@ -2,7 +2,6 @@ package com.luisfagundes.albums.impl.domain.usecase
 
 import com.luisfagundes.library.api.domain.model.Media
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class AlbumTransformationsTest {
@@ -51,29 +50,6 @@ internal class AlbumTransformationsTest {
         assertEquals(1, albums[1].count)
         assertEquals(1, albums[2].count)
         assertEquals(1, albums[3].count)
-        assertTrue(albums[3].isVideo)
     }
 
-    @Test
-    fun `toAlbumMedia preserves media fields needed by album details`() {
-        // Given
-        val media = Media(
-            id = 7L,
-            uri = "content://media/7",
-            dateAdded = 7_000L,
-            size = 700L,
-            durationMillis = 12_000L,
-            isVideo = true
-        )
-
-        // When
-        val albumMedia = media.toAlbumMedia()
-
-        // Then
-        assertEquals(media.id, albumMedia.id)
-        assertEquals(media.uri, albumMedia.uri)
-        assertEquals(media.dateAdded, albumMedia.dateAdded)
-        assertEquals(media.durationMillis, albumMedia.durationMillis)
-        assertEquals(media.isVideo, albumMedia.isVideo)
-    }
 }

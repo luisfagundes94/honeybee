@@ -1,10 +1,8 @@
 package com.luisfagundes.albums.impl.presentation.screen
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -27,8 +25,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -37,10 +33,9 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewWrapper
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
+import com.luisfagundes.core.designsystem.components.MediaThumbnail
 import com.luisfagundes.core.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.core.designsystem.components.HoneybeeLoadingTemplate
-import com.luisfagundes.core.designsystem.components.VideoDurationBadge
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
 import com.luisfagundes.core.designsystem.R.string.retry
@@ -184,29 +179,12 @@ private fun AlbumDetailsContent(
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.verySmall)
         ) {
             items(uiState.mediaList, key = { it.id }) { media ->
-                Box(
-                    modifier = Modifier
-                        .aspectRatio(1f)
-                        .clip(MaterialTheme.shapes.small)
-                        .clickable {
-                            onEvent(AlbumDetailsUiEvent.MediaClick(media.id))
-                        }
-                ) {
-                    AsyncImage(
-                        model = media.uri,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                    if (media.isVideo) {
-                        VideoDurationBadge(
-                            durationMillis = media.durationMillis,
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(MaterialTheme.spacing.verySmall)
-                        )
-                    }
-                }
+                MediaThumbnail(
+                    uri = media.uri,
+                    isVideo = media.isVideo,
+                    durationMillis = media.durationMillis,
+                    onClick = { onEvent(AlbumDetailsUiEvent.MediaClick(media.id)) }
+                )
             }
         }
     }

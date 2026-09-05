@@ -14,13 +14,12 @@ internal class AlbumsUiStateProvider : PreviewParameterProvider<AlbumsUiState> {
 }
 
 private val albums = listOf(
-    Album.Virtual.Favorites(count = 12, coverUri = "", isVideo = false),
-    Album.Virtual.Videos(count = 8, coverUri = "", isVideo = true),
+    Album.Virtual.Favorites(count = 12, coverUri = ""),
+    Album.Virtual.Videos(count = 8, coverUri = ""),
     Album.Physical(
         id = "camera",
         name = "Camera",
         count = 24,
-        coverUri = "",
-        isVideo = false
+        coverUri = ""
     )
 )

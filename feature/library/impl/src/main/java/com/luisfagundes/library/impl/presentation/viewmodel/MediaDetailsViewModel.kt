@@ -2,6 +2,8 @@ package com.luisfagundes.library.impl.presentation.viewmodel
 
 import androidx.lifecycle.viewModelScope
 import com.luisfagundes.core.common.presentation.arch.viewmodel.ViewModel
+import com.luisfagundes.library.api.domain.model.filterBy
+import com.luisfagundes.library.api.domain.model.toMediaFilter
 import com.luisfagundes.library.api.domain.repository.LibraryRepository
 import com.luisfagundes.library.impl.presentation.effect.MediaDetailsUiEffect
 import com.luisfagundes.library.impl.presentation.event.MediaDetailsUiEvent
@@ -30,12 +32,7 @@ internal class MediaDetailsViewModel @Inject constructor(
         setState { MediaDetailsUiState.Loading }
         repository.getActiveMedia().fold(
             onSuccess = { mediaList ->
-                val filteredList = when (albumId) {
-                    null -> mediaList
-                    "favorites" -> mediaList.filter { it.isFavorite }
-                    "videos" -> mediaList.filter { it.isVideo }
-                    else -> mediaList.filter { it.bucketId == albumId }
-                }
+                val filteredList = mediaList.filterBy(albumId.toMediaFilter())
                 val initialIndex = filteredList.indexOfFirst { it.id == initialMediaId }.coerceAtLeast(0)
                 val trashCount = repository.getItemsInTrashCount()
                 setState { MediaDetailsUiState.Content(filteredList, initialIndex, trashCount) }
