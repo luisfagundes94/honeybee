@@ -20,7 +20,6 @@ import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.BackHand
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -66,7 +65,6 @@ private const val APP_INTERNAL_SHARE_LINK =
 internal fun ConfigScreen(
     onNavigateToFeedback: () -> Unit,
     onNavigateToStatistics: () -> Unit,
-    onNavigateToPremium: () -> Unit,
     adsCoordinator: AdsCoordinator,
     modifier: Modifier = Modifier,
     viewModel: ConfigViewModel = hiltViewModel()
@@ -78,7 +76,6 @@ internal fun ConfigScreen(
         when (effect) {
             ConfigUiEffect.NavigateToStatistics -> onNavigateToStatistics()
             ConfigUiEffect.NavigateToFeedback -> onNavigateToFeedback()
-            ConfigUiEffect.NavigateToPremium -> onNavigateToPremium()
             ConfigUiEffect.ShowPrivacyOptions -> {
                 activity?.let(adsCoordinator::showPrivacyOptions)
             }
@@ -187,7 +184,7 @@ private fun ConfigOtherSection(
 ) {
     ConfigCategoryTitle(R.string.config_category_other)
     ConfigCard {
-        ConfigPremiumItems(uiState = uiState, onEvent = onEvent)
+        ConfigOtherItems(uiState = uiState, onEvent = onEvent)
         HorizontalDivider(
             modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default),
             color = MaterialTheme.colorScheme.outlineVariant
@@ -236,22 +233,10 @@ private fun ConfigCard(content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun ConfigPremiumItems(
+private fun ConfigOtherItems(
     uiState: ConfigUiState,
     onEvent: (ConfigUiEvent) -> Unit
 ) {
-    ConfigItem(
-        title = stringResource(R.string.config_item_premium),
-        icon = Icons.Default.Star,
-        iconContainer = {
-            Icon(imageVector = Icons.Default.Star, contentDescription = null)
-        },
-        onClick = { onEvent(ConfigUiEvent.PremiumClick) }
-    )
-    HorizontalDivider(
-        modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default),
-        color = MaterialTheme.colorScheme.outlineVariant
-    )
     ConfigItem(
         title = stringResource(R.string.config_item_notifications),
         icon = Icons.Default.Notifications,

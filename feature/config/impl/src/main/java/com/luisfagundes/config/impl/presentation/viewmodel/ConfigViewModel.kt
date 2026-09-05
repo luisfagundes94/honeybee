@@ -30,7 +30,6 @@ internal class ConfigViewModel @Inject constructor(
             is ConfigUiEvent.NotificationsToggled -> updateNotificationsEnabled(event.enabled)
             ConfigUiEvent.StatisticsClick -> navigateToStatistics()
             ConfigUiEvent.FeedbackClick -> navigateToFeedback()
-            ConfigUiEvent.PremiumClick -> navigateToPremium()
             ConfigUiEvent.PrivacyChoicesClick -> sendEffect { ConfigUiEffect.ShowPrivacyOptions }
         }
     }
@@ -59,10 +58,6 @@ internal class ConfigViewModel @Inject constructor(
 
     private fun navigateToFeedback() {
         sendEffect { ConfigUiEffect.NavigateToFeedback }
-    }
-
-    private fun navigateToPremium() {
-        sendEffect { ConfigUiEffect.NavigateToPremium }
     }
 
     private fun observeAds(adsConfig: AdsConfig) = viewModelScope.launch {

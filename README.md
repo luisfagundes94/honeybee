@@ -72,7 +72,7 @@ The project is divided into distinct Gradle modules to enforce separation of con
 #### 1. App Module (`:app`)
 * Serves as the application entry point ([HoneybeeApplication](file:///C:/Users/lf/AndroidStudioProjects/honeybee/app/src/main/java/com/luisfagundes/honeybee/HoneybeeApplication.kt)).
 * Hosts [MainActivity](file:///C:/Users/lf/AndroidStudioProjects/honeybee/app/src/main/java/com/luisfagundes/honeybee/presentation/activity/MainActivity.kt), [AppNavDisplay](file:///C:/Users/lf/AndroidStudioProjects/honeybee/app/src/main/java/com/luisfagundes/honeybee/presentation/navigation/AppNavDisplay.kt) (top-level routing using Navigation 3), and notification receivers.
-* Implements product flavors (`free` and `paid`) to support different subscription features via Hilt DI.
+* Wires app-wide dependencies, including monetization services, through Hilt DI.
 
 #### 2. Core Modules (`:core`)
 * **`:core:common`**: Contains design patterns, core architecture base classes ([ViewModel](file:///C:/Users/lf/AndroidStudioProjects/honeybee/core/common/src/main/java/com/luisfagundes/core/common/presentation/arch/viewmodel/ViewModel.kt), [StateViewModel](file:///C:/Users/lf/AndroidStudioProjects/honeybee/core/common/src/main/java/com/luisfagundes/core/common/presentation/arch/viewmodel/StateViewModel.kt), [EffectViewModel](file:///C:/Users/lf/AndroidStudioProjects/honeybee/core/common/src/main/java/com/luisfagundes/core/common/presentation/arch/viewmodel/EffectViewModel.kt)), coroutine dispatchers, resource managers, and global tools.

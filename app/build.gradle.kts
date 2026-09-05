@@ -7,7 +7,6 @@ import org.gradle.api.tasks.TaskAction
 private val testAdMobApplicationId = "ca-app-pub-3940256099942544~3347511713"
 private val testAdMobSettingsBannerAdUnitId = "ca-app-pub-3940256099942544/9214589741"
 private val testAdMobCleanupInterstitialAdUnitId = "ca-app-pub-3940256099942544/1033173712"
-private val testRevenueCatApiKey = "test_YmqIBYWSDBUDWuETPsPAKyTgCcg"
 
 abstract class ValidateReleaseMonetizationConfig : DefaultTask() {
     @get:Input
@@ -19,11 +18,6 @@ abstract class ValidateReleaseMonetizationConfig : DefaultTask() {
             require(!value.startsWith("MISSING_")) { "Missing required release configuration: $name" }
             require(!value.contains("ca-app-pub-3940256099942544")) {
                 "$name must not use a Google test ad identifier"
-            }
-            if (name == "HONEYBEE_REVENUECAT_API_KEY") {
-                require(!value.startsWith("test_")) {
-                    "$name must use a production RevenueCat public SDK key"
-                }
             }
         }
     }
@@ -66,7 +60,6 @@ android {
             manifestPlaceholders["admobAppId"] = testAdMobApplicationId
             buildConfigField("String", "ADMOB_SETTINGS_BANNER_AD_UNIT_ID", "\"$testAdMobSettingsBannerAdUnitId\"")
             buildConfigField("String", "ADMOB_CLEANUP_INTERSTITIAL_AD_UNIT_ID", "\"$testAdMobCleanupInterstitialAdUnitId\"")
-            buildConfigField("String", "REVENUECAT_API_KEY", "\"$testRevenueCatApiKey\"")
         }
         release {
             isMinifyEnabled = true
@@ -79,7 +72,6 @@ android {
             manifestPlaceholders["admobAppId"] = admobAppId
             buildConfigField("String", "ADMOB_SETTINGS_BANNER_AD_UNIT_ID", quotedReleaseValue("HONEYBEE_SETTINGS_BANNER_AD_UNIT_ID"))
             buildConfigField("String", "ADMOB_CLEANUP_INTERSTITIAL_AD_UNIT_ID", quotedReleaseValue("HONEYBEE_CLEANUP_INTERSTITIAL_AD_UNIT_ID"))
-            buildConfigField("String", "REVENUECAT_API_KEY", quotedReleaseValue("HONEYBEE_REVENUECAT_API_KEY"))
         }
         create("benchmark") {
             initWith(buildTypes.getByName("release"))
@@ -90,7 +82,6 @@ android {
             manifestPlaceholders["admobAppId"] = testAdMobApplicationId
             buildConfigField("String", "ADMOB_SETTINGS_BANNER_AD_UNIT_ID", "\"$testAdMobSettingsBannerAdUnitId\"")
             buildConfigField("String", "ADMOB_CLEANUP_INTERSTITIAL_AD_UNIT_ID", "\"$testAdMobCleanupInterstitialAdUnitId\"")
-            buildConfigField("String", "REVENUECAT_API_KEY", "\"$testRevenueCatApiKey\"")
         }
     }
     compileOptions {
@@ -127,8 +118,6 @@ dependencies {
 
     implementation(project(":feature:config:api"))
     implementation(project(":feature:config:impl"))
-    implementation(project(":feature:premium:api"))
-    implementation(project(":feature:premium:impl"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
@@ -146,7 +135,6 @@ dependencies {
     implementation(libs.firebase.messaging)
     implementation(libs.coil.compose)
     implementation(libs.coil.video)
-    implementation(libs.revenuecat.purchases)
 
     // Hilt
     implementation(libs.hilt.android)
@@ -188,14 +176,12 @@ val requiredReleaseMonetizationValues = listOf(
     "HONEYBEE_ADMOB_APP_ID",
     "HONEYBEE_SETTINGS_BANNER_AD_UNIT_ID",
     "HONEYBEE_CLEANUP_INTERSTITIAL_AD_UNIT_ID",
-    "HONEYBEE_REVENUECAT_API_KEY",
 )
 
 val releaseMonetizationValues = mapOf(
     "HONEYBEE_ADMOB_APP_ID" to releaseValue("HONEYBEE_ADMOB_APP_ID"),
     "HONEYBEE_SETTINGS_BANNER_AD_UNIT_ID" to releaseValue("HONEYBEE_SETTINGS_BANNER_AD_UNIT_ID"),
     "HONEYBEE_CLEANUP_INTERSTITIAL_AD_UNIT_ID" to releaseValue("HONEYBEE_CLEANUP_INTERSTITIAL_AD_UNIT_ID"),
-    "HONEYBEE_REVENUECAT_API_KEY" to releaseValue("HONEYBEE_REVENUECAT_API_KEY"),
 )
 
 val validateReleaseMonetizationConfig = tasks.register<ValidateReleaseMonetizationConfig>("validateReleaseMonetizationConfig") {

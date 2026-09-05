@@ -36,7 +36,6 @@ ump = "4.0.0"
 detekt = "2.0.0-alpha.5"
 firebaseCrashlytics = "20.1.0"
 googleFirebaseCrashlytics = "3.0.7"
-revenuecat = "10.16.0"
 
 [libraries]
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
@@ -86,8 +85,6 @@ androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profi
 google-mobile-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "googleMobileAds" }
 google-ump = { module = "com.google.android.ump:user-messaging-platform", version.ref = "ump" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics", version.ref = "firebaseCrashlytics" }
-revenuecat-purchases = { group = "com.revenuecat.purchases", name = "purchases", version.ref = "revenuecat" }
-revenuecat-purchases-ui = { group = "com.revenuecat.purchases", name = "purchases-ui", version.ref = "revenuecat" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

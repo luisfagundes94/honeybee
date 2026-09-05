@@ -40,7 +40,6 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:ads"))
-    implementation(project(":feature:premium:api"))
 
     // Core
     implementation(libs.androidx.appcompat)
