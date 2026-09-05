@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "statistics")
-internal class StatisticsEntity(
+internal data class StatisticsEntity(
     @PrimaryKey val id: Int = 1,
     val memoryCleared: Long,
     val mediaDeleted: Int,

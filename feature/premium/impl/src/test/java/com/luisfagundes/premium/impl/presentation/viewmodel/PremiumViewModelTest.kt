@@ -45,7 +45,7 @@ internal class PremiumViewModelTest {
     fun `offer updates should select annual plan and purchase should use domain offer token`() = runTest {
         // Given
         val monthly = SubscriptionOffer("monthly", SubscriptionPlan.MONTHLY, "$5")
-        val annual = SubscriptionOffer("yearly", SubscriptionPlan.YEARLY, "$40")
+        val annual = monthly.copy(id = "yearly", plan = SubscriptionPlan.YEARLY, formattedPrice = "$40")
 
         // When
         state.value = state.value.copy(offers = listOf(monthly, annual))

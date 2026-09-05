@@ -10,34 +10,34 @@ internal class AlbumTransformationsTest {
     @Test
     fun `toAlbums groups physical albums, adds virtual albums, and sorts by name`() {
         // Given
+        val cameraMedia = Media(
+            id = 1L,
+            uri = "content://camera/1",
+            dateAdded = 1_000L,
+            size = 100L,
+            isVideo = false,
+            bucketId = "camera",
+            bucketDisplayName = "Camera",
+            isFavorite = true
+        )
         val media = listOf(
-            Media(
-                id = 1L,
-                uri = "content://camera/1",
-                dateAdded = 1_000L,
-                size = 100L,
-                isVideo = false,
-                bucketId = "camera",
-                bucketDisplayName = "Camera",
-                isFavorite = true
-            ),
-            Media(
+            cameraMedia,
+            cameraMedia.copy(
                 id = 2L,
                 uri = "content://camera/2",
                 dateAdded = 2_000L,
                 size = 200L,
                 isVideo = true,
-                bucketId = "camera",
-                bucketDisplayName = "Camera"
+                isFavorite = false,
             ),
-            Media(
+            cameraMedia.copy(
                 id = 3L,
                 uri = "content://downloads/3",
                 dateAdded = 3_000L,
                 size = 300L,
-                isVideo = false,
                 bucketId = "downloads",
-                bucketDisplayName = "Downloads"
+                bucketDisplayName = "Downloads",
+                isFavorite = false,
             )
         )
 

@@ -14,7 +14,6 @@ This file is the quick-reference guide for agents and contributors working in th
 - Name private mutable `StateFlow` backing properties with a leading underscore (for example, `_state`); expose them as immutable `state`.
 - Use sealed interfaces/classes for finite UI-state variants; use a data class when a state is one evolving immutable snapshot.
 - Use design-system tokens instead of hardcoded Compose dimensions, colors, strings, or previews.
-- Keep domain and data entities as `class`; presentation UI models, states, and args may use `data class`.
 - Use extension functions for data-to-domain mapping; do not create mapper classes.
 - DataSources must add meaningful behavior; pass-through wrappers are not allowed.
 - Default new types to `internal`; only navigation routes are public unless an explicit `api`/`impl` split is needed.

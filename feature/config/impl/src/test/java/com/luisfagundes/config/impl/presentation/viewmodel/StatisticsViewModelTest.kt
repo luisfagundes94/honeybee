@@ -5,7 +5,6 @@ import com.luisfagundes.config.impl.presentation.event.StatisticsUiEvent
 import com.luisfagundes.config.impl.presentation.state.StatisticsUiState
 import com.luisfagundes.config.impl.tools.fakeStatistics
 import com.luisfagundes.core.testing.MainDispatcherRule
-import com.luisfagundes.library.api.domain.model.Statistics
 import com.luisfagundes.library.api.domain.repository.LibraryRepository
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -68,7 +67,7 @@ internal class StatisticsViewModelTest {
     fun `dispatchEvent LoadStatistics should reload statistics successfully`() = runTest {
         // Given
         val mockStats1 = fakeStatistics
-        val mockStats2 = Statistics(
+        val mockStats2 = fakeStatistics.copy(
             memoryCleared = 2_048L,
             mediaDeleted = 10,
             photosDeleted = 6,

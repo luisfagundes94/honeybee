@@ -4,13 +4,11 @@ import android.content.Context
 import android.content.ContentUris
 import android.net.Uri
 import com.luisfagundes.core.testing.MainDispatcherRule
-import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.impl.data.database.dao.StatisticsDao
-import com.luisfagundes.library.impl.data.database.entity.StatisticsEntity
 import com.luisfagundes.library.impl.data.datasource.LibraryDataSource
 import com.luisfagundes.library.impl.data.datasource.LibraryPreferences
-import com.luisfagundes.library.impl.data.model.MediaDto
 import com.luisfagundes.library.impl.tools.fakeMedia
+import com.luisfagundes.library.impl.tools.fakeMediaDto
 import com.luisfagundes.library.impl.tools.fakeStatisticsEntity
 import io.mockk.coEvery
 import io.mockk.every
@@ -71,9 +69,20 @@ internal class LibraryRepositoryImplTest {
         val june10Time = Instant.parse("2026-06-10T10:00:00Z").epochSecond
 
         val mediaDtos = listOf(
-            MediaDto(id = 1L, uri = mockUri1, dateAdded = may15Time, size = 100L, isVideo = false),
-            MediaDto(id = 2L, uri = mockUri2, dateAdded = june10Time, size = 200L, isVideo = true),
-            MediaDto(id = 3L, uri = mockUri3, dateAdded = may1Time, size = 300L, isVideo = false)
+            fakeMediaDto.copy(uri = mockUri1, dateAdded = may15Time, size = 100L),
+            fakeMediaDto.copy(
+                id = 2L,
+                uri = mockUri2,
+                dateAdded = june10Time,
+                size = 200L,
+                isVideo = true,
+            ),
+            fakeMediaDto.copy(
+                id = 3L,
+                uri = mockUri3,
+                dateAdded = may1Time,
+                size = 300L,
+            )
         )
 
         coEvery { dataSource.fetchMediaList() } returns Result.success(mediaDtos)
@@ -95,13 +104,18 @@ internal class LibraryRepositoryImplTest {
         // Given
         val mediaId = 1L
         val mockUri: Uri = mockk()
-        val mediaDto = MediaDto(id = mediaId, uri = mockUri, dateAdded = 0L, size = 100L, isVideo = false)
-        val media = Media(
+        val mediaDto = fakeMediaDto.copy(
+            id = mediaId,
+            uri = mockUri,
+            dateAdded = 0L,
+            size = 100L,
+            isVideo = false,
+        )
+        val media = fakeMedia.copy(
             id = mediaId,
             uri = mockUri.toString(),
             dateAdded = 0L,
             size = 100L,
-            isVideo = false
         )
 
         coEvery { dataSource.fetchMediaList() } returns Result.success(listOf(mediaDto))
@@ -133,8 +147,7 @@ internal class LibraryRepositoryImplTest {
     @Test
     fun `getStatistics should return statistics successfully`() = runTest {
         // Given
-        val expectedEntity = StatisticsEntity(
-            id = fakeStatisticsEntity.id,
+        val expectedEntity = fakeStatisticsEntity.copy(
             memoryCleared = 200L,
             mediaDeleted = 2,
             photosDeleted = 1,

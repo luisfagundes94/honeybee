@@ -98,60 +98,6 @@ repository.getData().getOrThrow()
 
 Remediation: Add `.onFailure` with `UiState.Error`.
 
-## Do Not Use Data Classes for Domain and Data Entities
-
-Entities in the domain and data layers MUST use `class`, NOT `data class`.
-`data class` is allowed for presentation UI models, `UiState`, and Args, as well as
-immutable state snapshots or value objects when generated `copy()` and equality are
-meaningful. Domain and data entities must remain `class`.
-
-The vast majority of data classes in the domain and data layers do not use the generated `copy()`, `componentN()`, `toString()`, or `equals()`/`hashCode()` methods, causing unnecessary binary-size and build-time overhead.
-
-```kotlin
-// ✅ CORRECT — Domain-layer entity as a class
-class Transaction(
-    val id: String,
-    val amount: BigDecimal,
-    val status: TransactionStatus
-)
-
-// ✅ CORRECT — Data-layer entity as a class
-class TransactionResponse(
-    val id: String,
-    val amount: String,
-    val status: String
-)
-
-// ✅ CORRECT — Presentation UI model as a data class
-data class TransactionState(
-    val id: String,
-    val formattedAmount: String,
-    val statusLabel: String
-)
-
-// ❌ WRONG — Domain-layer entity as a data class
-data class Transaction(
-    val id: String,
-    val amount: BigDecimal,
-    val status: TransactionStatus
-)
-
-// ❌ WRONG — Data-layer entity as a data class
-data class TransactionResponse(
-    val id: String,
-    val amount: String,
-    val status: String
-)
-```
-
-| Layer | Use `data class`? |
-|-------|:-----------------:|
-| Domain — entities and value objects | ❌ No |
-| Data — DTOs, responses, and requests | ❌ No |
-| Presentation — UiState, UI models, and Args | ✅ Yes |
-
-Remediation: Change `data class` to `class` for entities in the domain and data layers.
-
 ## A DataSource Must Not Be Pass-Through
 
 A DataSource, such as `RemoteDataSource` or `LocalDataSource`, is **optional** in the `data` layer.

@@ -1,6 +1,6 @@
 package com.luisfagundes.premium.impl.domain.model
 
-internal class CustomerInfoSnapshot(
+internal data class CustomerInfoSnapshot(
     val appUserId: String,
     val originalAppUserId: String,
     val activeEntitlements: Set<String>,

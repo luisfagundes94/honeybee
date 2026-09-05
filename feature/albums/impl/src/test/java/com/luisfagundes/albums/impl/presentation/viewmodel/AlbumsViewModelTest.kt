@@ -1,7 +1,6 @@
 package com.luisfagundes.albums.impl.presentation.viewmodel
 
 import app.cash.turbine.test
-import com.luisfagundes.albums.impl.domain.model.Album
 import com.luisfagundes.albums.impl.domain.usecase.GetAlbumsUseCase
 import com.luisfagundes.albums.impl.presentation.effect.AlbumsUiEffect
 import com.luisfagundes.albums.impl.presentation.event.AlbumsUiEvent
@@ -54,19 +53,11 @@ internal class AlbumsViewModelTest {
     fun `dispatchEvent LoadAlbums success should set Content state`() = runTest {
         // Given
         val albums = listOf(
-            Album.Physical(
-                id = "1",
-                name = fakeAlbum.name,
-                count = fakeAlbum.count,
-                coverUri = fakeAlbum.coverUri,
-                isVideo = fakeAlbum.isVideo
-            ),
-            Album.Physical(
+            fakeAlbum.copy(id = "1"),
+            fakeAlbum.copy(
                 id = "2",
                 name = "Screenshots",
-                count = 5,
-                coverUri = fakeAlbum.coverUri,
-                isVideo = fakeAlbum.isVideo
+                count = 5
             )
         )
 

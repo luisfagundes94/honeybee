@@ -75,19 +75,19 @@ internal class LocalLibraryDataSource @Inject constructor(
 private const val BUCKET_DISPLAY_NAME_COLUMN = "bucket_display_name"
 private const val BUCKET_ID_COLUMN = "bucket_id"
 
-private class MediaColumns {
-    var id = 0
-    var dateAdded = 0
-    var size = 0
-    var mimeType = 0
-    var width = 0
-    var height = 0
-    var duration = 0
-    var mediaType = 0
-    var bucketName = 0
-    var bucketId = 0
-    var favorite = -1
-}
+private data class MediaColumns(
+    var id: Int = 0,
+    var dateAdded: Int = 0,
+    var size: Int = 0,
+    var mimeType: Int = 0,
+    var width: Int = 0,
+    var height: Int = 0,
+    var duration: Int = 0,
+    var mediaType: Int = 0,
+    var bucketName: Int = 0,
+    var bucketId: Int = 0,
+    var favorite: Int = -1,
+)
 
 private fun Cursor.toMediaList(): List<MediaDto> {
     val columns = MediaColumns().apply {

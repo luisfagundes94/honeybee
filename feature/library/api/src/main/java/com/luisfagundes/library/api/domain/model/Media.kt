@@ -1,6 +1,6 @@
 package com.luisfagundes.library.api.domain.model
 
-class Media(
+data class Media(
     val id: Long,
     val uri: String,
     val dateAdded: Long,

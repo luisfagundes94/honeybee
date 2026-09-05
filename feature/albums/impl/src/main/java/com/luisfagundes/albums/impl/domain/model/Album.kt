@@ -6,7 +6,7 @@ internal sealed class Album {
     abstract val coverUri: String?
     abstract val isVideo: Boolean
 
-    class Physical(
+    data class Physical(
         override val id: String,
         val name: String,
         override val count: Int,
@@ -15,7 +15,7 @@ internal sealed class Album {
     ) : Album()
 
     sealed class Virtual : Album() {
-        class Favorites(
+        data class Favorites(
             override val count: Int,
             override val coverUri: String?,
             override val isVideo: Boolean
@@ -23,7 +23,7 @@ internal sealed class Album {
             override val id: String get() = FavoritesAlbumId
         }
 
-        class Videos(
+        data class Videos(
             override val count: Int,
             override val coverUri: String?,
             override val isVideo: Boolean
