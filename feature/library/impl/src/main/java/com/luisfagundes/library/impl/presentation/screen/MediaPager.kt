@@ -37,7 +37,7 @@ private const val MIN_MEDIA_ALPHA = 0.2f
 
 internal fun Modifier.mediaSwipeGesture(
     mediaId: Long,
-    swipeOffset: androidx.compose.animation.core.Animatable<Float, *>,
+    swipeOffset: Animatable<Float, *>,
     coroutineScope: CoroutineScope,
     onSwipeUp: () -> Unit
 ) = pointerInput(mediaId) {
@@ -71,7 +71,7 @@ internal fun MediaPagerCard(
     media: Media,
     isPageSelected: Boolean,
     aspectRatio: Float?,
-    swipeOffset: androidx.compose.animation.core.Animatable<Float, *>,
+    swipeOffset: Animatable<Float, *>,
     onAspectRatioChanged: (Float) -> Unit,
     onPhotoClick: () -> Unit
 ) {
@@ -103,7 +103,7 @@ internal fun MediaPagerCard(
 
 private fun mediaPagerCardModifier(
     aspectRatio: Float?,
-    swipeOffset: androidx.compose.animation.core.Animatable<Float, *>,
+    swipeOffset: Animatable<Float, *>,
     shape: RoundedCornerShape
 ): Modifier {
     val sizeModifier = aspectRatio?.let { Modifier.aspectRatio(it) } ?: Modifier.fillMaxSize()
