@@ -41,6 +41,8 @@ import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
 import com.luisfagundes.library.impl.R
 
+private const val TRASH_ONBOARDING_ANIMATION_SCALE = 1.25f
+
 @Composable
 internal fun SwipeUpTrashOnboardingOverlay(
     onDismiss: () -> Unit,
@@ -100,7 +102,7 @@ private fun SwipeUpTrashOnboardingContent(
         LottieAnimation(
             composition = composition,
             progress = { progress },
-            modifier = Modifier.scale(1.25f)
+            modifier = Modifier.scale(TRASH_ONBOARDING_ANIMATION_SCALE)
         )
         Text(
             text = description,
