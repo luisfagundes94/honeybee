@@ -132,7 +132,6 @@ private fun MediaDetailsScreen(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MediaDetailsContent(
     content: MediaDetailsUiState.Content,
@@ -189,7 +188,6 @@ private fun MediaDetailsContent(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MediaDetailsTopAppBar(
     currentMediaIndex: Int,
@@ -268,7 +266,6 @@ private fun MediaDetailsBottomBar(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MediaPagerItem(
     media: Media,
