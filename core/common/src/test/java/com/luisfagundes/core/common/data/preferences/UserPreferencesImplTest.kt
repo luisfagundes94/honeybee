@@ -1,41 +1,28 @@
 package com.luisfagundes.core.common.data.preferences
 
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.emptyPreferences
 import app.cash.turbine.test
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.io.TempDir
 import java.io.IOException
-import java.nio.file.Path
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class UserPreferencesImplTest {
 
-    @TempDir
-    lateinit var tempDirectory: Path
-
     private val dispatcher = UnconfinedTestDispatcher()
-    private val dataStoreScope = CoroutineScope(dispatcher + SupervisorJob())
-
-    @AfterEach
-    fun tearDown() {
-        dataStoreScope.cancel()
-    }
 
     @Test
-    fun `notificationsEnabled should default to true and persist updates`() = runTest {
+    fun `notificationsEnabled should default to true and emit updated values`() = runTest {
         val preferences = createPreferences()
 
         preferences.notificationsEnabled().test {
@@ -70,11 +57,20 @@ internal class UserPreferencesImplTest {
         }
     }
 
-    private fun createPreferences(): UserPreferencesImpl {
-        val dataStore = PreferenceDataStoreFactory.create(
-            scope = dataStoreScope,
-            produceFile = { tempDirectory.resolve("user_preferences.preferences_pb").toFile() }
-        )
-        return UserPreferencesImpl(dataStore, dispatcher)
+    private fun createPreferences(): UserPreferencesImpl = UserPreferencesImpl(
+        dataStore = InMemoryPreferencesDataStore(),
+        dispatcher = dispatcher,
+    )
+
+    private class InMemoryPreferencesDataStore : DataStore<Preferences> {
+        private val preferences = MutableStateFlow(emptyPreferences())
+
+        override val data: Flow<Preferences> = preferences
+
+        override suspend fun updateData(
+            transform: suspend (t: Preferences) -> Preferences,
+        ): Preferences {
+            return transform(preferences.value).also { preferences.value = it }
+        }
     }
 }
