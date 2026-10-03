@@ -8,6 +8,8 @@ interface LibraryRepository {
     suspend fun getActiveMedia(): Result<List<Media>>
     suspend fun getTrashMedia(): Result<List<Media>>
     suspend fun getItemsInTrashCount(): Int
+    suspend fun hasSeenSwipeUpTrashOnboarding(): Boolean
+    suspend fun markSwipeUpTrashOnboardingSeen()
     suspend fun moveToTrash(mediaId: Long)
     suspend fun restoreFromTrash(mediaIds: List<Long>)
     suspend fun permanentlyDelete(mediaList: List<Media>)

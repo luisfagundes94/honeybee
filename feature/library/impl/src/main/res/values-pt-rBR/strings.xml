@@ -33,6 +33,8 @@
     <string name="trash">Lixeira</string>
     <string name="deletion_not_allowed">Você não permitiu a exclusão de mídia</string>
     <string name="trash_is_empty">A lixeira está vazia</string>
+    <string name="swipe_up_trash_onboarding_description">Deslize para cima para mover esta foto ou vídeo para a Lixeira. Ele não será excluído permanentemente de imediato. Deslize para a esquerda ou para a direita para navegar pelas suas mídias.</string>
+    <string name="swipe_up_trash_onboarding_tap_hint">Toque em qualquer lugar para continuar</string>
     <plurals name="delete_media_format">
         <item quantity="one">Excluir (%1$d arquivo)</item>
         <item quantity="other">Excluir (%1$d arquivos)</item>

@@ -33,6 +33,8 @@
     <string name="trash">Trash</string>
     <string name="deletion_not_allowed">You didn\'t allow media deletion</string>
     <string name="trash_is_empty">Trash is empty</string>
+    <string name="swipe_up_trash_onboarding_description">Swipe up to move this photo or video to Trash. It won’t be permanently deleted right away. Swipe left or right to browse your media.</string>
+    <string name="swipe_up_trash_onboarding_tap_hint">Tap anywhere to continue</string>
     <plurals name="delete_media_format">
         <item quantity="one">Delete (%1$d File)</item>
         <item quantity="other">Delete (%1$d Files)</item>

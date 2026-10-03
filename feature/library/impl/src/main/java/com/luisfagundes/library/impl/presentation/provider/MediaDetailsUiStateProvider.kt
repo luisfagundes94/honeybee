@@ -17,6 +17,14 @@ internal class MediaDetailsUiStateProvider : PreviewParameterProvider<MediaDetai
             initialIndex = 0,
             trashCount = 2,
             favoriteMediaIds = emptySet()
+        ),
+        MediaDetailsUiState.Content(
+            mediaList = listOf(
+                Media(id = 1L, uri = "", dateAdded = 0L, size = 0L, isVideo = false)
+            ),
+            initialIndex = 0,
+            trashCount = 2,
+            shouldShowSwipeUpTrashOnboarding = true
         )
     )
 }

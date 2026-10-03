@@ -42,6 +42,9 @@ internal class MediaDetailsViewModelTest {
 
     @BeforeEach
     fun setUp() {
+        coEvery { repository.hasSeenSwipeUpTrashOnboarding() } returns true
+        coEvery { repository.markSwipeUpTrashOnboardingSeen() } returns Unit
+
         viewModel = MediaDetailsViewModel(
             repository = repository
         )
@@ -77,6 +80,67 @@ internal class MediaDetailsViewModelTest {
 
             coVerify(exactly = 1) { repository.getActiveMedia() }
             coVerify(exactly = 1) { repository.getItemsInTrashCount() }
+        }
+    }
+
+    @Test
+    fun `swipe onboarding is shown once and dismissal is persisted`() = runTest {
+        // Given
+        val mediaList = listOf(fakeMedia)
+        var hasSeenOnboarding = false
+        coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
+        coEvery { repository.getItemsInTrashCount() } returns 0
+        coEvery { repository.hasSeenSwipeUpTrashOnboarding() } coAnswers { hasSeenOnboarding }
+        coEvery { repository.markSwipeUpTrashOnboardingSeen() } coAnswers {
+            hasSeenOnboarding = true
+        }
+
+        viewModel.uiState.test {
+            assertEquals(MediaDetailsUiState.Loading, awaitItem())
+
+            // When
+            viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialMediaId = 1L))
+
+            // Then
+            assertEquals(
+                MediaDetailsUiState.Content(
+                    mediaList = mediaList,
+                    initialIndex = 0,
+                    trashCount = 0,
+                    shouldShowSwipeUpTrashOnboarding = true
+                ),
+                awaitItem()
+            )
+
+            // When
+            viewModel.dispatchEvent(MediaDetailsUiEvent.DismissSwipeUpTrashOnboarding)
+
+            // Then
+            assertEquals(
+                MediaDetailsUiState.Content(
+                    mediaList = mediaList,
+                    initialIndex = 0,
+                    trashCount = 0,
+                    shouldShowSwipeUpTrashOnboarding = false
+                ),
+                awaitItem()
+            )
+            coVerify(exactly = 1) { repository.markSwipeUpTrashOnboardingSeen() }
+
+            // When
+            viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialMediaId = 1L))
+
+            // Then
+            assertEquals(
+                MediaDetailsUiState.Content(
+                    mediaList = mediaList,
+                    initialIndex = 0,
+                    trashCount = 0,
+                    shouldShowSwipeUpTrashOnboarding = false
+                ),
+                viewModel.uiState.value
+            )
+            coVerify(exactly = 2) { repository.hasSeenSwipeUpTrashOnboarding() }
         }
     }
 

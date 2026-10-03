@@ -9,6 +9,7 @@ import androidx.core.content.edit
 
 private const val KEY_TRASHED = "trashed_photo_ids"
 private const val KEY_DELETED = "deleted_photo_ids"
+private const val KEY_SWIPE_UP_TRASH_ONBOARDING_SEEN = "swipe_up_trash_onboarding_seen"
 
 @Singleton
 internal class LibraryPreferences @Inject constructor(
@@ -33,6 +34,13 @@ internal class LibraryPreferences @Inject constructor(
 
     fun setDeletedPhotoIds(ids: Set<Long>) {
         prefs.edit { putStringSet(KEY_DELETED, ids.map { it.toString() }.toSet()) }
+    }
+
+    fun hasSeenSwipeUpTrashOnboarding(): Boolean =
+        prefs.getBoolean(KEY_SWIPE_UP_TRASH_ONBOARDING_SEEN, false)
+
+    fun markSwipeUpTrashOnboardingSeen() {
+        prefs.edit { putBoolean(KEY_SWIPE_UP_TRASH_ONBOARDING_SEEN, true) }
     }
 
 }

@@ -23,6 +23,7 @@ internal class MediaDetailsViewModel @Inject constructor(
             is MediaDetailsUiEvent.LoadDetails -> loadDetails(event.initialMediaId, event.albumId)
             is MediaDetailsUiEvent.SwipeUp -> moveToTrash(event.mediaId)
             is MediaDetailsUiEvent.ToggleFavorite -> toggleFavorite(event.mediaId)
+            MediaDetailsUiEvent.DismissSwipeUpTrashOnboarding -> dismissSwipeUpTrashOnboarding()
             MediaDetailsUiEvent.TrashClick -> navigateToTrash()
             MediaDetailsUiEvent.BackClick, MediaDetailsUiEvent.CancelClick -> navigateBack()
         }
@@ -35,7 +36,15 @@ internal class MediaDetailsViewModel @Inject constructor(
                 val filteredList = mediaList.filterBy(albumId.toMediaFilter())
                 val initialIndex = filteredList.indexOfFirst { it.id == initialMediaId }.coerceAtLeast(0)
                 val trashCount = repository.getItemsInTrashCount()
-                setState { MediaDetailsUiState.Content(filteredList, initialIndex, trashCount) }
+                val hasSeenOnboarding = repository.hasSeenSwipeUpTrashOnboarding()
+                setState {
+                    MediaDetailsUiState.Content(
+                        mediaList = filteredList,
+                        initialIndex = initialIndex,
+                        trashCount = trashCount,
+                        shouldShowSwipeUpTrashOnboarding = filteredList.isNotEmpty() && !hasSeenOnboarding
+                    )
+                }
             },
             onFailure = {
                 setState { MediaDetailsUiState.Error }
@@ -63,6 +72,19 @@ internal class MediaDetailsViewModel @Inject constructor(
 
     private fun navigateToTrash() {
         sendEffect { MediaDetailsUiEffect.NavigateToTrash }
+    }
+
+    private fun dismissSwipeUpTrashOnboarding() {
+        runIfStateIs<MediaDetailsUiState.Content> { currentState ->
+            if (currentState.shouldShowSwipeUpTrashOnboarding) {
+                setState {
+                    currentState.copy(shouldShowSwipeUpTrashOnboarding = false)
+                }
+                viewModelScope.launch {
+                    repository.markSwipeUpTrashOnboardingSeen()
+                }
+            }
+        }
     }
 
     private fun navigateBack() {

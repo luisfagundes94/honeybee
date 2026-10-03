@@ -10,6 +10,7 @@ internal sealed interface MediaDetailsUiState : UiState {
         val mediaList: List<Media>,
         val initialIndex: Int,
         val trashCount: Int,
-        val favoriteMediaIds: Set<Long> = emptySet()
+        val favoriteMediaIds: Set<Long> = emptySet(),
+        val shouldShowSwipeUpTrashOnboarding: Boolean = false
     ) : MediaDetailsUiState
 }

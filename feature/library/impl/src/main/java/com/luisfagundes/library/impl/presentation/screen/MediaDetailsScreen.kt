@@ -1,14 +1,11 @@
 package com.luisfagundes.library.impl.presentation.screen
 
 import android.content.Intent
-import androidx.core.net.toUri
 import androidx.compose.animation.core.Animatable
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -25,7 +22,6 @@ import androidx.compose.material.icons.outlined.AspectRatio
 import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Storage
-import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -54,6 +50,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewWrapper
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
@@ -61,9 +58,8 @@ import com.luisfagundes.core.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.core.designsystem.components.HoneybeeLoadingTemplate
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
-import com.luisfagundes.core.designsystem.R as DesignSystemResources
-import com.luisfagundes.library.impl.R
 import com.luisfagundes.library.api.domain.model.Media
+import com.luisfagundes.library.impl.R
 import com.luisfagundes.library.impl.presentation.components.FullscreenPhotoViewer
 import com.luisfagundes.library.impl.presentation.components.TrashBadgedBox
 import com.luisfagundes.library.impl.presentation.effect.MediaDetailsUiEffect
@@ -74,8 +70,7 @@ import com.luisfagundes.library.impl.presentation.tools.formatPhotoDate
 import com.luisfagundes.library.impl.presentation.tools.formatPhotoSize
 import com.luisfagundes.library.impl.presentation.tools.getFriendlyFileType
 import com.luisfagundes.library.impl.presentation.viewmodel.MediaDetailsViewModel
-import kotlinx.coroutines.launch
-
+import com.luisfagundes.core.designsystem.R as DesignSystemResources
 
 
 @Composable
@@ -150,40 +145,48 @@ private fun MediaDetailsContent(
     val percent =
         if (totalCount > 0) (content.trashCount * 100) / (totalCount + content.trashCount) else 0
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            MediaDetailsTopAppBar(
-                currentMediaIndex = currentMediaIndex,
-                totalCount = totalCount,
-                percent = percent,
-                trashCount = content.trashCount,
-                onBackClick = { onEvent(MediaDetailsUiEvent.BackClick) },
-                onEvent = onEvent
-            )
-        },
-        bottomBar = {
-            currentMedia?.let { media ->
-                MediaDetailsBottomBar(media = media)
-            }
-        }
-    ) { innerPadding ->
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) { page ->
-            val pageMediaIndex = page.coerceIn(0, (totalCount - 1).coerceAtLeast(0))
-            mediaList.getOrNull(pageMediaIndex)?.let { media ->
-                val isPageSelected = page == pagerState.currentPage
-
-                MediaPagerItem(
-                    media = media,
-                    isPageSelected = isPageSelected,
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = {
+                MediaDetailsTopAppBar(
+                    currentMediaIndex = currentMediaIndex,
+                    totalCount = totalCount,
+                    percent = percent,
+                    trashCount = content.trashCount,
+                    onBackClick = { onEvent(MediaDetailsUiEvent.BackClick) },
                     onEvent = onEvent
                 )
+            },
+            bottomBar = {
+                currentMedia?.let { media ->
+                    MediaDetailsBottomBar(media = media)
+                }
             }
+        ) { innerPadding ->
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) { page ->
+                val pageMediaIndex = page.coerceIn(0, (totalCount - 1).coerceAtLeast(0))
+                mediaList.getOrNull(pageMediaIndex)?.let { media ->
+                    val isPageSelected = page == pagerState.currentPage
+
+                    MediaPagerItem(
+                        media = media,
+                        isPageSelected = isPageSelected,
+                        onEvent = onEvent
+                    )
+                }
+            }
+        }
+
+        if (content.shouldShowSwipeUpTrashOnboarding) {
+            SwipeUpTrashOnboardingOverlay(
+                onDismiss = { onEvent(MediaDetailsUiEvent.DismissSwipeUpTrashOnboarding) }
+            )
         }
     }
 }

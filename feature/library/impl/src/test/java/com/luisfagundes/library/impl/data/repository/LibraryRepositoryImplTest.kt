@@ -100,6 +100,31 @@ internal class LibraryRepositoryImplTest {
     }
 
     @Test
+    fun `hasSeenSwipeUpTrashOnboarding delegates to preferences`() = runTest {
+        // Given
+        every { preferences.hasSeenSwipeUpTrashOnboarding() } returns true
+
+        // When
+        val hasSeenOnboarding = repository.hasSeenSwipeUpTrashOnboarding()
+
+        // Then
+        assertEquals(true, hasSeenOnboarding)
+        verify(exactly = 1) { preferences.hasSeenSwipeUpTrashOnboarding() }
+    }
+
+    @Test
+    fun `markSwipeUpTrashOnboardingSeen delegates to preferences`() = runTest {
+        // Given
+        every { preferences.markSwipeUpTrashOnboardingSeen() } returns Unit
+
+        // When
+        repository.markSwipeUpTrashOnboardingSeen()
+
+        // Then
+        verify(exactly = 1) { preferences.markSwipeUpTrashOnboardingSeen() }
+    }
+
+    @Test
     fun `permanentlyDelete should update statistics and call content resolver`() = runTest {
         // Given
         val mediaId = 1L

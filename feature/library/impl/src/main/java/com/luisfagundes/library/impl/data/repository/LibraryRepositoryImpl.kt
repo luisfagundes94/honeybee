@@ -25,6 +25,7 @@ import javax.inject.Inject
 
 private const val TAG = "LibraryRepository"
 
+@Suppress("TooManyFunctions")
 internal class LibraryRepositoryImpl @Inject constructor(
     private val dataSource: LibraryDataSource,
     private val preferences: LibraryPreferences,
@@ -57,6 +58,14 @@ internal class LibraryRepositoryImpl @Inject constructor(
         val trashedIds = preferences.getTrashedPhotoIds()
         val deletedIds = preferences.getDeletedPhotoIds()
         trashedIds.subtract(deletedIds).size
+    }
+
+    override suspend fun hasSeenSwipeUpTrashOnboarding(): Boolean = withContext(dispatcher) {
+        preferences.hasSeenSwipeUpTrashOnboarding()
+    }
+
+    override suspend fun markSwipeUpTrashOnboardingSeen() = withContext(dispatcher) {
+        preferences.markSwipeUpTrashOnboardingSeen()
     }
 
     override suspend fun moveToTrash(mediaId: Long) = withContext(dispatcher) {
