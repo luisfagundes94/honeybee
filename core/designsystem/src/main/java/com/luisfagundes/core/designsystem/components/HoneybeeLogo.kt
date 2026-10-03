@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import com.luisfagundes.core.designsystem.R
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
+import com.luisfagundes.core.designsystem.theme.honeybeeLogoBackground
 import com.luisfagundes.core.designsystem.theme.spacing
 
 @Composable
@@ -33,7 +34,7 @@ fun HoneybeeLogo(
     contentScale: ContentScale = ContentScale.Fit
 ) {
     val resolvedSize = size ?: MaterialTheme.spacing.logoSize
-    val resolvedBackgroundColor = backgroundColor ?: MaterialTheme.colorScheme.surface
+    val resolvedBackgroundColor = backgroundColor ?: honeybeeLogoBackground
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier

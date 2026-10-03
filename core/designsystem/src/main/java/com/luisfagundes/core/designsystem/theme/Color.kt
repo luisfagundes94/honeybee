@@ -2,6 +2,8 @@ package com.luisfagundes.core.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
 
+val honeybeeLogoBackground = Color(0xFFFFFFFF)
+
 val primaryLight = Color(0xFF775A0B)
 val onPrimaryLight = Color(0xFFFFFFFF)
 val primaryContainerLight = Color(0xFFFFDF9C)
