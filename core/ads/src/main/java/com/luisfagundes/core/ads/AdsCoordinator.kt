@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 data class AdsConfig(
     val settingsBannerAdUnitId: String,
+    val statisticsBannerAdUnitId: String,
     val cleanupInterstitialAdUnitId: String,
 )
 

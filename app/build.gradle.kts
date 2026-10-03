@@ -6,6 +6,7 @@ import org.gradle.api.tasks.TaskAction
 
 private val testAdMobApplicationId = "ca-app-pub-3940256099942544~3347511713"
 private val testAdMobSettingsBannerAdUnitId = "ca-app-pub-3940256099942544/9214589741"
+private val testAdMobStatisticsBannerAdUnitId = "ca-app-pub-3940256099942544/6300978111"
 private val testAdMobCleanupInterstitialAdUnitId = "ca-app-pub-3940256099942544/1033173712"
 
 abstract class ValidateReleaseMonetizationConfig : DefaultTask() {
@@ -59,6 +60,7 @@ android {
         debug {
             manifestPlaceholders["admobAppId"] = testAdMobApplicationId
             buildConfigField("String", "ADMOB_SETTINGS_BANNER_AD_UNIT_ID", "\"$testAdMobSettingsBannerAdUnitId\"")
+            buildConfigField("String", "ADMOB_STATISTICS_BANNER_AD_UNIT_ID", "\"$testAdMobStatisticsBannerAdUnitId\"")
             buildConfigField("String", "ADMOB_CLEANUP_INTERSTITIAL_AD_UNIT_ID", "\"$testAdMobCleanupInterstitialAdUnitId\"")
         }
         release {
@@ -71,6 +73,7 @@ android {
             val admobAppId = releaseValue("HONEYBEE_ADMOB_APP_ID")
             manifestPlaceholders["admobAppId"] = admobAppId
             buildConfigField("String", "ADMOB_SETTINGS_BANNER_AD_UNIT_ID", quotedReleaseValue("HONEYBEE_SETTINGS_BANNER_AD_UNIT_ID"))
+            buildConfigField("String", "ADMOB_STATISTICS_BANNER_AD_UNIT_ID", quotedReleaseValue("HONEYBEE_STATISTICS_BANNER_AD_UNIT_ID"))
             buildConfigField("String", "ADMOB_CLEANUP_INTERSTITIAL_AD_UNIT_ID", quotedReleaseValue("HONEYBEE_CLEANUP_INTERSTITIAL_AD_UNIT_ID"))
         }
         create("benchmark") {
@@ -81,6 +84,7 @@ android {
             // Benchmark builds run without production credentials, so use the SDK test values.
             manifestPlaceholders["admobAppId"] = testAdMobApplicationId
             buildConfigField("String", "ADMOB_SETTINGS_BANNER_AD_UNIT_ID", "\"$testAdMobSettingsBannerAdUnitId\"")
+            buildConfigField("String", "ADMOB_STATISTICS_BANNER_AD_UNIT_ID", "\"$testAdMobStatisticsBannerAdUnitId\"")
             buildConfigField("String", "ADMOB_CLEANUP_INTERSTITIAL_AD_UNIT_ID", "\"$testAdMobCleanupInterstitialAdUnitId\"")
         }
     }
@@ -175,12 +179,14 @@ fun Project.quotedReleaseValue(name: String): String = "\"${releaseValue(name)}\
 val requiredReleaseMonetizationValues = listOf(
     "HONEYBEE_ADMOB_APP_ID",
     "HONEYBEE_SETTINGS_BANNER_AD_UNIT_ID",
+    "HONEYBEE_STATISTICS_BANNER_AD_UNIT_ID",
     "HONEYBEE_CLEANUP_INTERSTITIAL_AD_UNIT_ID",
 )
 
 val releaseMonetizationValues = mapOf(
     "HONEYBEE_ADMOB_APP_ID" to releaseValue("HONEYBEE_ADMOB_APP_ID"),
     "HONEYBEE_SETTINGS_BANNER_AD_UNIT_ID" to releaseValue("HONEYBEE_SETTINGS_BANNER_AD_UNIT_ID"),
+    "HONEYBEE_STATISTICS_BANNER_AD_UNIT_ID" to releaseValue("HONEYBEE_STATISTICS_BANNER_AD_UNIT_ID"),
     "HONEYBEE_CLEANUP_INTERSTITIAL_AD_UNIT_ID" to releaseValue("HONEYBEE_CLEANUP_INTERSTITIAL_AD_UNIT_ID"),
 )
 

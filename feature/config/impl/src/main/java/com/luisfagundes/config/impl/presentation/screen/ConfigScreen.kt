@@ -52,7 +52,7 @@ import com.luisfagundes.config.impl.presentation.event.ConfigUiEvent
 import com.luisfagundes.config.impl.presentation.state.ConfigUiState
 import com.luisfagundes.config.impl.presentation.viewmodel.ConfigViewModel
 import com.luisfagundes.core.ads.AdsCoordinator
-import com.luisfagundes.core.ads.presentation.SettingsBannerAd
+import com.luisfagundes.core.ads.presentation.AdaptiveBannerAd
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
@@ -193,7 +193,7 @@ private fun ConfigOtherSection(
     }
     if (uiState.canShowSettingsBanner && uiState.settingsBannerAdUnitId.isNotBlank()) {
         Spacer(modifier = Modifier.height(MaterialTheme.spacing.default))
-        SettingsBannerAd(
+        AdaptiveBannerAd(
             adUnitId = uiState.settingsBannerAdUnitId,
             modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default)
         )

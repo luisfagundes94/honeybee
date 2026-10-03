@@ -15,6 +15,7 @@ internal object MonetizationConfigModule {
     @Singleton
     fun provideAdsConfig(): AdsConfig = AdsConfig(
         settingsBannerAdUnitId = BuildConfig.ADMOB_SETTINGS_BANNER_AD_UNIT_ID,
+        statisticsBannerAdUnitId = BuildConfig.ADMOB_STATISTICS_BANNER_AD_UNIT_ID,
         cleanupInterstitialAdUnitId = BuildConfig.ADMOB_CLEANUP_INTERSTITIAL_AD_UNIT_ID,
     )
 

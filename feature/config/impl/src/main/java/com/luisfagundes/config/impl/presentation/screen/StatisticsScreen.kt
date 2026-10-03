@@ -51,6 +51,9 @@ import com.luisfagundes.config.impl.presentation.event.StatisticsUiEvent
 import com.luisfagundes.config.impl.presentation.provider.StatisticsUiStateProvider
 import com.luisfagundes.config.impl.presentation.state.StatisticsUiState
 import com.luisfagundes.config.impl.presentation.viewmodel.StatisticsViewModel
+import com.luisfagundes.core.ads.AdsConfig
+import com.luisfagundes.core.ads.AdsCoordinator
+import com.luisfagundes.core.ads.presentation.AdaptiveBannerAd
 import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.core.common.presentation.tools.formatSize
 import com.luisfagundes.core.designsystem.components.HoneybeeErrorTemplate
@@ -63,10 +66,13 @@ import com.luisfagundes.library.api.domain.model.Statistics
 @Composable
 internal fun StatisticsScreen(
     onNavigateBack: () -> Unit,
+    adsCoordinator: AdsCoordinator,
+    adsConfig: AdsConfig,
     modifier: Modifier = Modifier,
     viewModel: StatisticsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val adsState by adsCoordinator.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.dispatchEvent(StatisticsUiEvent.LoadStatistics)
@@ -81,6 +87,8 @@ internal fun StatisticsScreen(
     StatisticsScreen(
         uiState = uiState,
         onEvent = viewModel::dispatchEvent,
+        canShowBanner = adsState.canShowAds,
+        bannerAdUnitId = adsConfig.statisticsBannerAdUnitId,
         modifier = modifier
     )
 }
@@ -90,6 +98,8 @@ internal fun StatisticsScreen(
 private fun StatisticsScreen(
     uiState: StatisticsUiState,
     onEvent: (StatisticsUiEvent) -> Unit,
+    canShowBanner: Boolean = false,
+    bannerAdUnitId: String = "",
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -141,6 +151,8 @@ private fun StatisticsScreen(
             is StatisticsUiState.Content -> {
                 StatisticsContent(
                     statistics = uiState.statistics,
+                    canShowBanner = canShowBanner,
+                    bannerAdUnitId = bannerAdUnitId,
                     modifier = Modifier.padding(innerPadding)
                 )
             }
@@ -151,6 +163,8 @@ private fun StatisticsScreen(
 @Composable
 private fun StatisticsContent(
     statistics: Statistics,
+    canShowBanner: Boolean,
+    bannerAdUnitId: String,
     modifier: Modifier = Modifier
 ) {
     val (memoryVal, memoryUnit) = if (statistics.memoryCleared == 0L) {
@@ -187,6 +201,12 @@ private fun StatisticsContent(
             value = statistics.videosDeleted.toString(),
             icon = Icons.Default.Videocam
         )
+        if (canShowBanner && bannerAdUnitId.isNotBlank()) {
+            AdaptiveBannerAd(
+                adUnitId = bannerAdUnitId,
+                modifier = Modifier.padding(top = MaterialTheme.spacing.small),
+            )
+        }
     }
 }
 

@@ -18,7 +18,7 @@ import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 
 @Composable
-fun SettingsBannerAd(
+fun AdaptiveBannerAd(
     adUnitId: String,
     modifier: Modifier = Modifier,
 ) {

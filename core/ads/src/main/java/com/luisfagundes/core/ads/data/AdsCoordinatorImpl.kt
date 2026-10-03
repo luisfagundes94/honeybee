@@ -2,13 +2,13 @@ package com.luisfagundes.core.ads.data
 
 import android.app.Activity
 import android.content.Context
+import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
+import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
-import com.google.android.gms.ads.AdError
-import com.google.android.gms.ads.LoadAdError
 import com.google.android.ump.ConsentInformation
 import com.google.android.ump.ConsentRequestParameters
 import com.google.android.ump.UserMessagingPlatform
@@ -29,7 +29,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private const val MINIMUM_DELETED_ITEMS_FOR_INTERSTITIAL = 5
+private const val ADS_PREFERENCES_NAME = "ads_preferences"
+private const val LAST_CLEANUP_INTERSTITIAL_SHOWN_AT_KEY = "last_cleanup_interstitial_shown_at"
 
 @Singleton
 internal class AdsCoordinatorImpl @Inject constructor(
@@ -40,6 +41,10 @@ internal class AdsCoordinatorImpl @Inject constructor(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val consentInformation: ConsentInformation =
         UserMessagingPlatform.getConsentInformation(context)
+    private val adsPreferences = context.getSharedPreferences(
+        ADS_PREFERENCES_NAME,
+        Context.MODE_PRIVATE,
+    )
     private val _state = MutableStateFlow(AdsState())
     private var isConsentRequestInFlight = false
     private var isMobileAdsInitialized = false
@@ -119,6 +124,15 @@ internal class AdsCoordinatorImpl @Inject constructor(
                 }
 
                 ad.fullScreenContentCallback = object : FullScreenContentCallback() {
+                    override fun onAdShowedFullScreenContent() {
+                        adsPreferences.edit()
+                            .putLong(
+                                LAST_CLEANUP_INTERSTITIAL_SHOWN_AT_KEY,
+                                System.currentTimeMillis(),
+                            )
+                            .apply()
+                    }
+
                     override fun onAdDismissedFullScreenContent() = completeOnce()
 
                     override fun onAdFailedToShowFullScreenContent(adError: AdError) = completeOnce()
@@ -130,7 +144,16 @@ internal class AdsCoordinatorImpl @Inject constructor(
     }
 
     private fun canShowCleanupInterstitial(deletedCount: Int): Boolean {
-        var canShow = deletedCount >= MINIMUM_DELETED_ITEMS_FOR_INTERSTITIAL
+        val nowMillis = System.currentTimeMillis()
+        val lastShownAtMillis = adsPreferences.getLong(
+            LAST_CLEANUP_INTERSTITIAL_SHOWN_AT_KEY,
+            0L,
+        )
+        var canShow = shouldShowCleanupInterstitial(
+            deletedCount = deletedCount,
+            lastShownAtMillis = lastShownAtMillis,
+            nowMillis = nowMillis,
+        )
         if (canShow) canShow = subscriptionProvider.status.value == SubscriptionStatus.Free
         if (canShow) canShow = state.value.canShowAds
         if (canShow) canShow = !isInterstitialShowing

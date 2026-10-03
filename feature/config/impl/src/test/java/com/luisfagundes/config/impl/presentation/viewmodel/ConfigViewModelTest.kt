@@ -33,7 +33,11 @@ internal class ConfigViewModelTest {
     private val adsCoordinator: AdsCoordinator = mockk {
         every { state } returns MutableStateFlow(AdsState())
     }
-    private val adsConfig = AdsConfig("banner", "interstitial")
+    private val adsConfig = AdsConfig(
+        settingsBannerAdUnitId = "banner",
+        statisticsBannerAdUnitId = "statistics",
+        cleanupInterstitialAdUnitId = "interstitial",
+    )
     private lateinit var viewModel: ConfigViewModel
 
     @BeforeEach
