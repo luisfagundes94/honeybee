@@ -9,7 +9,7 @@ JUnit 5 + MockK + Turbine (Flow assertions)
 - Don't repeat fake data in tests. In this case, create a package `tools` and put reusable fake-data `val`s there.
 - For more information about tests, use the testing-setup skill from Google 
 
-- Example testing with turbine:
+## Example testing with turbine:
   ```kotlin
     internal class MyViewModelTest {
         @RegisterExtension
