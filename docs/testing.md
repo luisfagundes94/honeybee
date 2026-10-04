@@ -9,17 +9,6 @@ JUnit 5 + MockK + Turbine (Flow assertions)
 - Don't repeat fake data in tests. In this case, create a package `tools` and put reusable fake-data `val`s there.
 - Don't create intermediate variables when asserting state or effects that only asserts one thing:
 
-  ❌ *Don't do this:*
-    ```kotlin
-        val state = awaitItem() as UiState.Content
-        assertEquals(state.items, items)
-    ```
-
-  ✅ *Do this:*
-    ```kotlin
-        assertEquals(UiState.Content(items), awaitItem())
-    ```
-
 - Example testing with turbine:
   ```kotlin
     internal class MyViewModelTest {
