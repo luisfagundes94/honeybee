@@ -22,14 +22,14 @@ This file is the quick-reference guide for agents and contributors working in th
 
 ## Detailed guidance
 
-| Topic | Documentation |
-| --- | --- |
-| Architecture, module boundaries, domain purity, and dependency injection | [`docs/architecture.md`](docs/architecture.md) |
-| UseCases, repositories, entities, DataSources, mapping, and `Result<T>` | [`docs/data-and-domain.md`](docs/data-and-domain.md) |
-| Compose design system, MVI state, ViewModels, and navigation | [`docs/presentation.md`](docs/presentation.md) |
-| Coroutines, design principles, and prohibited anti-patterns | [`docs/code-quality.md`](docs/code-quality.md) |
-| Unit and coroutine testing conventions | [`docs/testing.md`](docs/testing.md) |
-| Commit message conventions | [`docs/contributing.md`](docs/contributing.md) |
+| Topic                                                                    | Documentation                                        |
+|--------------------------------------------------------------------------|------------------------------------------------------|
+| Architecture, module boundaries, domain purity, and dependency injection | [`docs/architecture.md`](docs/architecture.md)       |
+| UseCases, repositories, entities, DataSources, mapping, and `Result<T>`  | [`docs/data-and-domain.md`](docs/data-and-domain.md) |
+| Compose design system, MVI state, ViewModels, and navigation             | [`docs/presentation.md`](docs/presentation.md)       |
+| Coroutines, design principles, and prohibited anti-patterns              | [`docs/code-quality.md`](docs/code-quality.md)       |
+| Unit and coroutine testing conventions                                   | [`docs/testing.md`](docs/testing.md)                 |
+| Commit message conventions                                               | [`docs/contributing.md`](docs/contributing.md)       |
 
 ## Before changing code
 
