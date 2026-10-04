@@ -25,4 +25,21 @@
     <string name="photos_deleted">Fotos excluídas</string>
     <string name="videos_deleted">Vídeos excluídos</string>
     <string name="statistics_back_button_content_description">Voltar</string>
+    <string name="config_item_premium">Premium</string>
+    <string name="premium_title">Premium</string>
+    <string name="premium_close_button_content_description">Fechar tela Premium</string>
+    <string name="premium_benefit_delete_title">Exclusões ilimitadas</string>
+    <string name="premium_benefit_delete_description">Remova fotos e vídeos sem limites.</string>
+    <string name="premium_benefit_no_ads_title">Sem anúncios</string>
+    <string name="premium_benefit_no_ads_description">Use o Honeybee sem anúncios.</string>
+    <string name="premium_benefit_videos_title">Acesso a vídeos</string>
+    <string name="premium_benefit_videos_description">Tenha acesso aos seus vídeos.</string>
+    <string name="premium_plan_monthly">Semanal</string>
+    <string name="premium_plan_lifetime">Vitalício</string>
+    <string name="premium_price_monthly">$2</string>
+    <string name="premium_price_lifetime">$25</string>
+    <string name="premium_billing_period_monthly">por semana</string>
+    <string name="premium_billing_period_lifetime">pagamento único</string>
+    <string name="premium_purchase_action">Continuar</string>
+    <string name="premium_purchase_unavailable">As compras ainda não estão disponíveis.</string>
 </resources>

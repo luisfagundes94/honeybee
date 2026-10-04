@@ -26,4 +26,20 @@
     <string name="videos_deleted">Videos Deleted</string>
     <string name="statistics_back_button_content_description">Go back</string>
     <string name="config_item_premium">Premium</string>
+    <string name="premium_title">Premium</string>
+    <string name="premium_close_button_content_description">Close premium screen</string>
+    <string name="premium_benefit_delete_title">Delete without limits</string>
+    <string name="premium_benefit_delete_description">Remove photos and videos without a limit.</string>
+    <string name="premium_benefit_no_ads_title">No ads</string>
+    <string name="premium_benefit_no_ads_description">Enjoy Honeybee without ads.</string>
+    <string name="premium_benefit_videos_title">Access to videos</string>
+    <string name="premium_benefit_videos_description">Unlock access to your videos.</string>
+    <string name="premium_plan_monthly">Monthly</string>
+    <string name="premium_plan_lifetime">Lifetime</string>
+    <string name="premium_price_monthly">$2</string>
+    <string name="premium_price_lifetime">$25</string>
+    <string name="premium_billing_period_monthly">per month</string>
+    <string name="premium_billing_period_lifetime">one-time</string>
+    <string name="premium_purchase_action">Continue</string>
+    <string name="premium_purchase_unavailable">Purchases aren\'t available yet.</string>
 </resources>

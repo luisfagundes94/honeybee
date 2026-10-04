@@ -64,6 +64,7 @@ private const val APP_INTERNAL_SHARE_LINK =
 internal fun ConfigScreen(
     onNavigateToFeedback: () -> Unit,
     onNavigateToStatistics: () -> Unit,
+    onNavigateToPremium: () -> Unit,
     adsCoordinator: AdsCoordinator,
     modifier: Modifier = Modifier,
     viewModel: ConfigViewModel = hiltViewModel()
@@ -84,6 +85,7 @@ internal fun ConfigScreen(
     ConfigScreen(
         uiState = uiState,
         onEvent = viewModel::dispatchEvent,
+        onNavigateToPremium = onNavigateToPremium,
         modifier = modifier
     )
 }
@@ -92,6 +94,7 @@ internal fun ConfigScreen(
 private fun ConfigScreen(
     uiState: ConfigUiState,
     onEvent: (ConfigUiEvent) -> Unit,
+    onNavigateToPremium: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -113,6 +116,7 @@ private fun ConfigScreen(
         ConfigContent(
             uiState = uiState,
             onEvent = onEvent,
+            onNavigateToPremium = onNavigateToPremium,
             context = LocalContext.current,
             modifier = Modifier.padding(innerPadding)
         )
@@ -123,6 +127,7 @@ private fun ConfigScreen(
 private fun ConfigContent(
     uiState: ConfigUiState,
     onEvent: (ConfigUiEvent) -> Unit,
+    onNavigateToPremium: () -> Unit,
     context: Context,
     modifier: Modifier = Modifier
 ) {
@@ -134,7 +139,12 @@ private fun ConfigContent(
         Spacer(modifier = Modifier.height(MaterialTheme.spacing.default))
         ConfigMyDataSection(uiState = uiState, onEvent = onEvent)
         Spacer(modifier = Modifier.height(MaterialTheme.spacing.default))
-        ConfigOtherSection(uiState = uiState, onEvent = onEvent, context = context)
+        ConfigOtherSection(
+            uiState = uiState,
+            onEvent = onEvent,
+            onNavigateToPremium = onNavigateToPremium,
+            context = context
+        )
         Spacer(modifier = Modifier.height(MaterialTheme.spacing.default))
     }
 }
@@ -174,6 +184,7 @@ private fun ConfigMyDataSection(
 private fun ConfigOtherSection(
     uiState: ConfigUiState,
     onEvent: (ConfigUiEvent) -> Unit,
+    onNavigateToPremium: () -> Unit,
     context: Context
 ) {
     ConfigCategoryTitle(
@@ -183,7 +194,7 @@ private fun ConfigOtherSection(
         ConfigItem(
             title = stringResource(R.string.config_item_premium),
             icon = Icons.Default.Stars,
-            onClick = {  }
+            onClick = onNavigateToPremium
         )
         ConfigItem(
             title = stringResource(R.string.config_item_notifications),
@@ -320,6 +331,7 @@ private fun ConfigItem(
 private fun ConfigScreenPreview() {
     ConfigScreen(
         uiState = ConfigUiState.Content(),
-        onEvent = {}
+        onEvent = {},
+        onNavigateToPremium = {}
     )
 }

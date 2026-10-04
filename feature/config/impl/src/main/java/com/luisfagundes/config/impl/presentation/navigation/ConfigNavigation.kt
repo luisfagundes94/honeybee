@@ -4,9 +4,11 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.luisfagundes.config.api.presentation.navigation.ConfigRoute
 import com.luisfagundes.config.api.presentation.navigation.FeedbackRoute
+import com.luisfagundes.config.api.presentation.navigation.PremiumRoute
 import com.luisfagundes.config.api.presentation.navigation.StatisticsRoute
 import com.luisfagundes.config.impl.presentation.screen.ConfigScreen
 import com.luisfagundes.config.impl.presentation.screen.FeedbackScreen
+import com.luisfagundes.config.impl.presentation.screen.PremiumScreen
 import com.luisfagundes.config.impl.presentation.screen.StatisticsScreen
 import com.luisfagundes.core.ads.AdsConfig
 import com.luisfagundes.core.ads.AdsCoordinator
@@ -24,6 +26,9 @@ internal fun EntryProviderScope<NavKey>.configEntries(
             },
             onNavigateToStatistics = {
                 backStack?.add(StatisticsRoute)
+            },
+            onNavigateToPremium = {
+                backStack?.add(PremiumRoute)
             },
             adsCoordinator = adsCoordinator,
         )
@@ -46,6 +51,15 @@ internal fun EntryProviderScope<NavKey>.configEntries(
             },
             adsCoordinator = adsCoordinator,
             adsConfig = adsConfig,
+        )
+    }
+
+    entry<PremiumRoute> {
+        val backStack = LocalNavBackStack.current
+        PremiumScreen(
+            onNavigateBack = {
+                backStack?.removeLastOrNull()
+            }
         )
     }
 }
