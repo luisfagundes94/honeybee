@@ -1,8 +1,7 @@
 package com.luisfagundes.config.impl.presentation.screen
 
-import android.content.Intent
-import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -25,7 +24,6 @@ import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -179,7 +177,7 @@ private fun ConfigMyDataSection(
 private fun ConfigOtherSection(
     uiState: ConfigUiState,
     onEvent: (ConfigUiEvent) -> Unit,
-    context: android.content.Context
+    context: Context
 ) {
     ConfigCategoryTitle(R.string.config_category_other)
     ConfigCard {
@@ -263,7 +261,7 @@ private fun ConfigOtherItems(
 @Composable
 private fun ConfigSharingItems(
     onEvent: (ConfigUiEvent) -> Unit,
-    context: android.content.Context
+    context: Context
 ) {
     ConfigItem(
         title = stringResource(R.string.config_item_send_feedback),
