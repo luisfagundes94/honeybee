@@ -23,10 +23,10 @@ internal object DatabaseModule {
         @ApplicationContext context: Context
     ): LibraryDatabase {
         return Room.databaseBuilder(
-            context,
-            LibraryDatabase::class.java,
-            DATABASE_NAME
-        ).fallbackToDestructiveMigration().build()
+                context,
+                LibraryDatabase::class.java,
+                DATABASE_NAME
+            ).fallbackToDestructiveMigration(false).build()
     }
 
     @Provides
