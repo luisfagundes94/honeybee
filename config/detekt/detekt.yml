@@ -807,7 +807,7 @@ style:
     active: true
     aliases: ['unused']
     allowedNames: ''
-    ignoreAnnotated: ['Preview']
+    ignoreAnnotated: ['Preview', 'PreviewLightDark']
   UnusedPrivateProperty:
     active: true
     aliases: ['unused']
