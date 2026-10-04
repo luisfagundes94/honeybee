@@ -2,6 +2,7 @@ package com.luisfagundes.config.impl.presentation.screen
 
 import android.content.Intent
 import android.app.Activity
+import android.content.Context
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -60,7 +61,6 @@ import com.luisfagundes.core.designsystem.theme.spacing
 private const val APP_INTERNAL_SHARE_LINK =
     "https://play.google.com/apps/internaltest/4701609758531422116"
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ConfigScreen(
     onNavigateToFeedback: () -> Unit,
@@ -89,7 +89,6 @@ internal fun ConfigScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ConfigScreen(
     uiState: ConfigUiState,
@@ -278,15 +277,17 @@ private fun ConfigSharingItems(
     ConfigItem(
         title = stringResource(R.string.config_item_share_with_friends),
         icon = Icons.Default.Share,
-        onClick = {
-            val sendIntent = Intent().apply {
-                action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_TEXT, APP_INTERNAL_SHARE_LINK)
-                type = "text/plain"
-            }
-            context.startActivity(Intent.createChooser(sendIntent, null))
-        }
+        onClick = { sendShareAppLinkIntent(context) }
     )
+}
+
+private fun sendShareAppLinkIntent(context: Context) {
+    val sendIntent = Intent().apply {
+        action = Intent.ACTION_SEND
+        putExtra(Intent.EXTRA_TEXT, APP_INTERNAL_SHARE_LINK)
+        type = "text/plain"
+    }
+    context.startActivity(Intent.createChooser(sendIntent, null))
 }
 
 @Composable
