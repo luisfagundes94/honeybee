@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.BackHand
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.StarBorder
+import androidx.compose.material.icons.filled.Stars
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -143,31 +144,27 @@ private fun ConfigMyDataSection(
     uiState: ConfigUiState,
     onEvent: (ConfigUiEvent) -> Unit
 ) {
-    ConfigCategoryTitle(R.string.config_category_my_data)
+    ConfigCategoryTitle(
+        titleRes = R.string.config_category_my_data
+    )
     ConfigCard {
         ConfigItem(
             title = stringResource(R.string.config_item_statistics),
             icon = Icons.AutoMirrored.Filled.TrendingUp,
             onClick = { onEvent(ConfigUiEvent.StatisticsClick) }
         )
-        HorizontalDivider(
-            modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default),
-            color = MaterialTheme.colorScheme.outlineVariant
-        )
         ConfigItem(
             title = stringResource(R.string.config_item_privacy),
             icon = Icons.Default.BackHand,
-            onClick = { onEvent(ConfigUiEvent.PrivacyChoicesClick) }
+            onClick = { onEvent(ConfigUiEvent.PrivacyChoicesClick) },
+            hasDivider = uiState.isPrivacyOptionsRequired
         )
         if (uiState.isPrivacyOptionsRequired) {
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default),
-                color = MaterialTheme.colorScheme.outlineVariant
-            )
             ConfigItem(
                 title = stringResource(R.string.config_item_privacy_choices),
                 icon = Icons.Default.BackHand,
-                onClick = { onEvent(ConfigUiEvent.PrivacyChoicesClick) }
+                onClick = { onEvent(ConfigUiEvent.PrivacyChoicesClick) },
+                hasDivider = false
             )
         }
     }
@@ -179,14 +176,51 @@ private fun ConfigOtherSection(
     onEvent: (ConfigUiEvent) -> Unit,
     context: Context
 ) {
-    ConfigCategoryTitle(R.string.config_category_other)
+    ConfigCategoryTitle(
+        titleRes = R.string.config_category_other
+    )
     ConfigCard {
-        ConfigOtherItems(uiState = uiState, onEvent = onEvent)
-        HorizontalDivider(
-            modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default),
-            color = MaterialTheme.colorScheme.outlineVariant
+        ConfigItem(
+            title = stringResource(R.string.config_item_premium),
+            icon = Icons.Default.Stars,
+            onClick = {  }
         )
-        ConfigSharingItems(onEvent = onEvent, context = context)
+        ConfigItem(
+            title = stringResource(R.string.config_item_notifications),
+            icon = Icons.Default.Notifications,
+            trailingContent = {
+                Switch(
+                    checked = uiState.isNotificationsEnabled,
+                    onCheckedChange = { onEvent(ConfigUiEvent.NotificationsToggled(it)) }
+                )
+            },
+            onClick = {
+                onEvent(ConfigUiEvent.NotificationsToggled(!uiState.isNotificationsEnabled))
+            }
+        )
+        ConfigItem(
+            title = stringResource(R.string.config_item_rate_app),
+            icon = Icons.Default.StarBorder,
+            onClick = { }
+        )
+        ConfigItem(
+            title = stringResource(R.string.config_item_send_feedback),
+            icon = Icons.AutoMirrored.Filled.HelpOutline,
+            onClick = { onEvent(ConfigUiEvent.FeedbackClick) }
+        )
+        ConfigItem(
+            title = stringResource(R.string.config_item_share_with_friends),
+            icon = Icons.Default.Share,
+            onClick = {
+                val sendIntent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, APP_INTERNAL_SHARE_LINK)
+                    type = "text/plain"
+                }
+                context.startActivity(Intent.createChooser(sendIntent, null))
+            },
+            hasDivider = false
+        )
     }
     if (uiState.canShowSettingsBanner && uiState.settingsBannerAdUnitId.isNotBlank()) {
         Spacer(modifier = Modifier.height(MaterialTheme.spacing.default))
@@ -230,72 +264,14 @@ private fun ConfigCard(content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun ConfigOtherItems(
-    uiState: ConfigUiState,
-    onEvent: (ConfigUiEvent) -> Unit
-) {
-    ConfigItem(
-        title = stringResource(R.string.config_item_notifications),
-        icon = Icons.Default.Notifications,
-        trailingContent = {
-            Switch(
-                checked = uiState.isNotificationsEnabled,
-                onCheckedChange = { onEvent(ConfigUiEvent.NotificationsToggled(it)) }
-            )
-        },
-        onClick = {
-            onEvent(ConfigUiEvent.NotificationsToggled(!uiState.isNotificationsEnabled))
-        }
-    )
-    HorizontalDivider(
-        modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default),
-        color = MaterialTheme.colorScheme.outlineVariant
-    )
-    ConfigItem(
-        title = stringResource(R.string.config_item_rate_app),
-        icon = Icons.Default.StarBorder,
-        onClick = { }
-    )
-}
-
-@Composable
-private fun ConfigSharingItems(
-    onEvent: (ConfigUiEvent) -> Unit,
-    context: Context
-) {
-    ConfigItem(
-        title = stringResource(R.string.config_item_send_feedback),
-        icon = Icons.AutoMirrored.Filled.HelpOutline,
-        onClick = { onEvent(ConfigUiEvent.FeedbackClick) }
-    )
-    HorizontalDivider(
-        modifier = Modifier.padding(horizontal = MaterialTheme.spacing.default),
-        color = MaterialTheme.colorScheme.outlineVariant
-    )
-    ConfigItem(
-        title = stringResource(R.string.config_item_share_with_friends),
-        icon = Icons.Default.Share,
-        onClick = { sendShareAppLinkIntent(context) }
-    )
-}
-
-private fun sendShareAppLinkIntent(context: Context) {
-    val sendIntent = Intent().apply {
-        action = Intent.ACTION_SEND
-        putExtra(Intent.EXTRA_TEXT, APP_INTERNAL_SHARE_LINK)
-        type = "text/plain"
-    }
-    context.startActivity(Intent.createChooser(sendIntent, null))
-}
-
-@Composable
 private fun ConfigItem(
     title: String,
     icon: ImageVector,
     modifier: Modifier = Modifier,
     iconContainer: (@Composable () -> Unit)? = null,
     trailingContent: (@Composable () -> Unit)? = null,
-    onClick: (() -> Unit)? = null
+    onClick: (() -> Unit)? = null,
+    hasDivider: Boolean = true
 ) {
     ListItem(
         modifier = modifier.let {
@@ -315,8 +291,7 @@ private fun ConfigItem(
         trailingContent = trailingContent ?: {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                contentDescription = null
             )
         },
         overlineContent = null,
@@ -331,6 +306,12 @@ private fun ConfigItem(
             )
         },
     )
+    if (hasDivider) {
+        HorizontalDivider(
+            modifier = modifier.padding(horizontal = MaterialTheme.spacing.default),
+            color = MaterialTheme.colorScheme.outlineVariant
+        )
+    }
 }
 
 @PreviewLightDark

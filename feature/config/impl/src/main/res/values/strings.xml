@@ -25,4 +25,5 @@
     <string name="photos_deleted">Photos Deleted</string>
     <string name="videos_deleted">Videos Deleted</string>
     <string name="statistics_back_button_content_description">Go back</string>
+    <string name="config_item_premium">Premium</string>
 </resources>
