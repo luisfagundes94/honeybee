@@ -10,11 +10,11 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-internal abstract class ConfigRepositoryModule {
+internal interface ConfigRepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindConfigRepository(
+    fun bindConfigRepository(
         configRepositoryImpl: ConfigRepositoryImpl
     ): ConfigRepository
 }

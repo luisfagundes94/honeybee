@@ -10,8 +10,8 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-internal abstract class AdsModule {
+internal interface AdsModule {
     @Binds
     @Singleton
-    abstract fun bindAdsCoordinator(impl: AdsCoordinatorImpl): AdsCoordinator
+    fun bindAdsCoordinator(impl: AdsCoordinatorImpl): AdsCoordinator
 }

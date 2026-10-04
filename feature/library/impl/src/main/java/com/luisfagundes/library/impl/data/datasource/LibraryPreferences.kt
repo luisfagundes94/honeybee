@@ -13,14 +13,15 @@ private const val KEY_SWIPE_UP_TRASH_ONBOARDING_SEEN = "swipe_up_trash_onboardin
 
 @Singleton
 internal class LibraryPreferences @Inject constructor(
-    @param:ApplicationContext private val context: Context
+    @ApplicationContext context: Context
 ) {
     private val prefs: SharedPreferences =
         context.getSharedPreferences("library_prefs", Context.MODE_PRIVATE)
 
     fun getTrashedPhotoIds(): Set<Long> {
-        return prefs.getStringSet(KEY_TRASHED, emptySet())?.mapNotNull { it.toLongOrNull() }
-            ?.toSet() ?: emptySet()
+        return prefs.getStringSet(KEY_TRASHED, emptySet()).orEmpty()
+            .mapNotNull { it.toLongOrNull() }
+            .toSet()
     }
 
     fun setTrashedPhotoIds(ids: Set<Long>) {
@@ -28,8 +29,9 @@ internal class LibraryPreferences @Inject constructor(
     }
 
     fun getDeletedPhotoIds(): Set<Long> {
-        return prefs.getStringSet(KEY_DELETED, emptySet())?.mapNotNull { it.toLongOrNull() }
-            ?.toSet() ?: emptySet()
+        return prefs.getStringSet(KEY_DELETED, emptySet()).orEmpty()
+            .mapNotNull { it.toLongOrNull() }
+            .toSet()
     }
 
     fun setDeletedPhotoIds(ids: Set<Long>) {

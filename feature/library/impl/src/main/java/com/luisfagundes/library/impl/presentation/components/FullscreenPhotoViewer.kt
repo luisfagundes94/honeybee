@@ -22,19 +22,29 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.luisfagundes.core.designsystem.theme.spacing
 import com.luisfagundes.library.impl.R
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 private const val PHOTO_ZOOM_RESET_THRESHOLD = 1.05f
 private const val PHOTO_DOUBLE_TAP_SCALE = 3f
+
+private data class PhotoViewerGestureState(
+    val scale: Animatable<Float, *>,
+    val offsetX: Animatable<Float, *>,
+    val offsetY: Animatable<Float, *>,
+    val viewportSize: IntSize
+)
 
 @Composable
 internal fun FullscreenPhotoViewer(
@@ -101,25 +111,26 @@ private fun PhotoViewerImage(
     maxWidth: Int,
     maxHeight: Int
 ) {
+    val gestureState = remember(scale, offsetX, offsetY, maxWidth, maxHeight) {
+        PhotoViewerGestureState(
+            scale = scale,
+            offsetX = offsetX,
+            offsetY = offsetY,
+            viewportSize = IntSize(maxWidth, maxHeight)
+        )
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .photoDoubleTapGesture(
-                scale = scale,
-                offsetX = offsetX,
-                offsetY = offsetY,
+                gestureState = gestureState,
                 coroutineScope = coroutineScope,
-                maxWidth = maxWidth,
-                maxHeight = maxHeight,
                 onDismissRequest = onDismissRequest
             )
             .photoTransformGesture(
-                scale = scale,
-                offsetX = offsetX,
-                offsetY = offsetY,
-                coroutineScope = coroutineScope,
-                maxWidth = maxWidth,
-                maxHeight = maxHeight
+                gestureState = gestureState,
+                coroutineScope = coroutineScope
             )
     ) {
         AsyncImage(
@@ -159,31 +170,21 @@ private fun PhotoViewerCloseButton(
 }
 
 private fun Modifier.photoDoubleTapGesture(
-    scale: Animatable<Float, *>,
-    offsetX: Animatable<Float, *>,
-    offsetY: Animatable<Float, *>,
-    coroutineScope: kotlinx.coroutines.CoroutineScope,
-    maxWidth: Int,
-    maxHeight: Int,
+    gestureState: PhotoViewerGestureState,
+    coroutineScope: CoroutineScope,
     onDismissRequest: () -> Unit
 ) = pointerInput(Unit) {
     detectTapGestures(
         onDoubleTap = { tapOffset ->
             coroutineScope.launch {
-                if (scale.value > PHOTO_ZOOM_RESET_THRESHOLD) {
-                    launch { scale.animateTo(1f, spring()) }
-                    launch { offsetX.animateTo(0f, spring()) }
-                    launch { offsetY.animateTo(0f, spring()) }
+                if (gestureState.scale.value > PHOTO_ZOOM_RESET_THRESHOLD) {
+                    launch { gestureState.scale.animateTo(1f, spring()) }
+                    launch { gestureState.offsetX.animateTo(0f, spring()) }
+                    launch { gestureState.offsetY.animateTo(0f, spring()) }
                 } else {
                     animatePhotoZoom(
-                        scale = scale,
-                        offsetX = offsetX,
-                        offsetY = offsetY,
-                        tapX = tapOffset.x,
-                        tapY = tapOffset.y,
-                        maxWidth = maxWidth,
-                        maxHeight = maxHeight,
-                        coroutineScope = this
+                        gestureState = gestureState,
+                        tapOffset = tapOffset
                     )
                 }
             }
@@ -193,47 +194,41 @@ private fun Modifier.photoDoubleTapGesture(
 }
 
 private fun kotlinx.coroutines.CoroutineScope.animatePhotoZoom(
-    scale: Animatable<Float, *>,
-    offsetX: Animatable<Float, *>,
-    offsetY: Animatable<Float, *>,
-    tapX: Float,
-    tapY: Float,
-    maxWidth: Int,
-    maxHeight: Int,
-    coroutineScope: kotlinx.coroutines.CoroutineScope
+    gestureState: PhotoViewerGestureState,
+    tapOffset: Offset
 ) {
-    val centerX = maxWidth / 2f
-    val centerY = maxHeight / 2f
-    val dx = tapX - centerX
-    val dy = tapY - centerY
-    val extraWidth = (PHOTO_DOUBLE_TAP_SCALE - 1) * maxWidth
-    val extraHeight = (PHOTO_DOUBLE_TAP_SCALE - 1) * maxHeight
+    val centerX = gestureState.viewportSize.width / 2f
+    val centerY = gestureState.viewportSize.height / 2f
+    val dx = tapOffset.x - centerX
+    val dy = tapOffset.y - centerY
+    val extraWidth = (PHOTO_DOUBLE_TAP_SCALE - 1) * gestureState.viewportSize.width
+    val extraHeight = (PHOTO_DOUBLE_TAP_SCALE - 1) * gestureState.viewportSize.height
     val maxX = extraWidth / 2f
     val maxY = extraHeight / 2f
     val targetOffsetX = (-dx * (PHOTO_DOUBLE_TAP_SCALE - 1)).coerceIn(-maxX, maxX)
     val targetOffsetY = (-dy * (PHOTO_DOUBLE_TAP_SCALE - 1)).coerceIn(-maxY, maxY)
 
-    coroutineScope.launch { scale.animateTo(PHOTO_DOUBLE_TAP_SCALE, spring()) }
-    coroutineScope.launch { offsetX.animateTo(targetOffsetX, spring()) }
-    coroutineScope.launch { offsetY.animateTo(targetOffsetY, spring()) }
+    launch { gestureState.scale.animateTo(PHOTO_DOUBLE_TAP_SCALE, spring()) }
+    launch { gestureState.offsetX.animateTo(targetOffsetX, spring()) }
+    launch { gestureState.offsetY.animateTo(targetOffsetY, spring()) }
 }
 
 private fun Modifier.photoTransformGesture(
-    scale: Animatable<Float, *>,
-    offsetX: Animatable<Float, *>,
-    offsetY: Animatable<Float, *>,
-    coroutineScope: kotlinx.coroutines.CoroutineScope,
-    maxWidth: Int,
-    maxHeight: Int
+    gestureState: PhotoViewerGestureState,
+    coroutineScope: CoroutineScope
 ) = pointerInput(Unit) {
     detectTransformGestures { _, pan, zoom, _ ->
         coroutineScope.launch {
-            val newScale = (scale.value * zoom).coerceIn(1f, 5f)
-            scale.snapTo(newScale)
-            val maxX = (newScale - 1) * maxWidth / 2f
-            val maxY = (newScale - 1) * maxHeight / 2f
-            offsetX.snapTo((offsetX.value + pan.x).coerceIn(-maxX, maxX))
-            offsetY.snapTo((offsetY.value + pan.y).coerceIn(-maxY, maxY))
+            val newScale = (gestureState.scale.value * zoom).coerceIn(1f, 5f)
+            gestureState.scale.snapTo(newScale)
+            val maxX = (newScale - 1) * gestureState.viewportSize.width / 2f
+            val maxY = (newScale - 1) * gestureState.viewportSize.height / 2f
+            gestureState.offsetX.snapTo(
+                (gestureState.offsetX.value + pan.x).coerceIn(-maxX, maxX)
+            )
+            gestureState.offsetY.snapTo(
+                (gestureState.offsetY.value + pan.y).coerceIn(-maxY, maxY)
+            )
         }
     }
 }

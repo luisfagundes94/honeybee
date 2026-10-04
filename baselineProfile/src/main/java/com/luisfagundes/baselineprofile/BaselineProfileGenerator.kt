@@ -47,7 +47,7 @@ class BaselineProfileGenerator {
         // The application id for the running build variant is read from the instrumentation arguments.
         rule.collect(
             packageName = InstrumentationRegistry.getArguments().getString(TARGET_APP_ID_ARGUMENT)
-                ?: throw IllegalStateException("targetAppId not passed as instrumentation runner arg"),
+                ?: error("targetAppId not passed as instrumentation runner arg"),
 
             // See: https://d.android.com/topic/performance/baselineprofiles/dex-layout-optimizations
             includeInStartupProfile = true

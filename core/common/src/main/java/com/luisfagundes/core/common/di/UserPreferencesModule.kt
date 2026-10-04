@@ -18,22 +18,24 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-internal abstract class UserPreferencesModule {
+internal interface UserPreferencesModule {
 
     @Binds
     @Singleton
-    abstract fun bindUserPreferences(
+    fun bindUserPreferences(
         userPreferencesImpl: UserPreferencesImpl
     ): UserPreferences
+}
 
-    companion object {
-        @Provides
-        @Singleton
-        @UserPreferencesDataStore
-        fun provideUserPreferencesDataStore(
-            @ApplicationContext context: Context
-        ): DataStore<Preferences> = PreferenceDataStoreFactory.create(
-            produceFile = { context.preferencesDataStoreFile("user_preferences") }
-        )
-    }
+@Module
+@InstallIn(SingletonComponent::class)
+internal object UserPreferencesDataStoreModule {
+    @Provides
+    @Singleton
+    @UserPreferencesDataStore
+    fun provideUserPreferencesDataStore(
+        @ApplicationContext context: Context
+    ): DataStore<Preferences> = PreferenceDataStoreFactory.create(
+        produceFile = { context.preferencesDataStoreFile("user_preferences") }
+    )
 }
