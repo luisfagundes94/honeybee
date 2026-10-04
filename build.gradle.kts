@@ -15,12 +15,6 @@ plugins {
     alias(libs.plugins.google.firebase.crashlytics) apply false
 }
 
-val detektAll = tasks.register("detektAll") {
-    group = "verification"
-    description = "Runs Detekt for every module."
-    dependsOn(subprojects.map { "${it.path}:detekt" })
-}
-
 subprojects {
     plugins.withId("dev.detekt") {
         extensions.configure<DetektExtension> {
