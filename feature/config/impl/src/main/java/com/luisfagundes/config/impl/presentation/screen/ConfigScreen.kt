@@ -122,7 +122,7 @@ private fun ConfigScreen(
 private fun ConfigContent(
     uiState: ConfigUiState,
     onEvent: (ConfigUiEvent) -> Unit,
-    context: android.content.Context,
+    context: Context,
     modifier: Modifier = Modifier
 ) {
     Column(
