@@ -21,6 +21,7 @@ subprojects {
             config.setFrom(rootProject.file("config/detekt/detekt.yml"))
             ignoreFailures = false
             failOnSeverity = FailOnSeverity.Warning
+            parallel = true
         }
     }
 }
