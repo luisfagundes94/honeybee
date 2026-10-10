@@ -1,6 +1,7 @@
 package com.luisfagundes.honeybee.di
 
 import com.luisfagundes.core.ads.AdsConfig
+import com.luisfagundes.core.billing.PlayBillingConfig
 import com.luisfagundes.honeybee.BuildConfig
 import dagger.Module
 import dagger.Provides
@@ -13,10 +14,17 @@ import javax.inject.Singleton
 internal object MonetizationConfigModule {
     @Provides
     @Singleton
+    fun providePlayBillingConfig(): PlayBillingConfig = PlayBillingConfig(
+        subscriptionProductId = "honeybee_premium",
+        monthlyBasePlanId = "monthly",
+        lifetimeProductId = "honeybee_premium_lifetime",
+    )
+
+    @Provides
+    @Singleton
     fun provideAdsConfig(): AdsConfig = AdsConfig(
         settingsBannerAdUnitId = BuildConfig.ADMOB_SETTINGS_BANNER_AD_UNIT_ID,
         statisticsBannerAdUnitId = BuildConfig.ADMOB_STATISTICS_BANNER_AD_UNIT_ID,
         cleanupInterstitialAdUnitId = BuildConfig.ADMOB_CLEANUP_INTERSTITIAL_AD_UNIT_ID,
     )
-
 }

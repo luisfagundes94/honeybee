@@ -34,12 +34,16 @@
     <string name="premium_benefit_no_ads_description">Use o Honeybee sem anúncios.</string>
     <string name="premium_benefit_videos_title">Acesso a vídeos</string>
     <string name="premium_benefit_videos_description">Tenha acesso aos seus vídeos.</string>
-    <string name="premium_plan_monthly">Semanal</string>
+    <string name="premium_plan_monthly">Mensal</string>
     <string name="premium_plan_lifetime">Vitalício</string>
-    <string name="premium_price_monthly">$2</string>
-    <string name="premium_price_lifetime">$25</string>
-    <string name="premium_billing_period_monthly">por semana</string>
+    <string name="premium_billing_period_monthly">por mês</string>
     <string name="premium_billing_period_lifetime">pagamento único</string>
     <string name="premium_purchase_action">Continuar</string>
-    <string name="premium_purchase_unavailable">As compras ainda não estão disponíveis.</string>
+    <string name="premium_active">Premium ativo</string>
+    <string name="premium_price_unavailable">Indisponível</string>
+    <string name="premium_purchase_success">O Premium foi ativado.</string>
+    <string name="premium_purchase_pending">Sua compra está pendente. O Premium será ativado quando o pagamento for concluído.</string>
+    <string name="premium_purchase_unavailable">As compras do Google Play não estão disponíveis agora.</string>
+    <string name="premium_purchase_failed">A compra não foi concluída. Verifique o Google Play e tente novamente.</string>
+    <string name="premium_products_unavailable">Não foi possível carregar os planos Premium. Tente novamente mais tarde.</string>
 </resources>

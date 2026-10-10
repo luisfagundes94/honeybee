@@ -40,6 +40,7 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:ads"))
+    implementation(project(":core:billing"))
 
     // Core
     implementation(libs.androidx.appcompat)

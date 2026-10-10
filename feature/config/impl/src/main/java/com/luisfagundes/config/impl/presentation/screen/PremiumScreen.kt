@@ -1,5 +1,8 @@
 package com.luisfagundes.config.impl.presentation.screen
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,6 +40,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,6 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
@@ -55,35 +60,76 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewWrapper
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.luisfagundes.config.impl.R
+import com.luisfagundes.core.billing.PremiumBillingCoordinator
+import com.luisfagundes.core.billing.PremiumBillingUiState
+import com.luisfagundes.core.billing.PremiumPlan
+import com.luisfagundes.core.billing.PremiumPurchaseEvent
+import com.luisfagundes.core.common.provider.SubscriptionStatus
 import com.luisfagundes.core.designsystem.components.HoneybeeLogo
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-
-private enum class PremiumPlan {
-    Monthly,
-    Lifetime
-}
 
 @Composable
 internal fun PremiumScreen(
     onNavigateBack: () -> Unit,
+    billingCoordinator: PremiumBillingCoordinator,
     modifier: Modifier = Modifier
 ) {
     var selectedPlan by rememberSaveable { mutableStateOf(PremiumPlan.Monthly) }
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
+    val billingState by billingCoordinator.uiState.collectAsStateWithLifecycle()
+    val subscriptionStatus by billingCoordinator.status.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val purchaseSuccessMessage = stringResource(R.string.premium_purchase_success)
+    val purchasePendingMessage = stringResource(R.string.premium_purchase_pending)
     val purchaseUnavailableMessage = stringResource(R.string.premium_purchase_unavailable)
+    val purchaseFailedMessage = stringResource(R.string.premium_purchase_failed)
+    val productsUnavailableMessage = stringResource(R.string.premium_products_unavailable)
+    val priceUnavailable = stringResource(R.string.premium_price_unavailable)
+
+    LaunchedEffect(billingCoordinator) {
+        billingCoordinator.refreshOffers()
+    }
+    LaunchedEffect(billingCoordinator) {
+        billingCoordinator.purchaseEvents.collect { event ->
+            val message = when (event) {
+                PremiumPurchaseEvent.Purchased -> purchaseSuccessMessage
+                PremiumPurchaseEvent.Pending -> purchasePendingMessage
+                PremiumPurchaseEvent.Cancelled -> null
+                PremiumPurchaseEvent.Unavailable -> purchaseUnavailableMessage
+                PremiumPurchaseEvent.Failed -> purchaseFailedMessage
+            }
+            message?.let { snackbarHostState.showSnackbar(it) }
+        }
+    }
+    LaunchedEffect(billingState.offersUnavailable) {
+        if (billingState.offersUnavailable) {
+            snackbarHostState.showSnackbar(productsUnavailableMessage)
+        }
+    }
 
     PremiumLayout(
         selectedPlan = selectedPlan,
+        billingState = billingState,
+        isPremium = subscriptionStatus == SubscriptionStatus.Premium,
+        priceUnavailable = priceUnavailable,
         onPlanSelected = { selectedPlan = it },
         onNavigateBack = onNavigateBack,
         snackbarHostState = snackbarHostState,
         onContinue = {
-            coroutineScope.launch {
-                snackbarHostState.showSnackbar(purchaseUnavailableMessage)
+            val activity = context.findActivity()
+            if (activity == null) {
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar(purchaseUnavailableMessage)
+                }
+            } else {
+                billingCoordinator.purchase(activity, selectedPlan)
             }
         },
         modifier = modifier
@@ -93,6 +139,9 @@ internal fun PremiumScreen(
 @Composable
 private fun PremiumLayout(
     selectedPlan: PremiumPlan,
+    billingState: PremiumBillingUiState,
+    isPremium: Boolean,
+    priceUnavailable: String,
     onPlanSelected: (PremiumPlan) -> Unit,
     onNavigateBack: () -> Unit,
     snackbarHostState: SnackbarHostState,
@@ -118,6 +167,9 @@ private fun PremiumLayout(
             bottomBar = {
                 PremiumPurchaseOptions(
                     selectedPlan = selectedPlan,
+                    billingState = billingState,
+                    isPremium = isPremium,
+                    priceUnavailable = priceUnavailable,
                     onPlanSelected = onPlanSelected,
                     onContinue = onContinue
                 )
@@ -255,6 +307,9 @@ private fun PremiumBenefit(
 @Composable
 private fun PremiumPurchaseOptions(
     selectedPlan: PremiumPlan,
+    billingState: PremiumBillingUiState,
+    isPremium: Boolean,
+    priceUnavailable: String,
     onPlanSelected: (PremiumPlan) -> Unit,
     onContinue: () -> Unit
 ) {
@@ -274,27 +329,33 @@ private fun PremiumPurchaseOptions(
         ) {
             PremiumPlanOption(
                 title = stringResource(R.string.premium_plan_monthly),
-                price = stringResource(R.string.premium_price_monthly),
+                price = billingState.monthlyPrice ?: priceUnavailable,
                 billingPeriod = stringResource(R.string.premium_billing_period_monthly),
                 selected = selectedPlan == PremiumPlan.Monthly,
+                enabled = billingState.monthlyPrice != null && !isPremium,
                 onClick = { onPlanSelected(PremiumPlan.Monthly) }
             )
             PremiumPlanOption(
                 title = stringResource(R.string.premium_plan_lifetime),
-                price = stringResource(R.string.premium_price_lifetime),
+                price = billingState.lifetimePrice ?: priceUnavailable,
                 billingPeriod = stringResource(R.string.premium_billing_period_lifetime),
                 selected = selectedPlan == PremiumPlan.Lifetime,
+                enabled = billingState.lifetimePrice != null && !isPremium,
                 onClick = { onPlanSelected(PremiumPlan.Lifetime) }
             )
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.default))
             Button(
                 onClick = onContinue,
+                enabled = !billingState.isLoadingOffers && !billingState.isPurchasing && !isPremium &&
+                    selectedPlan.hasOffer(billingState),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(MaterialTheme.spacing.primaryButtonHeight)
             ) {
                 Text(
-                    text = stringResource(R.string.premium_purchase_action),
+                    text = stringResource(
+                        if (isPremium) R.string.premium_active else R.string.premium_purchase_action
+                    ),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -309,6 +370,7 @@ private fun PremiumPlanOption(
     price: String,
     billingPeriod: String,
     selected: Boolean,
+    enabled: Boolean,
     onClick: () -> Unit
 ) {
     val contentColor = if (selected) {
@@ -322,6 +384,7 @@ private fun PremiumPlanOption(
             .fillMaxWidth()
             .selectable(
                 selected = selected,
+                enabled = enabled,
                 role = Role.RadioButton,
                 onClick = onClick
             ),
@@ -374,5 +437,37 @@ private fun PremiumPlanOption(
 @PreviewWrapper(wrapper = HoneybeeThemeWrapper::class)
 @Composable
 private fun PremiumScreenPreview() {
-    PremiumScreen(onNavigateBack = {})
+    PremiumScreen(
+        onNavigateBack = {},
+        billingCoordinator = PreviewPremiumBillingCoordinator,
+    )
+}
+
+private fun PremiumPlan.hasOffer(state: PremiumBillingUiState): Boolean = when (this) {
+    PremiumPlan.Monthly -> state.monthlyPrice != null
+    PremiumPlan.Lifetime -> state.lifetimePrice != null
+}
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
+
+private val PreviewPremiumBillingCoordinator = object : PremiumBillingCoordinator {
+    override val status = MutableStateFlow<SubscriptionStatus>(SubscriptionStatus.Free)
+    override val uiState = MutableStateFlow(
+        PremiumBillingUiState(
+            isLoadingOffers = false,
+            monthlyPrice = "$2.00",
+            lifetimePrice = "$25.00",
+        )
+    )
+    override val purchaseEvents = MutableSharedFlow<PremiumPurchaseEvent>()
+
+    override suspend fun refresh() = Unit
+
+    override fun refreshOffers() = Unit
+
+    override fun purchase(activity: Activity, plan: PremiumPlan) = Unit
 }

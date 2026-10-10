@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$/baselineProfile" />
             <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/core/ads" />
+            <option value="$PROJECT_DIR$/core/billing" />
             <option value="$PROJECT_DIR$/core/common" />
             <option value="$PROJECT_DIR$/core/designsystem" />
             <option value="$PROJECT_DIR$/core/testing" />

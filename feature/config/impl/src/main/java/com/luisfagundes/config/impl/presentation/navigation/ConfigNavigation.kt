@@ -12,11 +12,13 @@ import com.luisfagundes.config.impl.presentation.screen.PremiumScreen
 import com.luisfagundes.config.impl.presentation.screen.StatisticsScreen
 import com.luisfagundes.core.ads.AdsConfig
 import com.luisfagundes.core.ads.AdsCoordinator
+import com.luisfagundes.core.billing.PremiumBillingCoordinator
 import com.luisfagundes.core.common.presentation.navigation.LocalNavBackStack
 
 internal fun EntryProviderScope<NavKey>.configEntries(
     adsCoordinator: AdsCoordinator,
     adsConfig: AdsConfig,
+    premiumBillingCoordinator: PremiumBillingCoordinator,
 ) {
     entry<ConfigRoute> {
         val backStack = LocalNavBackStack.current
@@ -59,7 +61,8 @@ internal fun EntryProviderScope<NavKey>.configEntries(
         PremiumScreen(
             onNavigateBack = {
                 backStack?.removeLastOrNull()
-            }
+            },
+            billingCoordinator = premiumBillingCoordinator,
         )
     }
 }

@@ -36,10 +36,14 @@
     <string name="premium_benefit_videos_description">Unlock access to your videos.</string>
     <string name="premium_plan_monthly">Monthly</string>
     <string name="premium_plan_lifetime">Lifetime</string>
-    <string name="premium_price_monthly">$2</string>
-    <string name="premium_price_lifetime">$25</string>
     <string name="premium_billing_period_monthly">per month</string>
     <string name="premium_billing_period_lifetime">one-time</string>
     <string name="premium_purchase_action">Continue</string>
-    <string name="premium_purchase_unavailable">Purchases aren\'t available yet.</string>
+    <string name="premium_active">Premium active</string>
+    <string name="premium_price_unavailable">Unavailable</string>
+    <string name="premium_purchase_success">Premium is now active.</string>
+    <string name="premium_purchase_pending">Your purchase is pending. Premium will activate when payment completes.</string>
+    <string name="premium_purchase_unavailable">Google Play purchases are not available right now.</string>
+    <string name="premium_purchase_failed">The purchase could not be completed. Check Google Play and try again.</string>
+    <string name="premium_products_unavailable">Premium plans could not be loaded. Try again later.</string>
 </resources>

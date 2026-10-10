@@ -33,6 +33,7 @@ profileinstaller = "1.4.1"
 room = "2.8.5"
 googleMobileAds = "25.5.0"
 ump = "4.0.0"
+googlePlayBilling = "9.1.0"
 detekt = "2.0.0-alpha.6"
 firebaseCrashlytics = "20.1.1"
 googleFirebaseCrashlytics = "3.0.8"
@@ -70,6 +71,7 @@ androidx-navigation3-runtime = { group = "androidx.navigation3", name = "navigat
 androidx-navigation3-ui = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "navigation3" }
 androidx-lifecycle-viewmodel-navigation3 = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-navigation3", version.ref = "lifecycleRuntimeKtx" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 junit5-jupiter-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit5" }
 junit5-jupiter-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit5" }
 junit5-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher", version.ref = "junit5" }
@@ -86,6 +88,8 @@ androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.re
 androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "profileinstaller" }
 google-mobile-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "googleMobileAds" }
 google-ump = { module = "com.google.android.ump:user-messaging-platform", version.ref = "ump" }
+google-play-billing = { module = "com.android.billingclient:billing-ktx", version.ref = "googlePlayBilling" }
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics", version.ref = "firebaseCrashlytics" }
 
 [plugins]

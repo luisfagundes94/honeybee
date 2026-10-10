@@ -1,3 +1,4 @@
+import java.io.File
 import java.util.Properties
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.MapProperty
@@ -31,6 +32,17 @@ val localMonetizationProperties = Properties().apply {
     }
 }
 
+val releaseSigningPropertiesFile = providers.gradleProperty("HONEYBEE_SIGNING_PROPERTIES")
+    .orElse(providers.environmentVariable("HONEYBEE_SIGNING_PROPERTIES"))
+    .orNull
+    ?.let(rootProject::file)
+    ?: File(System.getProperty("user.home"), ".android/keystores/honeybee-upload/signing.properties")
+val releaseSigningProperties = Properties().apply {
+    if (releaseSigningPropertiesFile.isFile) {
+        releaseSigningPropertiesFile.inputStream().use(::load)
+    }
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -56,6 +68,18 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        if (releaseSigningPropertiesFile.isFile) {
+            create("upload") {
+                storeFile = file(requireNotNull(releaseSigningProperties.getProperty("storeFile")))
+                storePassword = requireNotNull(releaseSigningProperties.getProperty("storePassword"))
+                keyAlias = requireNotNull(releaseSigningProperties.getProperty("keyAlias"))
+                keyPassword = requireNotNull(releaseSigningProperties.getProperty("keyPassword"))
+                storeType = "PKCS12"
+            }
+        }
+    }
+
     buildTypes {
         debug {
             manifestPlaceholders["admobAppId"] = testAdMobApplicationId
@@ -64,6 +88,7 @@ android {
             buildConfigField("String", "ADMOB_CLEANUP_INTERSTITIAL_AD_UNIT_ID", "\"$testAdMobCleanupInterstitialAdUnitId\"")
         }
         release {
+            signingConfig = signingConfigs.findByName("upload")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -110,6 +135,7 @@ dependencies {
     implementation(project(":core:common"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:ads"))
+    implementation(project(":core:billing"))
 
     implementation(project(":feature:library:api"))
     implementation(project(":feature:library:impl"))

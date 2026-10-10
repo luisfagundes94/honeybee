@@ -5,6 +5,7 @@ import androidx.navigation3.runtime.NavKey
 import com.luisfagundes.config.impl.presentation.navigation.configEntries
 import com.luisfagundes.core.ads.AdsConfig
 import com.luisfagundes.core.ads.AdsCoordinator
+import com.luisfagundes.core.billing.PremiumBillingCoordinator
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,7 +20,8 @@ internal object NavigationModule {
     fun provideConfigEntries(
         adsCoordinator: AdsCoordinator,
         adsConfig: AdsConfig,
+        premiumBillingCoordinator: PremiumBillingCoordinator,
     ): @JvmSuppressWildcards (EntryProviderScope<NavKey>) -> Unit = { scope ->
-        scope.configEntries(adsCoordinator, adsConfig)
+        scope.configEntries(adsCoordinator, adsConfig, premiumBillingCoordinator)
     }
 }
