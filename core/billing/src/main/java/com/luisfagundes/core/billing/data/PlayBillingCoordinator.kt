@@ -20,8 +20,6 @@ import com.luisfagundes.core.billing.PremiumPlan
 import com.luisfagundes.core.billing.PremiumPurchaseEvent
 import com.luisfagundes.core.common.provider.SubscriptionStatus
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -33,6 +31,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.coroutines.resume
 
 private const val TAG = "PlayBilling"
@@ -137,27 +137,22 @@ internal class PlayBillingCoordinator @Inject constructor(
             return
         }
 
-        val products = listOf(
-            QueryProductDetailsParams.Product.newBuilder()
-                .setProductId(config.subscriptionProductId)
-                .setProductType(BillingClient.ProductType.SUBS)
-                .build(),
-            QueryProductDetailsParams.Product.newBuilder()
-                .setProductId(config.lifetimeProductId)
-                .setProductType(BillingClient.ProductType.INAPP)
-                .build(),
+        val subscriptions = billingQueries.queryProductDetails(
+            config.subscriptionProductId,
+            BillingClient.ProductType.SUBS,
         )
-        val params = QueryProductDetailsParams.newBuilder()
-            .setProductList(products)
-            .build()
-        val result = billingQueries.queryProductDetails(params)
-        if (result.billingResult.responseCode != BillingClient.BillingResponseCode.OK) {
-            Log.w(TAG, "Product query failed: ${result.billingResult.debugMessage}")
-            _uiState.value = _uiState.value.copy(isLoadingOffers = false, offersUnavailable = true)
-            return
+        val oneTimeProducts = billingQueries.queryProductDetails(
+            config.lifetimeProductId,
+            BillingClient.ProductType.INAPP,
+        )
+        val details = listOf(subscriptions, oneTimeProducts).flatMap { result ->
+            if (result.billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                result.productDetails
+            } else {
+                Log.w(TAG, "Product query failed: ${result.billingResult.debugMessage}")
+                emptyList()
+            }
         }
-
-        val details = result.productDetails
         val monthlyDetails = details.firstOrNull {
             it.productId == config.subscriptionProductId &&
                 it.productType == BillingClient.ProductType.SUBS
@@ -326,8 +321,15 @@ private class PlayBillingQueries(
             }
         }
 
-    suspend fun queryProductDetails(params: QueryProductDetailsParams): ProductQuery =
+    suspend fun queryProductDetails(productId: String, productType: String): ProductQuery =
         suspendCancellableCoroutine { continuation ->
+            val product = QueryProductDetailsParams.Product.newBuilder()
+                .setProductId(productId)
+                .setProductType(productType)
+                .build()
+            val params = QueryProductDetailsParams.newBuilder()
+                .setProductList(listOf(product))
+                .build()
             billingClient.queryProductDetailsAsync(params) { result, details ->
                 if (continuation.isActive) {
                     continuation.resume(ProductQuery(result, details.productDetailsList))
