@@ -1,9 +1,4 @@
-import java.io.File
 import java.util.Properties
-import org.gradle.api.DefaultTask
-import org.gradle.api.provider.MapProperty
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.TaskAction
 
 private val testAdMobApplicationId = "ca-app-pub-3940256099942544~3347511713"
 private val testAdMobSettingsBannerAdUnitId = "ca-app-pub-3940256099942544/9214589741"
@@ -62,8 +57,8 @@ android {
         applicationId = "com.luisfagundes.honeybee"
         minSdk = 26
         targetSdk = 37
-        versionCode = 10
-        versionName = "0.9.61"
+        versionCode = 11
+        versionName = "0.9.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
