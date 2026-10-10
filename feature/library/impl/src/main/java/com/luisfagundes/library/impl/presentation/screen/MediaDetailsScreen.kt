@@ -1,7 +1,7 @@
 package com.luisfagundes.library.impl.presentation.screen
 
 import android.content.Intent
-import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -42,7 +41,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -141,11 +143,13 @@ private fun MediaDetailsContent(
     val currentPage = pagerState.currentPage
     val currentMediaIndex = currentPage.coerceIn(0, (totalCount - 1).coerceAtLeast(0))
     val currentMedia = mediaList.getOrNull(currentMediaIndex)
+    val swipeState = remember(currentMedia?.id) { MediaSwipeState() }
+    var trashIconBounds by remember { mutableStateOf<Rect?>(null) }
 
     val percent =
         if (totalCount > 0) (content.trashCount * 100) / (totalCount + content.trashCount) else 0
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    SharedTransitionLayout(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
@@ -155,7 +159,12 @@ private fun MediaDetailsContent(
                     percent = percent,
                     trashCount = content.trashCount,
                     onBackClick = { onEvent(MediaDetailsUiEvent.BackClick) },
-                    onEvent = onEvent
+                    onEvent = onEvent,
+                    trashIconModifier = Modifier
+                        .onGloballyPositioned { trashIconBounds = it.boundsInRoot() }
+                        .renderInSharedTransitionScopeOverlay(zIndexInOverlay = 1f) {
+                            swipeState.dragOffset != 0f || swipeState.isTrashing
+                        }
                 )
             },
             bottomBar = {
@@ -164,23 +173,16 @@ private fun MediaDetailsContent(
                 }
             }
         ) { innerPadding ->
-            HorizontalPager(
-                state = pagerState,
+            MediaDetailsPager(
+                mediaList = mediaList,
+                pagerState = pagerState,
+                swipeState = swipeState,
+                trashIconBounds = trashIconBounds,
+                onEvent = onEvent,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-            ) { page ->
-                val pageMediaIndex = page.coerceIn(0, (totalCount - 1).coerceAtLeast(0))
-                mediaList.getOrNull(pageMediaIndex)?.let { media ->
-                    val isPageSelected = page == pagerState.currentPage
-
-                    MediaPagerItem(
-                        media = media,
-                        isPageSelected = isPageSelected,
-                        onEvent = onEvent
-                    )
-                }
-            }
+            )
         }
 
         if (content.shouldShowSwipeUpTrashOnboarding) {
@@ -199,6 +201,7 @@ private fun MediaDetailsTopAppBar(
     trashCount: Int,
     onBackClick: () -> Unit,
     onEvent: (MediaDetailsUiEvent) -> Unit,
+    trashIconModifier: Modifier = Modifier,
     modifier: Modifier = Modifier
 ) {
     CenterAlignedTopAppBar(
@@ -237,6 +240,7 @@ private fun MediaDetailsTopAppBar(
                 itemsInTrash = trashCount,
                 onClick = { onEvent(MediaDetailsUiEvent.TrashClick) },
                 contentDescription = stringResource(R.string.items_in_trash),
+                iconModifier = trashIconModifier,
                 modifier = Modifier.padding(end = MaterialTheme.spacing.default)
             )
         }
@@ -270,9 +274,12 @@ private fun MediaDetailsBottomBar(
 }
 
 @Composable
-private fun MediaPagerItem(
+internal fun MediaPagerItem(
     media: Media,
     isPageSelected: Boolean,
+    swipeState: MediaSwipeState,
+    trashIconBounds: Rect?,
+    cardOverlayModifier: Modifier,
     onEvent: (MediaDetailsUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -284,7 +291,6 @@ private fun MediaPagerItem(
             } else null
         )
     }
-    val swipeOffset = remember(media.id) { Animatable(0f) }
     var showBottomSheet by remember { mutableStateOf(false) }
     var showFullscreenPhoto by remember { mutableStateOf(false) }
 
@@ -294,7 +300,8 @@ private fun MediaPagerItem(
             .fillMaxSize()
             .mediaSwipeGesture(
                 mediaId = media.id,
-                swipeOffset = swipeOffset,
+                swipeState = swipeState,
+                trashIconBounds = trashIconBounds,
                 coroutineScope = coroutineScope,
                 onSwipeUp = { onEvent(MediaDetailsUiEvent.SwipeUp(media.id)) }
             )
@@ -303,7 +310,9 @@ private fun MediaPagerItem(
             media = media,
             isPageSelected = isPageSelected,
             aspectRatio = aspectRatio,
-            swipeOffset = swipeOffset,
+            swipeState = swipeState,
+            overlayModifier = cardOverlayModifier,
+            trashIconBounds = trashIconBounds,
             onAspectRatioChanged = { aspectRatio = it },
             onPhotoClick = { showFullscreenPhoto = true }
         )

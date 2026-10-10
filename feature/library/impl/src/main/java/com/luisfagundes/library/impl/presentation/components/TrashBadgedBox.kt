@@ -21,7 +21,8 @@ internal fun TrashBadgedBox(
     itemsInTrash: Int,
     onClick: () -> Unit,
     contentDescription: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    iconModifier: Modifier = Modifier
 ) {
     BadgedBox(
         badge = {
@@ -47,6 +48,7 @@ internal fun TrashBadgedBox(
                     Icons.Default.RestoreFromTrash
                 },
                 contentDescription = contentDescription,
+                modifier = iconModifier,
             )
         }
     }
