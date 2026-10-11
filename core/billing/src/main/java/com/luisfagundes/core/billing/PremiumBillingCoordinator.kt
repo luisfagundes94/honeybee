@@ -27,6 +27,7 @@ enum class PremiumPurchaseEvent {
 }
 
 interface PremiumBillingCoordinator : SubscriptionProvider {
+    val ownedPlan: StateFlow<PremiumPlan?>
     val uiState: StateFlow<PremiumBillingUiState>
     val purchaseEvents: SharedFlow<PremiumPurchaseEvent>
 

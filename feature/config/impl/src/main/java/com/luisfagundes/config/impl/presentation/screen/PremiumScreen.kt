@@ -85,6 +85,7 @@ internal fun PremiumScreen(
     val coroutineScope = rememberCoroutineScope()
     val billingState by billingCoordinator.uiState.collectAsStateWithLifecycle()
     val subscriptionStatus by billingCoordinator.status.collectAsStateWithLifecycle()
+    val ownedPlan by billingCoordinator.ownedPlan.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val purchaseSuccessMessage = stringResource(R.string.premium_purchase_success)
     val purchasePendingMessage = stringResource(R.string.premium_purchase_pending)
@@ -95,6 +96,9 @@ internal fun PremiumScreen(
 
     LaunchedEffect(billingCoordinator) {
         billingCoordinator.refreshOffers()
+    }
+    LaunchedEffect(ownedPlan) {
+        ownedPlan?.let { selectedPlan = it }
     }
     LaunchedEffect(billingCoordinator) {
         billingCoordinator.purchaseEvents.collect { event ->
@@ -219,7 +223,9 @@ private fun PremiumContent(
         )
         Column(
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.large),
-            modifier = Modifier.fillMaxWidth().padding(MaterialTheme.spacing.default)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(MaterialTheme.spacing.default)
         ) {
             PremiumBenefit(
                 title = stringResource(R.string.premium_benefit_delete_title),
@@ -455,6 +461,7 @@ private tailrec fun Context.findActivity(): Activity? = when (this) {
 }
 
 private val PreviewPremiumBillingCoordinator = object : PremiumBillingCoordinator {
+    override val ownedPlan = MutableStateFlow<PremiumPlan?>(null)
     override val status = MutableStateFlow<SubscriptionStatus>(SubscriptionStatus.Free)
     override val uiState = MutableStateFlow(
         PremiumBillingUiState(

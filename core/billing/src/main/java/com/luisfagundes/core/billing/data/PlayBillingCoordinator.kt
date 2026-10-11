@@ -44,6 +44,7 @@ internal class PlayBillingCoordinator @Inject constructor(
 ) : PremiumBillingCoordinator {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val _status = MutableStateFlow<SubscriptionStatus>(SubscriptionStatus.Loading)
+    private val _ownedPlan = MutableStateFlow<PremiumPlan?>(null)
     private val _uiState = MutableStateFlow(PremiumBillingUiState())
     private val _purchaseEvents = MutableSharedFlow<PremiumPurchaseEvent>(extraBufferCapacity = 1)
     private var monthlyProduct: PurchasableProduct? = null
@@ -61,6 +62,7 @@ internal class PlayBillingCoordinator @Inject constructor(
     private val billingQueries = PlayBillingQueries(billingClient)
 
     override val status = _status.asStateFlow()
+    override val ownedPlan = _ownedPlan.asStateFlow()
     override val uiState = _uiState.asStateFlow()
     override val purchaseEvents = _purchaseEvents.asSharedFlow()
 
@@ -87,6 +89,9 @@ internal class PlayBillingCoordinator @Inject constructor(
         val purchases = subscriptions.purchases + oneTimeProducts.purchases
         val ownedPremiumPurchases = purchases.filter(::isPremiumPurchase)
         ownedPremiumPurchases.forEach(::acknowledgeIfNeeded)
+        val ownedPlans = ownedPremiumPurchases.mapNotNull { it.toPremiumPlan(config) }
+        _ownedPlan.value = ownedPlans.firstOrNull { it == PremiumPlan.Lifetime }
+            ?: ownedPlans.firstOrNull()
         _status.value = if (ownedPremiumPurchases.isEmpty()) {
             SubscriptionStatus.Free
         } else {
@@ -241,6 +246,7 @@ internal class PlayBillingCoordinator @Inject constructor(
     private fun grantAndAcknowledge(purchase: Purchase) {
         if (purchase.purchaseState == Purchase.PurchaseState.PENDING || !isPremiumPurchase(purchase)) return
 
+        _ownedPlan.value = purchase.toPremiumPlan(config)
         _status.value = SubscriptionStatus.Premium
         if (purchase.isAcknowledged) return
 
@@ -284,6 +290,12 @@ internal class PlayBillingCoordinator @Inject constructor(
         val offerToken: String?,
     )
 
+}
+
+private fun Purchase.toPremiumPlan(config: PlayBillingConfig): PremiumPlan? = when {
+    config.lifetimeProductId in products -> PremiumPlan.Lifetime
+    config.subscriptionProductId in products -> PremiumPlan.Monthly
+    else -> null
 }
 
 private class PlayBillingQueries(
