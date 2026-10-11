@@ -5,6 +5,7 @@ import com.luisfagundes.core.common.presentation.arch.event.UiEvent
 internal sealed interface TrashUiEvent : UiEvent {
     data object LoadTrash : TrashUiEvent
     data class RestoreMedia(val mediaId: Long) : TrashUiEvent
+    data object ClearTrash : TrashUiEvent
     data object ConfirmDeletion : TrashUiEvent
     data object ApproveDeletion : TrashUiEvent
 }

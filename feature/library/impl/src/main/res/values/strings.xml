@@ -31,6 +31,9 @@
     <string name="media_unknown">Unknown</string>
     <string name="favorite">Favorite</string>
     <string name="trash">Trash</string>
+    <string name="restore_all">Restore all</string>
+    <string name="restore_all_confirmation_title">Restore all items?</string>
+    <string name="restore_all_confirmation_description">All items in Trash will be returned to your library.</string>
     <string name="deletion_not_allowed">You didn\'t allow media deletion</string>
     <string name="trash_is_empty">Trash is empty</string>
     <string name="swipe_up_trash_onboarding_description">Swipe up to move this photo or video to Trash. It won’t be permanently deleted right away. Swipe left or right to browse your media.</string>

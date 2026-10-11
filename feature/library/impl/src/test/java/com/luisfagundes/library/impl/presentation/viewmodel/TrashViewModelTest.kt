@@ -116,6 +116,42 @@ internal class TrashViewModelTest {
     }
 
     @Test
+    fun `clearing trash restores all media without permanently deleting it`() = runTest {
+        // Given
+        val mediaList = listOf(fakeMedia, secondMedia)
+        coEvery { repository.getTrashMedia() } returns Result.success(mediaList)
+        coEvery { repository.restoreFromTrash(listOf(1L, 2L)) } returns Unit
+        viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
+
+        viewModel.uiState.test {
+            assertEquals(TrashUiState.Content(mediaList), awaitItem())
+
+            // When
+            viewModel.dispatchEvent(TrashUiEvent.ClearTrash)
+
+            // Then
+            assertEquals(TrashUiState.Content(emptyList()), awaitItem())
+            coVerify(exactly = 1) { repository.restoreFromTrash(listOf(1L, 2L)) }
+            coVerify(exactly = 0) { repository.createDeleteRequest(any()) }
+            coVerify(exactly = 0) { repository.permanentlyDelete(any()) }
+        }
+    }
+
+    @Test
+    fun `clearing empty trash does not restore media`() = runTest {
+        // Given
+        coEvery { repository.getTrashMedia() } returns Result.success(emptyList())
+        viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
+
+        // When
+        viewModel.dispatchEvent(TrashUiEvent.ClearTrash)
+
+        // Then
+        assertEquals(TrashUiState.Content(emptyList()), viewModel.uiState.value)
+        coVerify(exactly = 0) { repository.restoreFromTrash(any()) }
+    }
+
+    @Test
     fun `dispatchEvent ConfirmDeletion with empty list should do nothing`() = runTest {
         // Given
         coEvery { repository.getTrashMedia() } returns Result.success(emptyList())

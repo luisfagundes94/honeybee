@@ -31,6 +31,9 @@
     <string name="media_unknown">Desconhecido</string>
     <string name="favorite">Favorito</string>
     <string name="trash">Lixeira</string>
+    <string name="restore_all">Restaurar tudo</string>
+    <string name="restore_all_confirmation_title">Restaurar todos os itens?</string>
+    <string name="restore_all_confirmation_description">Todos os itens da Lixeira serão devolvidos à sua biblioteca.</string>
     <string name="deletion_not_allowed">Você não permitiu a exclusão de mídia</string>
     <string name="trash_is_empty">A lixeira está vazia</string>
     <string name="swipe_up_trash_onboarding_description">Deslize para cima para mover esta foto ou vídeo para a Lixeira. Ele não será excluído permanentemente de imediato. Deslize para a esquerda ou para a direita para navegar pelas suas mídias.</string>

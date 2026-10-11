@@ -21,6 +21,7 @@ internal class TrashViewModel @Inject constructor(
         when (event) {
             is TrashUiEvent.LoadTrash -> loadTrash()
             is TrashUiEvent.RestoreMedia -> restoreMedia(event.mediaId)
+            is TrashUiEvent.ClearTrash -> clearTrash()
             is TrashUiEvent.ConfirmDeletion -> confirmDeletion()
             is TrashUiEvent.ApproveDeletion -> approveDeletion()
         }
@@ -43,6 +44,23 @@ internal class TrashViewModel @Inject constructor(
         setStateOf<TrashUiState.Content> { currentState ->
             val updatedList = currentState.mediaToBeDeleted.filterNot { it.id == mediaId }
             currentState.copy(mediaToBeDeleted = updatedList)
+        }
+    }
+
+    private fun clearTrash() {
+        runIfStateIs<TrashUiState.Content> { currentState ->
+            val mediaIds = currentState.mediaToBeDeleted.map { it.id }
+            if (mediaIds.isEmpty()) return@runIfStateIs
+
+            viewModelScope.launch {
+                repository.restoreFromTrash(mediaIds)
+                val restoredIds = mediaIds.toSet()
+                setStateOf<TrashUiState.Content> { content ->
+                    content.copy(
+                        mediaToBeDeleted = content.mediaToBeDeleted.filterNot { it.id in restoredIds }
+                    )
+                }
+            }
         }
     }
 

@@ -29,16 +29,22 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.RestoreFromTrash
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -150,26 +156,42 @@ private fun TrashContent(
     onEvent: (TrashUiEvent) -> Unit,
     onBackClick: () -> Unit
 ) {
+    var showRestoreAllDialog by rememberSaveable { mutableStateOf(false) }
+
+    if (showRestoreAllDialog) {
+        AlertDialog(
+            onDismissRequest = { showRestoreAllDialog = false },
+            title = {
+                Text(text = stringResource(R.string.restore_all_confirmation_title))
+            },
+            text = {
+                Text(text = stringResource(R.string.restore_all_confirmation_description))
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showRestoreAllDialog = false
+                        onEvent(TrashUiEvent.ClearTrash)
+                    }
+                ) {
+                    Text(text = stringResource(R.string.restore_all))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRestoreAllDialog = false }) {
+                    Text(text = stringResource(DesignSystemResources.string.cancel))
+                }
+            }
+        )
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            CenterAlignedTopAppBar(
-                modifier = Modifier,
-                title = {
-                    Text(
-                        text = stringResource(R.string.trash),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = stringResource(R.string.close)
-                        )
-                    }
-                }
+            TrashTopAppBar(
+                canClearTrash = mediaToBeDeleted.isNotEmpty(),
+                onClearTrash = { showRestoreAllDialog = true },
+                onBackClick = onBackClick
             )
         },
         bottomBar = {
@@ -201,6 +223,45 @@ private fun TrashContent(
             )
         }
     }
+}
+
+@Composable
+private fun TrashTopAppBar(
+    canClearTrash: Boolean,
+    onClearTrash: () -> Unit,
+    onBackClick: () -> Unit
+) {
+    CenterAlignedTopAppBar(
+        title = {
+            Text(
+                text = stringResource(R.string.trash),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = stringResource(R.string.close)
+                )
+            }
+        },
+        actions = {
+            TextButton(
+                onClick = onClearTrash,
+                enabled = canClearTrash
+            ) {
+                Icon(
+                    imageVector = Icons.Default.RestoreFromTrash,
+                    contentDescription = null
+                )
+                Text(
+                    text = stringResource(R.string.restore_all)
+                )
+            }
+        }
+    )
 }
 
 @Composable
