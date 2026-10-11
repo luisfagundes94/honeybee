@@ -357,7 +357,7 @@ private fun TrashMediaItem(
                 .background(MaterialTheme.colorScheme.primary, CircleShape)
         ) {
             Icon(
-                imageVector = Icons.Default.Delete,
+                imageVector = Icons.Default.RestoreFromTrash,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier.size(MaterialTheme.spacing.iconSmall)
