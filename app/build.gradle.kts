@@ -57,8 +57,8 @@ android {
         applicationId = "com.luisfagundes.honeybee"
         minSdk = 26
         targetSdk = 37
-        versionCode = 13
-        versionName = "0.9.8"
+        versionCode = 14
+        versionName = "0.9.81"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
