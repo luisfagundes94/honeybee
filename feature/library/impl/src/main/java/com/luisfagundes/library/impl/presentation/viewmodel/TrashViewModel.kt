@@ -128,7 +128,7 @@ internal class TrashViewModel @Inject constructor(
                         sendEffect { TrashUiEffect.ShowDailyLimitSheet(quota.remaining) }
                     }
                 }
-                is DeletionQuota.Locked -> sendEffect { TrashUiEffect.NavigateToPremium }
+                is DeletionQuota.Locked -> sendEffect { TrashUiEffect.ShowDailyLimitSheet(remaining = 0) }
             }
         }
     }

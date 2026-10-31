@@ -419,7 +419,7 @@ internal class TrashViewModelTest {
     }
 
     @Test
-    fun `ConfirmDeletion while locked navigates to premium`() = runTest {
+    fun `ConfirmDeletion while locked shows the daily limit sheet without remaining items`() = runTest {
         // Given
         subscriptionStatus.value = SubscriptionStatus.Free
         coEvery { repository.getTrashMedia() } returns Result.success(listOf(fakeMedia))
@@ -431,7 +431,7 @@ internal class TrashViewModelTest {
             viewModel.dispatchEvent(TrashUiEvent.ConfirmDeletion)
 
             // Then
-            assertEquals(TrashUiEffect.NavigateToPremium, awaitItem())
+            assertEquals(TrashUiEffect.ShowDailyLimitSheet(remaining = 0), awaitItem())
         }
         coVerify(exactly = 0) { repository.createDeleteRequest(any()) }
         coVerify(exactly = 0) { repository.permanentlyDelete(any()) }

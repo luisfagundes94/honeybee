@@ -42,7 +42,6 @@
     <string name="deletion_lock_banner_description">Você poderá excluir novamente em</string>
     <string name="deletion_lock_timer_format">%1$02d:%2$02d:%3$02d</string>
     <string name="deletion_lock_timer_content_description">%1$d horas, %2$d minutos e %3$d segundos até você poder excluir novamente</string>
-    <string name="delete_premium_button">Premium</string>
     <string name="daily_limit_sheet_title">Você atingiu seu limite diário</string>
     <string name="daily_limit_sheet_description">Contas gratuitas podem excluir até %1$d fotos e depois aguardar 1 hora. Assine o Premium para excluir sem limites ou exclua agora apenas as fotos que cabem no seu limite.</string>
     <string name="daily_limit_sheet_premium_button">Assinar Premium</string>

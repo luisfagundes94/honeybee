@@ -249,15 +249,7 @@ private fun TrashContent(
         bottomBar = {
             val deleteCount = mediaToBeDeleted.size
 
-            if (deleteCount > 0 && deletionQuota is DeletionQuota.Locked) {
-                HoneybeePrimaryButton(
-                    label = stringResource(R.string.delete_premium_button),
-                    onClick = { onEvent(TrashUiEvent.ConfirmDeletion) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(MaterialTheme.spacing.default)
-                )
-            } else if (deleteCount > 0) {
+            if (deleteCount > 0) {
                 HoneybeePrimaryButton(
                     label = pluralStringResource(
                         id = R.plurals.delete_media_format,
@@ -391,16 +383,18 @@ private fun DailyLimitBottomSheet(
                 onClick = onPremiumClick,
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
-            HoneybeeTertiaryButton(
-                label = pluralStringResource(
-                    id = R.plurals.delete_within_limit_format,
-                    count = remaining,
-                    remaining
-                ),
-                onClick = onDeleteWithinLimitClick,
-                modifier = Modifier.fillMaxWidth()
-            )
+            if (remaining > 0) {
+                Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
+                HoneybeeTertiaryButton(
+                    label = pluralStringResource(
+                        id = R.plurals.delete_within_limit_format,
+                        count = remaining,
+                        remaining
+                    ),
+                    onClick = onDeleteWithinLimitClick,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }

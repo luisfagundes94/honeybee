@@ -42,7 +42,6 @@
     <string name="deletion_lock_banner_description">You can delete again in</string>
     <string name="deletion_lock_timer_format">%1$02d:%2$02d:%3$02d</string>
     <string name="deletion_lock_timer_content_description">%1$d hours, %2$d minutes and %3$d seconds until you can delete again</string>
-    <string name="delete_premium_button">Premium</string>
     <string name="daily_limit_sheet_title">You\'ve reached your daily limit</string>
     <string name="daily_limit_sheet_description">Free accounts can delete up to %1$d photos, then wait 1 hour. Go Premium to delete without limits, or delete only the photos that fit your limit now.</string>
     <string name="daily_limit_sheet_premium_button">Go Premium</string>
