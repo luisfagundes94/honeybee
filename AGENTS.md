@@ -50,7 +50,7 @@ Adapt task names to the module type and build variant.
 ./gradlew :<module>:check
 
 # App integration builds, only when necessary
-./gradle :app:assembleDebug
+./gradle :app:assembleDebug --no-daemon -q
 ```
 
 ## Commits
