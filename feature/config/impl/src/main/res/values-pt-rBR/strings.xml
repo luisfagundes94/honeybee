@@ -40,6 +40,9 @@
     <string name="premium_billing_period_lifetime">pagamento único</string>
     <string name="premium_purchase_action">Continuar</string>
     <string name="premium_active">Premium ativo</string>
+    <string name="premium_subscription_cancelled">Cancelada, ativa até o fim do período de cobrança</string>
+    <string name="premium_manage_subscription">Gerenciar assinatura</string>
+    <string name="premium_manage_subscription_unavailable">O Google Play não está disponível para gerenciar sua assinatura.</string>
     <string name="premium_price_unavailable">Indisponível</string>
     <string name="premium_purchase_success">O Premium foi ativado.</string>
     <string name="premium_purchase_pending">Sua compra está pendente. O Premium será ativado quando o pagamento for concluído.</string>

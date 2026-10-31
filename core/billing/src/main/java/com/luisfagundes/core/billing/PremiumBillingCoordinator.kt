@@ -28,10 +28,16 @@ enum class PremiumPurchaseEvent {
 
 interface PremiumBillingCoordinator : SubscriptionProvider {
     val ownedPlan: StateFlow<PremiumPlan?>
+
+    /** True when the monthly subscription is owned but will not renew (cancelled in Play). */
+    val isSubscriptionCancelled: StateFlow<Boolean>
     val uiState: StateFlow<PremiumBillingUiState>
     val purchaseEvents: SharedFlow<PremiumPurchaseEvent>
 
     fun refreshOffers()
 
     fun purchase(activity: Activity, plan: PremiumPlan)
+
+    /** Play Store page where the user can cancel or change the monthly subscription. */
+    fun subscriptionManagementUrl(packageName: String): String
 }

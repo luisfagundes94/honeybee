@@ -45,6 +45,7 @@ internal class PlayBillingCoordinator @Inject constructor(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val _status = MutableStateFlow<SubscriptionStatus>(SubscriptionStatus.Loading)
     private val _ownedPlan = MutableStateFlow<PremiumPlan?>(null)
+    private val _isSubscriptionCancelled = MutableStateFlow(false)
     private val _uiState = MutableStateFlow(PremiumBillingUiState())
     private val _purchaseEvents = MutableSharedFlow<PremiumPurchaseEvent>(extraBufferCapacity = 1)
     private var monthlyProduct: PurchasableProduct? = null
@@ -63,6 +64,7 @@ internal class PlayBillingCoordinator @Inject constructor(
 
     override val status = _status.asStateFlow()
     override val ownedPlan = _ownedPlan.asStateFlow()
+    override val isSubscriptionCancelled = _isSubscriptionCancelled.asStateFlow()
     override val uiState = _uiState.asStateFlow()
     override val purchaseEvents = _purchaseEvents.asSharedFlow()
 
@@ -92,12 +94,19 @@ internal class PlayBillingCoordinator @Inject constructor(
         val ownedPlans = ownedPremiumPurchases.mapNotNull { it.toPremiumPlan(config) }
         _ownedPlan.value = ownedPlans.firstOrNull { it == PremiumPlan.Lifetime }
             ?: ownedPlans.firstOrNull()
+        _isSubscriptionCancelled.value = _ownedPlan.value == PremiumPlan.Monthly &&
+                ownedPremiumPurchases.any {
+                    config.subscriptionProductId in it.products && !it.isAutoRenewing
+                }
         _status.value = if (ownedPremiumPurchases.isEmpty()) {
             SubscriptionStatus.Free
         } else {
             SubscriptionStatus.Premium
         }
     }
+
+    override fun subscriptionManagementUrl(packageName: String): String =
+        subscriptionManagementUrl(config.subscriptionProductId, packageName)
 
     override fun refreshOffers() {
         scope.launch { loadOffers() }

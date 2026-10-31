@@ -1,8 +1,11 @@
 package com.luisfagundes.config.impl.presentation.screen
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,6 +41,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -58,6 +62,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewWrapper
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -86,6 +91,7 @@ internal fun PremiumScreen(
     val billingState by billingCoordinator.uiState.collectAsStateWithLifecycle()
     val subscriptionStatus by billingCoordinator.status.collectAsStateWithLifecycle()
     val ownedPlan by billingCoordinator.ownedPlan.collectAsStateWithLifecycle()
+    val isSubscriptionCancelled by billingCoordinator.isSubscriptionCancelled.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val purchaseSuccessMessage = stringResource(R.string.premium_purchase_success)
     val purchasePendingMessage = stringResource(R.string.premium_purchase_pending)
@@ -93,6 +99,8 @@ internal fun PremiumScreen(
     val purchaseFailedMessage = stringResource(R.string.premium_purchase_failed)
     val productsUnavailableMessage = stringResource(R.string.premium_products_unavailable)
     val priceUnavailable = stringResource(R.string.premium_price_unavailable)
+    val manageSubscriptionUnavailableMessage =
+        stringResource(R.string.premium_manage_subscription_unavailable)
 
     LaunchedEffect(billingCoordinator) {
         billingCoordinator.refreshOffers()
@@ -126,6 +134,18 @@ internal fun PremiumScreen(
         onPlanSelected = { selectedPlan = it },
         onNavigateBack = onNavigateBack,
         snackbarHostState = snackbarHostState,
+        showManageSubscription = ownedPlan == PremiumPlan.Monthly,
+        isSubscriptionCancelled = isSubscriptionCancelled,
+        onManageSubscription = {
+            val url = billingCoordinator.subscriptionManagementUrl(context.packageName)
+            try {
+                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            } catch (_: ActivityNotFoundException) {
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar(manageSubscriptionUnavailableMessage)
+                }
+            }
+        },
         onContinue = {
             val activity = context.findActivity()
             if (activity == null) {
@@ -149,6 +169,9 @@ private fun PremiumLayout(
     onPlanSelected: (PremiumPlan) -> Unit,
     onNavigateBack: () -> Unit,
     snackbarHostState: SnackbarHostState,
+    showManageSubscription: Boolean,
+    isSubscriptionCancelled: Boolean,
+    onManageSubscription: () -> Unit,
     onContinue: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -175,6 +198,9 @@ private fun PremiumLayout(
                     isPremium = isPremium,
                     priceUnavailable = priceUnavailable,
                     onPlanSelected = onPlanSelected,
+                    showManageSubscription = showManageSubscription,
+                    isSubscriptionCancelled = isSubscriptionCancelled,
+                    onManageSubscription = onManageSubscription,
                     onContinue = onContinue
                 )
             },
@@ -317,6 +343,9 @@ private fun PremiumPurchaseOptions(
     isPremium: Boolean,
     priceUnavailable: String,
     onPlanSelected: (PremiumPlan) -> Unit,
+    showManageSubscription: Boolean,
+    isSubscriptionCancelled: Boolean,
+    onManageSubscription: () -> Unit,
     onContinue: () -> Unit
 ) {
     Column(
@@ -365,6 +394,23 @@ private fun PremiumPurchaseOptions(
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
+            }
+            if (showManageSubscription && isSubscriptionCancelled) {
+                Text(
+                    text = stringResource(R.string.premium_subscription_cancelled),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            if (showManageSubscription) {
+                TextButton(
+                    onClick = onManageSubscription,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = stringResource(R.string.premium_manage_subscription))
+                }
             }
         }
     }
@@ -462,6 +508,7 @@ private tailrec fun Context.findActivity(): Activity? = when (this) {
 
 private val PreviewPremiumBillingCoordinator = object : PremiumBillingCoordinator {
     override val ownedPlan = MutableStateFlow<PremiumPlan?>(null)
+    override val isSubscriptionCancelled = MutableStateFlow(false)
     override val status = MutableStateFlow<SubscriptionStatus>(SubscriptionStatus.Free)
     override val uiState = MutableStateFlow(
         PremiumBillingUiState(
@@ -477,4 +524,6 @@ private val PreviewPremiumBillingCoordinator = object : PremiumBillingCoordinato
     override fun refreshOffers() = Unit
 
     override fun purchase(activity: Activity, plan: PremiumPlan) = Unit
+
+    override fun subscriptionManagementUrl(packageName: String): String = ""
 }
