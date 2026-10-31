@@ -1,4 +1,4 @@
-# AGENTS.md
+# CLAUDE.md
 
 This file is the quick-reference guide for agents and contributors working in the Honeybee repository. Detailed guidance is grouped by topic under [`docs/`](docs/).
 Keep work scoped: repository-wide searches, tests and builds are expensive.
