@@ -4,6 +4,7 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.luisfagundes.core.common.presentation.navigation.LocalNavBackStack
 import com.luisfagundes.core.ads.AdsCoordinator
+import com.luisfagundes.config.api.presentation.navigation.PremiumRoute
 import com.luisfagundes.library.api.presentation.navigation.CongratulationsRoute
 import com.luisfagundes.library.api.presentation.navigation.LibraryRoute
 import com.luisfagundes.library.api.presentation.navigation.MediaDetailsRoute
@@ -48,6 +49,9 @@ internal fun EntryProviderScope<NavKey>.libraryEntries(
             },
             onNavigateToCongratulations = { count, size ->
                 backStack?.add(CongratulationsRoute(count, size))
+            },
+            onNavigateToPremium = {
+                backStack?.add(PremiumRoute)
             }
         )
     }
@@ -57,10 +61,7 @@ internal fun EntryProviderScope<NavKey>.libraryEntries(
             deletedCount = route.deletedCount,
             deletedSize = route.deletedSize,
             onDoneClick = { activity ->
-                adsCoordinator.showCleanupInterstitial(
-                    activity = activity,
-                    deletedCount = route.deletedCount,
-                ) {
+                adsCoordinator.showCleanupInterstitial(activity = activity) {
                     backStack?.clear()
                     backStack?.add(LibraryRoute)
                 }

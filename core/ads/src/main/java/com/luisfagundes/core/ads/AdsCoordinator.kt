@@ -23,7 +23,6 @@ interface AdsCoordinator {
 
     fun showCleanupInterstitial(
         activity: Activity,
-        deletedCount: Int,
         onComplete: () -> Unit,
     )
 }

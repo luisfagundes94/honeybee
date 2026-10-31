@@ -38,6 +38,18 @@
     <string name="trash_is_empty">Trash is empty</string>
     <string name="swipe_up_trash_onboarding_description">Swipe up to move this photo or video to Trash. It won’t be permanently deleted right away. Swipe left or right to browse your media.</string>
     <string name="swipe_up_trash_onboarding_tap_hint">Tap anywhere to continue</string>
+    <string name="deletion_lock_banner_title">Delete limit reached</string>
+    <string name="deletion_lock_banner_description">You can delete again in</string>
+    <string name="deletion_lock_timer_format">%1$02d:%2$02d:%3$02d</string>
+    <string name="deletion_lock_timer_content_description">%1$d hours, %2$d minutes and %3$d seconds until you can delete again</string>
+    <string name="delete_premium_button">Premium</string>
+    <string name="daily_limit_sheet_title">You\'ve reached your daily limit</string>
+    <string name="daily_limit_sheet_description">Free accounts can delete up to %1$d photos, then wait 1 hour. Go Premium to delete without limits, or delete only the photos that fit your limit now.</string>
+    <string name="daily_limit_sheet_premium_button">Go Premium</string>
+    <plurals name="delete_within_limit_format">
+        <item quantity="one">Delete %1$d photo</item>
+        <item quantity="other">Delete %1$d photos</item>
+    </plurals>
     <plurals name="delete_media_format">
         <item quantity="one">Delete (%1$d File)</item>
         <item quantity="other">Delete (%1$d Files)</item>

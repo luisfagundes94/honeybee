@@ -1,6 +1,7 @@
 package com.luisfagundes.library.impl.presentation.provider
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import com.luisfagundes.library.api.domain.model.DeletionQuota
 import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.impl.presentation.state.TrashUiState
 
@@ -9,7 +10,15 @@ internal class TrashUiStateProvider : PreviewParameterProvider<TrashUiState> {
         TrashUiState.Loading,
         TrashUiState.Error,
         TrashUiState.Content(mediaToBeDeleted = emptyList()),
-        TrashUiState.Content(mediaToBeDeleted = mediaToBeDeleted)
+        TrashUiState.Content(mediaToBeDeleted = mediaToBeDeleted),
+        TrashUiState.Content(
+            mediaToBeDeleted = mediaToBeDeleted,
+            deletionQuota = DeletionQuota.Available(remaining = 2)
+        ),
+        TrashUiState.Content(
+            mediaToBeDeleted = mediaToBeDeleted,
+            deletionQuota = DeletionQuota.Locked(untilMillis = Long.MAX_VALUE)
+        )
     )
 }
 

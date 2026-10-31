@@ -12,11 +12,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -29,26 +33,36 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.RestoreFromTrash
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -63,8 +77,11 @@ import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.core.designsystem.components.HoneybeeErrorTemplate
 import com.luisfagundes.core.designsystem.components.HoneybeeLoadingTemplate
 import com.luisfagundes.core.designsystem.components.HoneybeePrimaryButton
+import com.luisfagundes.core.designsystem.components.HoneybeeTertiaryButton
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
+import com.luisfagundes.library.api.domain.model.DELETION_LIMIT
+import com.luisfagundes.library.api.domain.model.DeletionQuota
 import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.impl.R
 import com.luisfagundes.library.impl.presentation.effect.TrashUiEffect
@@ -72,17 +89,25 @@ import com.luisfagundes.library.impl.presentation.event.TrashUiEvent
 import com.luisfagundes.library.impl.presentation.provider.TrashUiStateProvider
 import com.luisfagundes.library.impl.presentation.state.TrashUiState
 import com.luisfagundes.library.impl.presentation.viewmodel.TrashViewModel
+import kotlinx.coroutines.delay
 import com.luisfagundes.core.designsystem.R as DesignSystemResources
+
+private const val TIMER_TICK_MILLIS = 1_000L
+private const val MILLIS_PER_SECOND = 1_000L
+private const val SECONDS_PER_MINUTE = 60L
+private const val SECONDS_PER_HOUR = 3_600L
 
 @Composable
 internal fun TrashScreen(
     onNavigateBack: () -> Unit,
     onNavigateToCongratulations: (Int, Long) -> Unit,
+    onNavigateToPremium: () -> Unit,
     viewModel: TrashViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val deletionNotAllowedMessage = stringResource(R.string.deletion_not_allowed)
+    var dailyLimitRemaining by rememberSaveable { mutableStateOf<Int?>(null) }
 
     val deleteLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult()
@@ -97,6 +122,8 @@ internal fun TrashScreen(
     CollectUiEffects(viewModel.uiEffect) { effect ->
         when (effect) {
             TrashUiEffect.NavigateBack -> onNavigateBack()
+            TrashUiEffect.NavigateToPremium -> onNavigateToPremium()
+            is TrashUiEffect.ShowDailyLimitSheet -> dailyLimitRemaining = effect.remaining
             is TrashUiEffect.ShowDeleteConfirmation -> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     val pendingIntent = MediaStore.createDeleteRequest(
@@ -123,6 +150,21 @@ internal fun TrashScreen(
         onEvent = viewModel::dispatchEvent,
         onBackClick = onNavigateBack
     )
+
+    dailyLimitRemaining?.let { remaining ->
+        DailyLimitBottomSheet(
+            remaining = remaining,
+            onDismissRequest = { dailyLimitRemaining = null },
+            onPremiumClick = {
+                dailyLimitRemaining = null
+                onNavigateToPremium()
+            },
+            onDeleteWithinLimitClick = {
+                dailyLimitRemaining = null
+                viewModel.dispatchEvent(TrashUiEvent.DeleteWithinLimit)
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -144,6 +186,7 @@ private fun TrashScreen(
 
         is TrashUiState.Content -> TrashContent(
             mediaToBeDeleted = uiState.mediaToBeDeleted,
+            deletionQuota = uiState.deletionQuota,
             onEvent = onEvent,
             onBackClick = onBackClick
         )
@@ -153,6 +196,7 @@ private fun TrashScreen(
 @Composable
 private fun TrashContent(
     mediaToBeDeleted: List<Media>,
+    deletionQuota: DeletionQuota,
     onEvent: (TrashUiEvent) -> Unit,
     onBackClick: () -> Unit
 ) {
@@ -188,16 +232,32 @@ private fun TrashContent(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TrashTopAppBar(
-                canClearTrash = mediaToBeDeleted.isNotEmpty(),
-                onClearTrash = { showRestoreAllDialog = true },
-                onBackClick = onBackClick
-            )
+            Column {
+                TrashTopAppBar(
+                    canClearTrash = mediaToBeDeleted.isNotEmpty(),
+                    onClearTrash = { showRestoreAllDialog = true },
+                    onBackClick = onBackClick
+                )
+                if (deletionQuota is DeletionQuota.Locked) {
+                    DeletionLockBanner(
+                        untilMillis = deletionQuota.untilMillis,
+                        onExpired = { onEvent(TrashUiEvent.QuotaExpired) }
+                    )
+                }
+            }
         },
         bottomBar = {
             val deleteCount = mediaToBeDeleted.size
 
-            if (deleteCount > 0) {
+            if (deleteCount > 0 && deletionQuota is DeletionQuota.Locked) {
+                HoneybeePrimaryButton(
+                    label = stringResource(R.string.delete_premium_button),
+                    onClick = { onEvent(TrashUiEvent.ConfirmDeletion) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(MaterialTheme.spacing.default)
+                )
+            } else if (deleteCount > 0) {
                 HoneybeePrimaryButton(
                     label = pluralStringResource(
                         id = R.plurals.delete_media_format,
@@ -220,6 +280,126 @@ private fun TrashContent(
                 mediaToBeDeleted = mediaToBeDeleted,
                 innerPadding = innerPadding,
                 onEvent = onEvent
+            )
+        }
+    }
+}
+
+@Composable
+private fun DeletionLockBanner(
+    untilMillis: Long,
+    onExpired: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val currentOnExpired by rememberUpdatedState(onExpired)
+    val remainingMillis by produceState(
+        initialValue = (untilMillis - System.currentTimeMillis()).coerceAtLeast(0L),
+        key1 = untilMillis
+    ) {
+        while (true) {
+            val remaining = (untilMillis - System.currentTimeMillis()).coerceAtLeast(0L)
+            value = remaining
+            if (remaining == 0L) {
+                currentOnExpired()
+                break
+            }
+            delay(TIMER_TICK_MILLIS)
+        }
+    }
+    val totalSeconds = remainingMillis / MILLIS_PER_SECOND
+    val hours = (totalSeconds / SECONDS_PER_HOUR).toInt()
+    val minutes = (totalSeconds % SECONDS_PER_HOUR / SECONDS_PER_MINUTE).toInt()
+    val seconds = (totalSeconds % SECONDS_PER_MINUTE).toInt()
+    val timerDescription = stringResource(
+        R.string.deletion_lock_timer_content_description,
+        hours,
+        minutes,
+        seconds
+    )
+
+    Surface(
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        shape = RoundedCornerShape(MaterialTheme.spacing.default),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = MaterialTheme.spacing.default)
+            .padding(bottom = MaterialTheme.spacing.small)
+            .semantics(mergeDescendants = true) { contentDescription = timerDescription }
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.content),
+            modifier = Modifier.padding(MaterialTheme.spacing.default)
+        ) {
+            Icon(imageVector = Icons.Default.Schedule, contentDescription = null)
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.deletion_lock_banner_title),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = stringResource(R.string.deletion_lock_banner_description),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            Text(
+                text = stringResource(R.string.deletion_lock_timer_format, hours, minutes, seconds),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DailyLimitBottomSheet(
+    remaining: Int,
+    onDismissRequest: () -> Unit,
+    onPremiumClick: () -> Unit,
+    onDeleteWithinLimitClick: () -> Unit
+) {
+    val sheetState = rememberBottomSheetState(
+        initialValue = SheetValue.Hidden
+    )
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        sheetState = sheetState
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = MaterialTheme.spacing.default)
+                .padding(bottom = MaterialTheme.spacing.large)
+        ) {
+            Text(
+                text = stringResource(R.string.daily_limit_sheet_title),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
+            Text(
+                text = stringResource(R.string.daily_limit_sheet_description, DELETION_LIMIT),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(MaterialTheme.spacing.default))
+            HoneybeePrimaryButton(
+                label = stringResource(R.string.daily_limit_sheet_premium_button),
+                onClick = onPremiumClick,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
+            HoneybeeTertiaryButton(
+                label = pluralStringResource(
+                    id = R.plurals.delete_within_limit_format,
+                    count = remaining,
+                    remaining
+                ),
+                onClick = onDeleteWithinLimitClick,
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }

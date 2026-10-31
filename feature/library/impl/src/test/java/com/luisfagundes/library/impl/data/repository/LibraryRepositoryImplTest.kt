@@ -2,9 +2,13 @@ package com.luisfagundes.library.impl.data.repository
 
 import android.net.Uri
 import com.luisfagundes.core.testing.MainDispatcherRule
+import com.luisfagundes.library.api.domain.model.DELETION_LIMIT
+import com.luisfagundes.library.api.domain.model.DELETION_WINDOW_MILLIS
+import com.luisfagundes.library.api.domain.model.DeletionQuota
 import com.luisfagundes.library.impl.data.database.dao.StatisticsDao
 import com.luisfagundes.library.impl.data.datasource.LibraryDataSource
 import com.luisfagundes.library.impl.data.datasource.LibraryPreferences
+import com.luisfagundes.library.impl.domain.policy.DeletionCounters
 import com.luisfagundes.library.impl.tools.fakeMedia
 import com.luisfagundes.library.impl.tools.fakeMediaDto
 import com.luisfagundes.library.impl.tools.fakeStatisticsEntity
@@ -21,7 +25,9 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
+import java.time.Clock
 import java.time.Instant
+import java.time.ZoneOffset
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class LibraryRepositoryImplTest {
@@ -33,6 +39,9 @@ internal class LibraryRepositoryImplTest {
     private val preferences: LibraryPreferences = mockk()
     private val statisticsDao: StatisticsDao = mockk(relaxed = true)
 
+    private val nowMillis = 10_000_000L
+    private val clock: Clock = Clock.fixed(Instant.ofEpochMilli(nowMillis), ZoneOffset.UTC)
+
     private lateinit var repository: LibraryRepositoryImpl
 
     @BeforeEach
@@ -41,8 +50,69 @@ internal class LibraryRepositoryImplTest {
             dataSource = dataSource,
             preferences = preferences,
             statisticsDao = statisticsDao,
+            clock = clock,
             dispatcher = dispatcherRule.testDispatcher
         )
+    }
+
+    @Test
+    fun `getDeletionQuota returns available quota from stored counters`() = runTest {
+        // Given
+        every { preferences.getDeletionCounters() } returns
+            DeletionCounters(deleted = 10, windowStartMillis = nowMillis - 1_000L)
+
+        // When
+        val result = repository.getDeletionQuota()
+
+        // Then
+        assertEquals(DeletionQuota.Available(DELETION_LIMIT - 10), result.getOrNull())
+    }
+
+    @Test
+    fun `getDeletionQuota returns locked while the lock is active`() = runTest {
+        // Given
+        val lockedUntil = nowMillis + 5_000L
+        every { preferences.getDeletionCounters() } returns DeletionCounters(
+            deleted = DELETION_LIMIT,
+            windowStartMillis = nowMillis - 1_000L,
+            lockedUntilMillis = lockedUntil
+        )
+
+        // When
+        val result = repository.getDeletionQuota()
+
+        // Then
+        assertEquals(DeletionQuota.Locked(lockedUntil), result.getOrNull())
+    }
+
+    @Test
+    fun `permanentlyDelete records the deleted count and locks when the limit is reached`() = runTest {
+        // Given
+        val mediaList = (1L..DELETION_LIMIT.toLong()).map { fakeMedia.copy(id = it) }
+        every { preferences.getTrashedPhotoIds() } returns mediaList.map { it.id }.toSet()
+        every { preferences.getDeletedPhotoIds() } returns emptySet()
+        every { preferences.setTrashedPhotoIds(any()) } returns Unit
+        every { preferences.setDeletedPhotoIds(any()) } returns Unit
+        every { preferences.getDeletionCounters() } returns DeletionCounters()
+        every { preferences.setDeletionCounters(any()) } returns Unit
+        coEvery { dataSource.deleteMedia(any(), any()) } returns Unit
+        every { statisticsDao.getStatistics() } returns null
+        every { statisticsDao.insertOrUpdate(any()) } returns 1L
+
+        // When
+        val result = repository.permanentlyDelete(mediaList)
+
+        // Then
+        assertTrue(result.isSuccess)
+        verify {
+            preferences.setDeletionCounters(
+                DeletionCounters(
+                    deleted = DELETION_LIMIT,
+                    windowStartMillis = nowMillis,
+                    lockedUntilMillis = nowMillis + DELETION_WINDOW_MILLIS
+                )
+            )
+        }
     }
 
     @Test
@@ -148,6 +218,8 @@ internal class LibraryRepositoryImplTest {
         every { preferences.getDeletedPhotoIds() } returns emptySet()
         every { preferences.setTrashedPhotoIds(any()) } returns Unit
         every { preferences.setDeletedPhotoIds(any()) } returns Unit
+        every { preferences.getDeletionCounters() } returns DeletionCounters()
+        every { preferences.setDeletionCounters(any()) } returns Unit
 
         coEvery { dataSource.deleteMedia(any(), any()) } returns Unit
         every { statisticsDao.getStatistics() } returns null

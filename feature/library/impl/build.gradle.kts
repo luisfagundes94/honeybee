@@ -36,6 +36,7 @@ android {
 
 dependencies {
     implementation(project(":feature:library:api"))
+    implementation(project(":feature:config:api"))
     implementation(project(":core:common"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:ads"))

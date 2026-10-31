@@ -2,6 +2,9 @@ package com.luisfagundes.library.impl.presentation.viewmodel
 
 import app.cash.turbine.test
 import com.luisfagundes.core.testing.MainDispatcherRule
+import com.luisfagundes.core.common.provider.SubscriptionProvider
+import com.luisfagundes.core.common.provider.SubscriptionStatus
+import com.luisfagundes.library.api.domain.model.DeletionQuota
 import com.luisfagundes.library.api.domain.model.MediaDeleteRequest
 import com.luisfagundes.library.api.domain.repository.LibraryRepository
 import com.luisfagundes.library.impl.presentation.effect.TrashUiEffect
@@ -10,8 +13,10 @@ import com.luisfagundes.library.impl.presentation.state.TrashUiState
 import com.luisfagundes.library.impl.tools.fakeMedia
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -26,6 +31,10 @@ internal class TrashViewModelTest {
     val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
 
     private val repository: LibraryRepository = mockk()
+    private val subscriptionStatus = MutableStateFlow<SubscriptionStatus>(SubscriptionStatus.Premium)
+    private val subscriptionProvider: SubscriptionProvider = mockk {
+        every { status } returns subscriptionStatus
+    }
 
     private lateinit var viewModel: TrashViewModel
 
@@ -39,7 +48,8 @@ internal class TrashViewModelTest {
     @BeforeEach
     fun setUp() {
         viewModel = TrashViewModel(
-            repository = repository
+            repository = repository,
+            subscriptionProvider = subscriptionProvider
         )
     }
 
@@ -321,5 +331,178 @@ internal class TrashViewModelTest {
 
             coVerify(exactly = 1) { repository.permanentlyDelete(mediaList) }
         }
+    }
+
+    @Test
+    fun `premium users get an unlimited quota without querying the repository`() = runTest {
+        // Given
+        coEvery { repository.getTrashMedia() } returns Result.success(listOf(fakeMedia))
+
+        // When
+        viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
+
+        // Then
+        assertEquals(
+            TrashUiState.Content(listOf(fakeMedia), DeletionQuota.Unlimited),
+            viewModel.uiState.value
+        )
+        coVerify(exactly = 0) { repository.getDeletionQuota() }
+    }
+
+    @Test
+    fun `free users load the quota from the repository`() = runTest {
+        // Given
+        subscriptionStatus.value = SubscriptionStatus.Free
+        coEvery { repository.getTrashMedia() } returns Result.success(listOf(fakeMedia))
+        coEvery { repository.getDeletionQuota() } returns Result.success(DeletionQuota.Available(5))
+
+        // When
+        viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
+
+        // Then
+        assertEquals(
+            TrashUiState.Content(listOf(fakeMedia), DeletionQuota.Available(5)),
+            viewModel.uiState.value
+        )
+    }
+
+    @Test
+    fun `LoadTrash sets Error when the quota cannot be loaded`() = runTest {
+        // Given
+        subscriptionStatus.value = SubscriptionStatus.Free
+        coEvery { repository.getTrashMedia() } returns Result.success(listOf(fakeMedia))
+        coEvery { repository.getDeletionQuota() } returns Result.failure(IllegalStateException())
+
+        // When
+        viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
+
+        // Then
+        assertEquals(TrashUiState.Error, viewModel.uiState.value)
+    }
+
+    @Test
+    fun `ConfirmDeletion within the remaining quota requests the deletion`() = runTest {
+        // Given
+        subscriptionStatus.value = SubscriptionStatus.Free
+        val deleteRequest = MediaDeleteRequest(listOf(fakeMedia.uri))
+        coEvery { repository.getTrashMedia() } returns Result.success(listOf(fakeMedia))
+        coEvery { repository.getDeletionQuota() } returns Result.success(DeletionQuota.Available(1))
+        coEvery { repository.createDeleteRequest(listOf(1L)) } returns Result.success(deleteRequest)
+        viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
+
+        viewModel.uiEffect.test {
+            // When
+            viewModel.dispatchEvent(TrashUiEvent.ConfirmDeletion)
+
+            // Then
+            assertEquals(TrashUiEffect.ShowDeleteConfirmation(deleteRequest), awaitItem())
+        }
+    }
+
+    @Test
+    fun `ConfirmDeletion above the remaining quota shows the daily limit sheet`() = runTest {
+        // Given
+        subscriptionStatus.value = SubscriptionStatus.Free
+        coEvery { repository.getTrashMedia() } returns Result.success(listOf(fakeMedia, secondMedia))
+        coEvery { repository.getDeletionQuota() } returns Result.success(DeletionQuota.Available(1))
+        viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
+
+        viewModel.uiEffect.test {
+            // When
+            viewModel.dispatchEvent(TrashUiEvent.ConfirmDeletion)
+
+            // Then
+            assertEquals(TrashUiEffect.ShowDailyLimitSheet(remaining = 1), awaitItem())
+        }
+        coVerify(exactly = 0) { repository.createDeleteRequest(any()) }
+        coVerify(exactly = 0) { repository.permanentlyDelete(any()) }
+    }
+
+    @Test
+    fun `ConfirmDeletion while locked navigates to premium`() = runTest {
+        // Given
+        subscriptionStatus.value = SubscriptionStatus.Free
+        coEvery { repository.getTrashMedia() } returns Result.success(listOf(fakeMedia))
+        coEvery { repository.getDeletionQuota() } returns Result.success(DeletionQuota.Locked(9_000L))
+        viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
+
+        viewModel.uiEffect.test {
+            // When
+            viewModel.dispatchEvent(TrashUiEvent.ConfirmDeletion)
+
+            // Then
+            assertEquals(TrashUiEffect.NavigateToPremium, awaitItem())
+        }
+        coVerify(exactly = 0) { repository.createDeleteRequest(any()) }
+        coVerify(exactly = 0) { repository.permanentlyDelete(any()) }
+    }
+
+    @Test
+    fun `DeleteWithinLimit deletes only the oldest media that fit the quota`() = runTest {
+        // Given
+        subscriptionStatus.value = SubscriptionStatus.Free
+        coEvery { repository.getTrashMedia() } returns Result.success(listOf(secondMedia, fakeMedia))
+        coEvery { repository.getDeletionQuota() } returns Result.success(DeletionQuota.Available(1))
+        coEvery { repository.createDeleteRequest(listOf(1L)) } returns Result.success(null)
+        coEvery { repository.permanentlyDelete(listOf(fakeMedia)) } returns Result.success(Unit)
+        viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
+
+        viewModel.uiEffect.test {
+            // When
+            viewModel.dispatchEvent(TrashUiEvent.DeleteWithinLimit)
+
+            // Then
+            assertEquals(TrashUiEffect.NavigateToCongratulations(1, 2_000L), awaitItem())
+        }
+        coVerify(exactly = 1) { repository.permanentlyDelete(listOf(fakeMedia)) }
+    }
+
+    @Test
+    fun `ApproveDeletion deletes only the media chosen by DeleteWithinLimit`() = runTest {
+        // Given
+        subscriptionStatus.value = SubscriptionStatus.Free
+        val deleteRequest = MediaDeleteRequest(listOf(fakeMedia.uri))
+        coEvery { repository.getTrashMedia() } returns Result.success(listOf(fakeMedia, secondMedia))
+        coEvery { repository.getDeletionQuota() } returns Result.success(DeletionQuota.Available(1))
+        coEvery { repository.createDeleteRequest(listOf(1L)) } returns Result.success(deleteRequest)
+        coEvery { repository.permanentlyDelete(listOf(fakeMedia)) } returns Result.success(Unit)
+        viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
+
+        viewModel.uiEffect.test {
+            viewModel.dispatchEvent(TrashUiEvent.DeleteWithinLimit)
+            assertEquals(TrashUiEffect.ShowDeleteConfirmation(deleteRequest), awaitItem())
+
+            // When
+            viewModel.dispatchEvent(TrashUiEvent.ApproveDeletion)
+
+            // Then
+            assertEquals(TrashUiEffect.NavigateToCongratulations(1, 2_000L), awaitItem())
+        }
+        coVerify(exactly = 1) { repository.permanentlyDelete(listOf(fakeMedia)) }
+    }
+
+    @Test
+    fun `QuotaExpired reloads the quota`() = runTest {
+        // Given
+        subscriptionStatus.value = SubscriptionStatus.Free
+        coEvery { repository.getTrashMedia() } returns Result.success(listOf(fakeMedia))
+        coEvery { repository.getDeletionQuota() } returnsMany listOf(
+            Result.success(DeletionQuota.Locked(9_000L)),
+            Result.success(DeletionQuota.Available(25))
+        )
+        viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
+        assertEquals(
+            TrashUiState.Content(listOf(fakeMedia), DeletionQuota.Locked(9_000L)),
+            viewModel.uiState.value
+        )
+
+        // When
+        viewModel.dispatchEvent(TrashUiEvent.QuotaExpired)
+
+        // Then
+        assertEquals(
+            TrashUiState.Content(listOf(fakeMedia), DeletionQuota.Available(25)),
+            viewModel.uiState.value
+        )
     }
 }

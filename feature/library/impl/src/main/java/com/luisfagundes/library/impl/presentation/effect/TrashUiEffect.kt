@@ -5,6 +5,8 @@ import com.luisfagundes.library.api.domain.model.MediaDeleteRequest
 
 internal sealed interface TrashUiEffect : UiEffect {
     data object NavigateBack : TrashUiEffect
+    data object NavigateToPremium : TrashUiEffect
+    data class ShowDailyLimitSheet(val remaining: Int) : TrashUiEffect
     data class ShowDeleteConfirmation(val request: MediaDeleteRequest) : TrashUiEffect
     data class NavigateToCongratulations(val deletedCount: Int, val deletedSize: Long) : TrashUiEffect
 }

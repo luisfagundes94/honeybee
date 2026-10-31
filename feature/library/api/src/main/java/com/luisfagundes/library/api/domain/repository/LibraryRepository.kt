@@ -1,5 +1,6 @@
 package com.luisfagundes.library.api.domain.repository
 
+import com.luisfagundes.library.api.domain.model.DeletionQuota
 import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.api.domain.model.MediaDeleteRequest
 import com.luisfagundes.library.api.domain.model.Statistics
@@ -15,4 +16,5 @@ interface LibraryRepository {
     suspend fun permanentlyDelete(mediaList: List<Media>): Result<Unit>
     suspend fun createDeleteRequest(mediaIds: List<Long>): Result<MediaDeleteRequest?>
     suspend fun getStatistics(): Result<Statistics>
+    suspend fun getDeletionQuota(): Result<DeletionQuota>
 }

@@ -7,5 +7,7 @@ internal sealed interface TrashUiEvent : UiEvent {
     data class RestoreMedia(val mediaId: Long) : TrashUiEvent
     data object ClearTrash : TrashUiEvent
     data object ConfirmDeletion : TrashUiEvent
+    data object DeleteWithinLimit : TrashUiEvent
     data object ApproveDeletion : TrashUiEvent
+    data object QuotaExpired : TrashUiEvent
 }

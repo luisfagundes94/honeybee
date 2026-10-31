@@ -29,9 +29,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private const val ADS_PREFERENCES_NAME = "ads_preferences"
-private const val LAST_CLEANUP_INTERSTITIAL_SHOWN_AT_KEY = "last_cleanup_interstitial_shown_at"
-
 @Singleton
 internal class AdsCoordinatorImpl @Inject constructor(
     @param:ApplicationContext private val context: Context,
@@ -41,10 +38,6 @@ internal class AdsCoordinatorImpl @Inject constructor(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val consentInformation: ConsentInformation =
         UserMessagingPlatform.getConsentInformation(context)
-    private val adsPreferences = context.getSharedPreferences(
-        ADS_PREFERENCES_NAME,
-        Context.MODE_PRIVATE,
-    )
     private val _state = MutableStateFlow(AdsState())
     private var isConsentRequestInFlight = false
     private var isMobileAdsInitialized = false
@@ -101,10 +94,9 @@ internal class AdsCoordinatorImpl @Inject constructor(
 
     override fun showCleanupInterstitial(
         activity: Activity,
-        deletedCount: Int,
         onComplete: () -> Unit,
     ) {
-        if (!canShowCleanupInterstitial(deletedCount)) {
+        if (!canShowCleanupInterstitial()) {
             onComplete()
         } else scope.launch {
             val ad = interstitialAd
@@ -124,15 +116,6 @@ internal class AdsCoordinatorImpl @Inject constructor(
                 }
 
                 ad.fullScreenContentCallback = object : FullScreenContentCallback() {
-                    override fun onAdShowedFullScreenContent() {
-                        adsPreferences.edit()
-                            .putLong(
-                                LAST_CLEANUP_INTERSTITIAL_SHOWN_AT_KEY,
-                                System.currentTimeMillis(),
-                            )
-                            .apply()
-                    }
-
                     override fun onAdDismissedFullScreenContent() = completeOnce()
 
                     override fun onAdFailedToShowFullScreenContent(adError: AdError) = completeOnce()
@@ -143,22 +126,10 @@ internal class AdsCoordinatorImpl @Inject constructor(
         }
     }
 
-    private fun canShowCleanupInterstitial(deletedCount: Int): Boolean {
-        val nowMillis = System.currentTimeMillis()
-        val lastShownAtMillis = adsPreferences.getLong(
-            LAST_CLEANUP_INTERSTITIAL_SHOWN_AT_KEY,
-            0L,
-        )
-        var canShow = shouldShowCleanupInterstitial(
-            deletedCount = deletedCount,
-            lastShownAtMillis = lastShownAtMillis,
-            nowMillis = nowMillis,
-        )
-        if (canShow) canShow = subscriptionProvider.status.value == SubscriptionStatus.Free
-        if (canShow) canShow = state.value.canShowAds
-        if (canShow) canShow = !isInterstitialShowing
-        return canShow
-    }
+    private fun canShowCleanupInterstitial(): Boolean =
+        subscriptionProvider.status.value == SubscriptionStatus.Free &&
+            state.value.canShowAds &&
+            !isInterstitialShowing
 
     private fun enableAds() {
         if (subscriptionProvider.status.value != SubscriptionStatus.Free) return

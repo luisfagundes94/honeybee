@@ -5,6 +5,7 @@ import android.os.Build
 import android.util.Log
 import com.luisfagundes.core.common.di.DefaultDispatcher
 import com.luisfagundes.core.common.tools.safeRunCatching
+import com.luisfagundes.library.api.domain.model.DeletionQuota
 import com.luisfagundes.library.api.domain.model.Media
 import com.luisfagundes.library.api.domain.model.MediaDeleteRequest
 import com.luisfagundes.library.api.domain.model.Statistics
@@ -14,8 +15,10 @@ import com.luisfagundes.library.impl.data.datasource.LibraryDataSource
 import com.luisfagundes.library.impl.data.datasource.LibraryPreferences
 import com.luisfagundes.library.impl.data.database.entity.StatisticsEntity
 import com.luisfagundes.library.impl.data.model.MediaDto
+import com.luisfagundes.library.impl.domain.policy.DeletionQuotaPolicy
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import java.time.Clock
 import javax.inject.Inject
 
 private const val TAG = "LibraryRepository"
@@ -25,6 +28,7 @@ internal class LibraryRepositoryImpl @Inject constructor(
     private val dataSource: LibraryDataSource,
     private val preferences: LibraryPreferences,
     private val statisticsDao: StatisticsDao,
+    private val clock: Clock,
     @param:DefaultDispatcher private val dispatcher: CoroutineDispatcher
 ) : LibraryRepository {
 
@@ -91,8 +95,24 @@ internal class LibraryRepositoryImpl @Inject constructor(
 
                 updateStatisticsForDeletedMedia(mediaList)
                 dataSource.deleteMedia(mediaIds, videoIds)
+                recordDeletionQuota(mediaList.size)
             }
         }
+
+    override suspend fun getDeletionQuota(): Result<DeletionQuota> = withContext(dispatcher) {
+        safeRunCatching {
+            DeletionQuotaPolicy.quotaAt(preferences.getDeletionCounters(), clock.millis())
+        }
+    }
+
+    private fun recordDeletionQuota(count: Int) {
+        val updated = DeletionQuotaPolicy.record(
+            counters = preferences.getDeletionCounters(),
+            count = count,
+            nowMillis = clock.millis()
+        )
+        preferences.setDeletionCounters(updated)
+    }
 
     override suspend fun createDeleteRequest(mediaIds: List<Long>): Result<MediaDeleteRequest?> =
         withContext(dispatcher) {
