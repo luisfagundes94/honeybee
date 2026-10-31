@@ -215,9 +215,9 @@ class ProfileViewModel(
 ```kotlin
 // INCORRECT
 
-backStack += User(...)
-backStack += ProductRepository(...)
-backStack += ProductViewModel(...)
+backStack += User()
+backStack += ProductRepository()
+backStack += ProductViewModel()
 ```
 
 ---
