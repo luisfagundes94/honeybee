@@ -196,7 +196,10 @@ internal class MediaDetailsViewModelTest {
         val trashCountAfter = 3
 
         coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
-        coEvery { repository.getItemsInTrashCount() } returnsMany listOf(Result.success(trashCountBefore), Result.success(trashCountAfter))
+        coEvery { repository.getItemsInTrashCount() } returnsMany listOf(
+            Result.success(trashCountBefore),
+            Result.success(trashCountAfter)
+        )
         coEvery { repository.moveToTrash(1L) } returns Result.success(Unit)
 
         viewModel.uiState.test {
