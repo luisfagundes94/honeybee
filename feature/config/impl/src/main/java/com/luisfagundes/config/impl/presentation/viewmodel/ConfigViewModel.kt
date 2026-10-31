@@ -9,6 +9,7 @@ import com.luisfagundes.core.ads.AdsConfig
 import com.luisfagundes.core.ads.AdsCoordinator
 import com.luisfagundes.core.common.presentation.arch.viewmodel.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -35,21 +36,18 @@ internal class ConfigViewModel @Inject constructor(
     }
 
     private fun observeNotificationsEnabled() = viewModelScope.launch {
-        repository.notificationsEnabled().collect { enabled ->
-            setStateOf<ConfigUiState.Content> {
-                it.copy(isNotificationsEnabled = enabled)
+        repository.notificationsEnabled()
+            .catch { /* keep the last known toggle value */ }
+            .collect { enabled ->
+                setStateOf<ConfigUiState.Content> {
+                    it.copy(isNotificationsEnabled = enabled)
+                }
             }
-        }
     }
 
     private fun updateNotificationsEnabled(enabled: Boolean) = viewModelScope.launch {
-        val previousState = getCurrentState()
-        repository.setNotificationsEnabled(enabled).fold(
-            onSuccess = {},
-            onFailure = {
-                setState { previousState }
-            }
-        )
+        // The stored preference drives the toggle, so a failed write leaves it unchanged.
+        repository.setNotificationsEnabled(enabled)
     }
 
     private fun navigateToStatistics() {

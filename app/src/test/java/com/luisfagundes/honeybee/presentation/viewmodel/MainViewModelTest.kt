@@ -11,6 +11,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -49,6 +50,32 @@ internal class MainViewModelTest {
 
         // Then
         assertEquals(MainUiState.Content(isOnboardingCompleted = true), viewModel.uiState.value)
+    }
+
+    @Test
+    fun `onboarding status failure falls back to onboarding content`() = runTest {
+        // Given
+        every { onboardingRepository.getOnboardingStatus() } returns flow<Boolean> {
+            throw IllegalStateException("boom")
+        }
+
+        // When
+        val failingViewModel = MainViewModel(onboardingRepository, subscriptionProvider)
+
+        // Then
+        assertEquals(MainUiState.Content(isOnboardingCompleted = false), failingViewModel.uiState.value)
+    }
+
+    @Test
+    fun `refresh subscription failure does not crash`() = runTest {
+        // Given
+        coEvery { subscriptionProvider.refresh() } throws IllegalStateException("boom")
+
+        // When
+        viewModel.dispatchEvent(MainUiEvent.RefreshSubscription)
+
+        // Then
+        coVerify(exactly = 1) { subscriptionProvider.refresh() }
     }
 
     @Test

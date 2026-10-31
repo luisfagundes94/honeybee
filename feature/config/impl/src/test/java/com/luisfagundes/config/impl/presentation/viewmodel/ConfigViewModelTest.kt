@@ -15,6 +15,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -60,6 +61,18 @@ internal class ConfigViewModelTest {
 
         // Then
         assertEquals(ConfigUiState.Content(isNotificationsEnabled = false), viewModel.uiState.value)
+    }
+
+    @Test
+    fun `preference flow failure keeps the current state`() = runTest {
+        // Given
+        every { repository.notificationsEnabled() } returns flow<Boolean> { throw IllegalStateException("boom") }
+
+        // When
+        val failingViewModel = ConfigViewModel(repository, adsCoordinator, adsConfig)
+
+        // Then
+        assertEquals(ConfigUiState.Content(), failingViewModel.uiState.value)
     }
 
     @Test
