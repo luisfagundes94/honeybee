@@ -32,9 +32,17 @@ When a feature needs to expose functionality to another feature, split the expos
 
 ## Dependency Injection
 
-Hilt throughout. Key qualifier annotations in `:core:common`:
-- `@IoDispatcher`, `@DefaultDispatcher`, `@MainDispatcher`
+Hilt throughout. Key qualifier annotations in `:core:common`: `@IoDispatcher`, `@DefaultDispatcher`,
+`@MainDispatcher`
 
-All Hilt modules use `@InstallIn(SingletonComponent::class)`.
+`@HiltAndroidApp` Annotate the Application class.
+`@AndroidEntryPoint` Annotate Activities and Fragments.
+`@HiltViewModel` Annotate ViewModels; use standard constructor injection.
+
+Modules:
+
+- Use `@Module` and `@InstallIn(SingletonComponent::class)` for app-wide singletons (e.g., Network,
+  Database).
+- Use `@Binds` in an abstract class to bind interface implementations (cleaner than `@Provides`).
 
 You can find the Hilt custom annotations at `core/common/src/main/java/com/luisfagundes/core/common/di`
