@@ -6,4 +6,5 @@ internal sealed interface ConfigUiEffect : UiEffect {
     data object NavigateToStatistics : ConfigUiEffect
     data object NavigateToFeedback : ConfigUiEffect
     data object ShowPrivacyOptions : ConfigUiEffect
+    data object OpenPrivacyPolicy : ConfigUiEffect
 }

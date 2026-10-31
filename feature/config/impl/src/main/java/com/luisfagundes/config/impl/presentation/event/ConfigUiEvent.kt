@@ -7,4 +7,5 @@ internal sealed interface ConfigUiEvent : UiEvent {
     data object StatisticsClick : ConfigUiEvent
     data object FeedbackClick : ConfigUiEvent
     data object PrivacyChoicesClick : ConfigUiEvent
+    data object PrivacyPolicyClick : ConfigUiEvent
 }

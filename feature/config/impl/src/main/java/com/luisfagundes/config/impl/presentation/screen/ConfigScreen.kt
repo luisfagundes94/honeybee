@@ -1,7 +1,9 @@
 package com.luisfagundes.config.impl.presentation.screen
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -60,6 +62,17 @@ import com.luisfagundes.core.designsystem.theme.spacing
 private const val APP_INTERNAL_SHARE_LINK =
     "https://play.google.com/apps/internaltest/4701609758531422116"
 
+private const val PRIVACY_POLICY_URL = "https://luisfagundes94.github.io/honeybee/privacy-policy/"
+
+private fun openPrivacyPolicy(context: Context) {
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(PRIVACY_POLICY_URL))
+    try {
+        context.startActivity(intent)
+    } catch (_: ActivityNotFoundException) {
+        // No browser installed; nothing to open the policy with.
+    }
+}
+
 @Composable
 internal fun ConfigScreen(
     onNavigateToFeedback: () -> Unit,
@@ -71,6 +84,7 @@ internal fun ConfigScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val activity = LocalActivity.current
+    val context = LocalContext.current
 
     CollectUiEffects(viewModel.uiEffect) { effect ->
         when (effect) {
@@ -79,6 +93,7 @@ internal fun ConfigScreen(
             ConfigUiEffect.ShowPrivacyOptions -> {
                 activity?.let(adsCoordinator::showPrivacyOptions)
             }
+            ConfigUiEffect.OpenPrivacyPolicy -> openPrivacyPolicy(context)
         }
     }
 
@@ -166,7 +181,7 @@ private fun ConfigMyDataSection(
         ConfigItem(
             title = stringResource(R.string.config_item_privacy),
             icon = Icons.Default.BackHand,
-            onClick = { onEvent(ConfigUiEvent.PrivacyChoicesClick) },
+            onClick = { onEvent(ConfigUiEvent.PrivacyPolicyClick) },
             hasDivider = uiState.isPrivacyOptionsRequired
         )
         if (uiState.isPrivacyOptionsRequired) {

@@ -5,10 +5,10 @@ import com.luisfagundes.config.impl.domain.repository.ConfigRepository
 import com.luisfagundes.config.impl.presentation.effect.ConfigUiEffect
 import com.luisfagundes.config.impl.presentation.event.ConfigUiEvent
 import com.luisfagundes.config.impl.presentation.state.ConfigUiState
-import com.luisfagundes.core.testing.MainDispatcherRule
 import com.luisfagundes.core.ads.AdsConfig
 import com.luisfagundes.core.ads.AdsCoordinator
 import com.luisfagundes.core.ads.AdsState
+import com.luisfagundes.core.testing.MainDispatcherRule
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -116,6 +116,17 @@ internal class ConfigViewModelTest {
 
             // Then
             assertEquals(ConfigUiEffect.NavigateToFeedback, awaitItem())
+        }
+    }
+
+    @Test
+    fun `dispatchEvent PrivacyPolicyClick should open privacy policy`() = runTest {
+        viewModel.uiEffect.test {
+            // When
+            viewModel.dispatchEvent(ConfigUiEvent.PrivacyPolicyClick)
+
+            // Then
+            assertEquals(ConfigUiEffect.OpenPrivacyPolicy, awaitItem())
         }
     }
 }

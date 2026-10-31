@@ -32,6 +32,7 @@ internal class ConfigViewModel @Inject constructor(
             ConfigUiEvent.StatisticsClick -> navigateToStatistics()
             ConfigUiEvent.FeedbackClick -> navigateToFeedback()
             ConfigUiEvent.PrivacyChoicesClick -> sendEffect { ConfigUiEffect.ShowPrivacyOptions }
+            ConfigUiEvent.PrivacyPolicyClick -> sendEffect { ConfigUiEffect.OpenPrivacyPolicy }
         }
     }
 
