@@ -66,7 +66,7 @@ internal fun LibraryScreen(
     CollectUiEffects(viewModel.uiEffect) { effect ->
         when (effect) {
             is LibraryUiEffect.NavigateToMediaDetail -> onNavigateToMediaDetail(effect.mediaId)
-            LibraryUiEffect.NavigateToTrash -> onNavigateToTrash()
+            is LibraryUiEffect.NavigateToTrash -> onNavigateToTrash()
         }
     }
 

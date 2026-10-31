@@ -61,15 +61,24 @@ Use conventional commits. The commit message should be structured as follows:
 <type>[optional scope]: <description>
 ```
 
-## Detailed guidance
+## External Documentation
 
-| Topic                                                                    | Documentation                                        |
-|--------------------------------------------------------------------------|------------------------------------------------------|
-| Architecture, module boundaries, domain purity, and dependency injection | [`docs/architecture.md`](docs/architecture.md)       |
-| UseCases, repositories, entities, DataSources, mapping, and `Result<T>`  | [`docs/data-and-domain.md`](docs/data-and-domain.md) |
-| Compose design system, MVI state, ViewModels, and navigation             | [`docs/presentation.md`](docs/presentation.md)       |
-| Coroutines, design principles, and prohibited anti-patterns              | [`docs/code-quality.md`](docs/code-quality.md)       |
-| Unit and coroutine testing conventions                                   | [`docs/testing.md`](docs/testing.md)                 |
+- When asked to implement a functionality that you are not sure of, refer to the
+  official [Android Developer Documentation](https://developer.android.com)
+  or [Kotlin Documentation](https://kotlinlang.org) for additional context and best practices.
+
+## Useful Agent Skills Recap
+
+| Skill Folder       | Documentation                                                    |
+|--------------------|------------------------------------------------------------------|
+| Clean Architecture | [`android-architecture/`](.claude/skills/android-architecture)   |
+| Domain Layer       | [`android-domain-layer/`](.claude/skills/android-domain-layer)   |
+| Data Layer         | [`android-data-layer/`](.claude/skills/android-data-layer)       |
+| ViewModel          | [`android-viewmodel/`](.claude/skills/android-viewmodel)         |
+| UI                 | [`android-ui/`](.claude/skills/android-ui)                       |
+| Testing            | [`android-testing/`](.claude/skills/android-testing)             |
+| Navigation         | [`android-navigation/`](.claude/skills/android-navigation)       |
+| Accessibility      | [`android-accessibility/`](.claude/skills/android-accessibility) |
 
 ## Definition of Done
 
