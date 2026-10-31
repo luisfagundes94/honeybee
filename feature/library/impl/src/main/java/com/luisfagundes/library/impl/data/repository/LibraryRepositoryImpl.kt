@@ -1,11 +1,7 @@
 package com.luisfagundes.library.impl.data.repository
 
-import android.content.ContentUris
-import android.content.Context
 import android.database.sqlite.SQLiteException
-import android.net.Uri
 import android.os.Build
-import android.provider.MediaStore
 import android.util.Log
 import com.luisfagundes.core.common.di.DefaultDispatcher
 import com.luisfagundes.core.common.tools.safeRunCatching
@@ -18,7 +14,6 @@ import com.luisfagundes.library.impl.data.datasource.LibraryDataSource
 import com.luisfagundes.library.impl.data.datasource.LibraryPreferences
 import com.luisfagundes.library.impl.data.database.entity.StatisticsEntity
 import com.luisfagundes.library.impl.data.model.MediaDto
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -30,7 +25,6 @@ internal class LibraryRepositoryImpl @Inject constructor(
     private val dataSource: LibraryDataSource,
     private val preferences: LibraryPreferences,
     private val statisticsDao: StatisticsDao,
-    @param:ApplicationContext private val context: Context,
     @param:DefaultDispatcher private val dispatcher: CoroutineDispatcher
 ) : LibraryRepository {
 
@@ -96,7 +90,7 @@ internal class LibraryRepositoryImpl @Inject constructor(
                 val videoIds = mediaList.filter { it.isVideo }.map { it.id }.toSet()
 
                 updateStatisticsForDeletedMedia(mediaList)
-                deleteFromMediaStore(mediaIds, videoIds)
+                dataSource.deleteMedia(mediaIds, videoIds)
             }
         }
 
@@ -109,8 +103,7 @@ internal class LibraryRepositoryImpl @Inject constructor(
             dataSource.fetchMediaList().fold(
                 onSuccess = { allMedia ->
                     val videoIds = allMedia.filter { it.isVideo }.map { it.id }.toSet()
-                    val mediaUris = mediaIds.map { getMediaUri(it, videoIds).toString() }
-                    Result.success(MediaDeleteRequest(mediaUris))
+                    Result.success(MediaDeleteRequest(dataSource.mediaUris(mediaIds, videoIds)))
                 },
                 onFailure = { Result.failure(it) }
             )
@@ -137,34 +130,12 @@ internal class LibraryRepositoryImpl @Inject constructor(
         }
     }
 
-    private fun deleteFromMediaStore(mediaIds: List<Long>, videoIds: Set<Long>) {
-        mediaIds.forEach { id ->
-            try {
-                val uri = getMediaUri(id, videoIds)
-                context.contentResolver.delete(uri, null, null)
-            } catch (e: SecurityException) {
-                Log.e(TAG, "Unable to delete media id=$id due to missing permission", e)
-            } catch (e: IllegalArgumentException) {
-                Log.e(TAG, "Unable to delete media id=$id due to an invalid URI", e)
-            }
-        }
-    }
-
     override suspend fun getStatistics(): Result<Statistics> = withContext(dispatcher) {
         safeRunCatching {
             val entity = statisticsDao.getStatistics()
             entity.toDomain()
         }
     }
-}
-
-private fun getMediaUri(id: Long, videoIds: Set<Long>): Uri {
-    val isVideo = id in videoIds
-    return ContentUris.withAppendedId(
-        if (isVideo) MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-        else MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-        id
-    )
 }
 
 private fun MediaDto.toDomain() = Media(

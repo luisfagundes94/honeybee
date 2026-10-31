@@ -4,7 +4,9 @@ import android.content.ContentUris
 import android.content.Context
 import android.database.Cursor
 import android.os.Build
+import android.net.Uri
 import android.provider.MediaStore
+import android.util.Log
 import com.luisfagundes.core.common.tools.safeRunCatching
 import com.luisfagundes.library.impl.data.model.MediaDto
 import com.luisfagundes.core.common.di.IoDispatcher
@@ -25,6 +27,23 @@ internal class LocalLibraryDataSource @Inject constructor(
 
     override suspend fun fetchMediaList(): Result<List<MediaDto>> = withContext(dispatcher) {
         safeRunCatching { queryMedia() }
+    }
+
+    override fun mediaUris(mediaIds: List<Long>, videoIds: Set<Long>): List<String> =
+        mediaIds.map { getMediaUri(it, videoIds).toString() }
+
+    override suspend fun deleteMedia(mediaIds: List<Long>, videoIds: Set<Long>) {
+        withContext(dispatcher) {
+            mediaIds.forEach { id ->
+                try {
+                    context.contentResolver.delete(getMediaUri(id, videoIds), null, null)
+                } catch (e: SecurityException) {
+                    Log.e(TAG, "Unable to delete media id=$id due to missing permission", e)
+                } catch (e: IllegalArgumentException) {
+                    Log.e(TAG, "Unable to delete media id=$id due to an invalid URI", e)
+                }
+            }
+        }
     }
 
     private fun queryMedia(): List<MediaDto> {
@@ -72,8 +91,18 @@ internal class LocalLibraryDataSource @Inject constructor(
     }.toTypedArray()
 }
 
+private const val TAG = "LocalLibraryDataSource"
 private const val BUCKET_DISPLAY_NAME_COLUMN = "bucket_display_name"
 private const val BUCKET_ID_COLUMN = "bucket_id"
+
+private fun getMediaUri(id: Long, videoIds: Set<Long>): Uri {
+    val isVideo = id in videoIds
+    return ContentUris.withAppendedId(
+        if (isVideo) MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+        else MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+        id
+    )
+}
 
 private data class MediaColumns(
     var id: Int = 0,

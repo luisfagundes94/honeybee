@@ -1,7 +1,5 @@
 package com.luisfagundes.library.impl.data.repository
 
-import android.content.Context
-import android.content.ContentUris
 import android.net.Uri
 import com.luisfagundes.core.testing.MainDispatcherRule
 import com.luisfagundes.library.impl.data.database.dao.StatisticsDao
@@ -11,10 +9,9 @@ import com.luisfagundes.library.impl.tools.fakeMedia
 import com.luisfagundes.library.impl.tools.fakeMediaDto
 import com.luisfagundes.library.impl.tools.fakeStatisticsEntity
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -22,7 +19,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
 import java.time.Instant
@@ -35,27 +31,18 @@ internal class LibraryRepositoryImplTest {
 
     private val dataSource: LibraryDataSource = mockk()
     private val preferences: LibraryPreferences = mockk()
-    private val context: Context = mockk()
     private val statisticsDao: StatisticsDao = mockk(relaxed = true)
 
     private lateinit var repository: LibraryRepositoryImpl
 
     @BeforeEach
     fun setUp() {
-        mockkStatic(ContentUris::class)
-        every { ContentUris.withAppendedId(any<Uri>(), any<Long>()) } returns mockk()
         repository = LibraryRepositoryImpl(
             dataSource = dataSource,
             preferences = preferences,
             statisticsDao = statisticsDao,
-            context = context,
             dispatcher = dispatcherRule.testDispatcher
         )
-    }
-
-    @AfterEach
-    fun tearDown() {
-        unmockkStatic(ContentUris::class)
     }
 
     @Test
@@ -162,8 +149,7 @@ internal class LibraryRepositoryImplTest {
         every { preferences.setTrashedPhotoIds(any()) } returns Unit
         every { preferences.setDeletedPhotoIds(any()) } returns Unit
 
-        val mockContentResolver: android.content.ContentResolver = mockk(relaxed = true)
-        every { context.contentResolver } returns mockContentResolver
+        coEvery { dataSource.deleteMedia(any(), any()) } returns Unit
         every { statisticsDao.getStatistics() } returns null
         every { statisticsDao.insertOrUpdate(any()) } returns 1L
 
@@ -172,6 +158,7 @@ internal class LibraryRepositoryImplTest {
 
         // Then
         assertTrue(result.isSuccess)
+        coVerify(exactly = 1) { dataSource.deleteMedia(listOf(mediaId), emptySet()) }
         verify {
             statisticsDao.insertOrUpdate(match { entity ->
                 entity.id == 1 &&
