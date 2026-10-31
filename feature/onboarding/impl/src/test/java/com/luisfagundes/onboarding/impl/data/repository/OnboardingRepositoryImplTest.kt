@@ -1,21 +1,26 @@
 package com.luisfagundes.onboarding.impl.data.repository
 
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
 import app.cash.turbine.test
 import com.luisfagundes.core.testing.MainDispatcherRule
-import com.luisfagundes.onboarding.impl.data.datasource.OnboardingDataSource
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
+import org.junit.jupiter.api.io.TempDir
+import java.io.File
+import java.io.IOException
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class OnboardingRepositoryImplTest {
@@ -23,50 +28,64 @@ internal class OnboardingRepositoryImplTest {
     @RegisterExtension
     val dispatcherRule = MainDispatcherRule(UnconfinedTestDispatcher())
 
-    private val dataSource: OnboardingDataSource = mockk()
-    private lateinit var repository: OnboardingRepositoryImpl
+    @TempDir
+    lateinit var tempDir: File
 
-    @BeforeEach
-    fun setUp() {
-        repository = OnboardingRepositoryImpl(
-            dataSource = dataSource,
-            dispatcher = dispatcherRule.testDispatcher
-        )
-    }
+    private fun repository(dataStore: DataStore<Preferences>) = OnboardingRepositoryImpl(
+        dataStore = dataStore,
+        dispatcher = dispatcherRule.testDispatcher
+    )
+
+    private fun realDataStore() = PreferenceDataStoreFactory.create(
+        produceFile = { File(tempDir, "onboarding.preferences_pb") }
+    )
 
     @Test
-    fun `getOnboardingStatus should flow status from dataSource`() = runTest {
+    fun `getOnboardingStatus defaults to false`() = runTest {
         // Given
-        val expectedStatus = true
-        every { dataSource.isOnboardingCompleted() } returns flowOf(expectedStatus)
+        val repository = repository(realDataStore())
 
         // When & Then
-        repository.getOnboardingStatus().test {
-            assertEquals(expectedStatus, awaitItem())
-            awaitComplete()
-        }
+        assertFalse(repository.getOnboardingStatus().first())
     }
 
     @Test
-    fun `completeOnboarding should call dataSource setOnboardingCompleted`() = runTest {
+    fun `completeOnboarding persists completed status`() = runTest {
         // Given
-        coEvery { dataSource.setOnboardingCompleted() } returns Unit
+        val repository = repository(realDataStore())
 
         // When
         val result = repository.completeOnboarding()
 
         // Then
         assertTrue(result.isSuccess)
-        coVerify(exactly = 1) { dataSource.setOnboardingCompleted() }
+        assertTrue(repository.getOnboardingStatus().first())
     }
 
     @Test
-    fun `completeOnboarding returns failure when dataSource throws`() = runTest {
+    fun `getOnboardingStatus falls back to false on IOException`() = runTest {
         // Given
-        coEvery { dataSource.setOnboardingCompleted() } throws IllegalStateException("boom")
+        val dataStore: DataStore<Preferences> = mockk {
+            every { data } returns flow { throw IOException("boom") }
+        }
+
+        // When & Then
+        repository(dataStore).getOnboardingStatus().test {
+            assertEquals(false, awaitItem())
+            awaitComplete()
+        }
+    }
+
+    @Test
+    fun `completeOnboarding returns failure when dataStore fails`() = runTest {
+        // Given
+        val dataStore: DataStore<Preferences> = mockk {
+            every { data } returns flow { throw IOException("boom") }
+        }
+        coEvery { dataStore.updateData(any()) } throws IOException("boom")
 
         // When
-        val result = repository.completeOnboarding()
+        val result = repository(dataStore).completeOnboarding()
 
         // Then
         assertTrue(result.isFailure)
