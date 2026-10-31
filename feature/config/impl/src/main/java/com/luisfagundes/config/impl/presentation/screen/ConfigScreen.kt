@@ -59,10 +59,19 @@ import com.luisfagundes.core.common.presentation.arch.compose.CollectUiEffects
 import com.luisfagundes.core.designsystem.theme.HoneybeeThemeWrapper
 import com.luisfagundes.core.designsystem.theme.spacing
 
-private const val APP_INTERNAL_SHARE_LINK =
-    "https://play.google.com/apps/internaltest/4701609758531422116"
+private const val APP_STORE_URL =
+    "https://play.google.com/store/apps/details?id=com.luisfagundes.honeybee"
 
 private const val PRIVACY_POLICY_URL = "https://luisfagundes94.github.io/honeybee/privacy-policy/"
+
+private fun openAppStorePage(context: Context) {
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(APP_STORE_URL))
+    try {
+        context.startActivity(intent)
+    } catch (_: ActivityNotFoundException) {
+        // No Play Store or browser installed; nothing to open the page with.
+    }
+}
 
 private fun openPrivacyPolicy(context: Context) {
     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(PRIVACY_POLICY_URL))
@@ -227,7 +236,7 @@ private fun ConfigOtherSection(
         ConfigItem(
             title = stringResource(R.string.config_item_rate_app),
             icon = Icons.Default.StarBorder,
-            onClick = { }
+            onClick = { openAppStorePage(context) }
         )
         ConfigItem(
             title = stringResource(R.string.config_item_send_feedback),
@@ -240,7 +249,7 @@ private fun ConfigOtherSection(
             onClick = {
                 val sendIntent = Intent().apply {
                     action = Intent.ACTION_SEND
-                    putExtra(Intent.EXTRA_TEXT, APP_INTERNAL_SHARE_LINK)
+                    putExtra(Intent.EXTRA_TEXT, APP_STORE_URL)
                     type = "text/plain"
                 }
                 context.startActivity(Intent.createChooser(sendIntent, null))
