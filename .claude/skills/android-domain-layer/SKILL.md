@@ -6,7 +6,7 @@ description: Rules and guidelines for implementing the Android Domain Layer, ens
 ## Domain Layer Is Pure Kotlin
 
 The domain layer CANNOT have Android framework dependencies. No Context, Activity, Fragment,
-LiveData, or android.* imports.
+LiveData, StateFlow or android.* imports.
 
 Verification: Compilation (module without Android plugin)
 Remediation: Move Android deps to data or presentation layer
@@ -19,27 +19,30 @@ single implementation.
 
 ```kotlin
 // ✅ CORRECT — UseCase with business logic
-class TransferMoneyUseCase(
-    private val accountRepository: AccountRepository,
-    private val transactionRepository: TransactionRepository,
-    private val limitsValidator: LimitsValidator
+class AddAlbumToLibraryUseCase(
+    private val albumRepository: AlbumRepository,
+    private val userLibraryRepository: UserLibraryRepository,
+    private val storageValidator: StorageValidator
 ) {
-    suspend operator fun invoke(params: TransferParams): Result<Transaction> {
+    suspend operator fun invoke(albumId: String): Result<Unit> {
         // Business rule validation
-        val sourceAccount = accountRepository.getAccount(params.sourceId)
+        val album = albumRepository.getAlbumDetails(albumId)
             .getOrElse { return Result.failure(it) }
 
-        if (sourceAccount.balance < params.amount) {
-            return Result.failure(InsufficientBalanceException())
+        if (userLibraryRepository.containsAlbum(albumId)) {
+            return Result.failure(AlbumAlreadyInLibraryException())
         }
 
-        // Limit validation
-        if (!limitsValidator.isWithinDailyLimit(params.amount)) {
-            return Result.failure(DailyLimitExceededException())
+        // Storage / limit validation
+        if (!storageValidator.hasEnoughSpaceForOffline(album.totalSizeBytes)) {
+            return Result.failure(InsufficientStorageException())
         }
 
         // Composite operation orchestration
-        return transactionRepository.executeTransfer(params)
+        userLibraryRepository.addAlbum(album)
+            .getOrElse { return Result.failure(it) }
+
+        return albumRepository.markAsSaved(albumId)
     }
 }
 
@@ -70,10 +73,10 @@ internal class ItemListViewModel(
 ) : ViewModel() {  }
 
 // ❌ WRONG — Interface + Impl with a single implementation
-interface TransferMoneyUseCase {
-    suspend operator fun invoke(params: TransferParams): Result<Transaction>
+interface AddAlbumToLibraryUseCase {
+    suspend operator fun invoke(albumId: String): Result<Unit>
 }
-class TransferMoneyUseCaseImpl() : TransferMoneyUseCase {  }
+class AddAlbumToLibraryUseCaseImpl() : AddAlbumToLibraryUseCase {}
 ```
 
 Checklist (at least 1 = YES to justify UseCase):
