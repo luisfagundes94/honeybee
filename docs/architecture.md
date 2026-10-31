@@ -1,7 +1,5 @@
 # Architecture
 
-## Architecture
-
 MVI + Clean Architecture + Clean Code
 
 ## Layer Boundaries Are Absolute
