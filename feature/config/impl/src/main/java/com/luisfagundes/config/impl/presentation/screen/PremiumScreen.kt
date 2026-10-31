@@ -58,8 +58,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -199,7 +201,6 @@ private fun PremiumLayout(
                     priceUnavailable = priceUnavailable,
                     onPlanSelected = onPlanSelected,
                     showManageSubscription = showManageSubscription,
-                    isSubscriptionCancelled = isSubscriptionCancelled,
                     onManageSubscription = onManageSubscription,
                     onContinue = onContinue
                 )
@@ -207,6 +208,7 @@ private fun PremiumLayout(
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
         ) { innerPadding ->
             PremiumContent(
+                isSubscriptionCancelled = isSubscriptionCancelled,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
@@ -238,6 +240,7 @@ private fun PremiumTopBar(onNavigateBack: () -> Unit) {
 
 @Composable
 private fun PremiumContent(
+    isSubscriptionCancelled: Boolean,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -245,6 +248,7 @@ private fun PremiumContent(
         modifier = modifier
     ) {
         PremiumHeader(
+            isSubscriptionCancelled = isSubscriptionCancelled,
             modifier = Modifier.padding(MaterialTheme.spacing.default)
         )
         Column(
@@ -275,6 +279,7 @@ private fun PremiumContent(
 
 @Composable
 private fun PremiumHeader(
+    isSubscriptionCancelled: Boolean,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -292,6 +297,18 @@ private fun PremiumHeader(
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.semantics { heading() }
         )
+        if (isSubscriptionCancelled) {
+            Text(
+                text = stringResource(R.string.premium_subscription_cancelled),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = MaterialTheme.spacing.default)
+                    .semantics { liveRegion = LiveRegionMode.Polite }
+            )
+        }
     }
 }
 
@@ -344,7 +361,6 @@ private fun PremiumPurchaseOptions(
     priceUnavailable: String,
     onPlanSelected: (PremiumPlan) -> Unit,
     showManageSubscription: Boolean,
-    isSubscriptionCancelled: Boolean,
     onManageSubscription: () -> Unit,
     onContinue: () -> Unit
 ) {
@@ -393,15 +409,6 @@ private fun PremiumPurchaseOptions(
                     ),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
-                )
-            }
-            if (showManageSubscription && isSubscriptionCancelled) {
-                Text(
-                    text = stringResource(R.string.premium_subscription_cancelled),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
                 )
             }
             if (showManageSubscription) {
