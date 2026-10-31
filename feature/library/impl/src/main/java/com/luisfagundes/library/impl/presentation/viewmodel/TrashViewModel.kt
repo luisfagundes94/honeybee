@@ -40,11 +40,15 @@ internal class TrashViewModel @Inject constructor(
     }
 
     private fun restoreMedia(mediaId: Long) = viewModelScope.launch {
-        repository.restoreFromTrash(listOf(mediaId))
-        setStateOf<TrashUiState.Content> { currentState ->
-            val updatedList = currentState.mediaToBeDeleted.filterNot { it.id == mediaId }
-            currentState.copy(mediaToBeDeleted = updatedList)
-        }
+        repository.restoreFromTrash(listOf(mediaId)).fold(
+            onSuccess = {
+                setStateOf<TrashUiState.Content> { currentState ->
+                    val updatedList = currentState.mediaToBeDeleted.filterNot { it.id == mediaId }
+                    currentState.copy(mediaToBeDeleted = updatedList)
+                }
+            },
+            onFailure = { setState { TrashUiState.Error } }
+        )
     }
 
     private fun clearTrash() {
@@ -53,13 +57,18 @@ internal class TrashViewModel @Inject constructor(
             if (mediaIds.isEmpty()) return@runIfStateIs
 
             viewModelScope.launch {
-                repository.restoreFromTrash(mediaIds)
-                val restoredIds = mediaIds.toSet()
-                setStateOf<TrashUiState.Content> { content ->
-                    content.copy(
-                        mediaToBeDeleted = content.mediaToBeDeleted.filterNot { it.id in restoredIds }
-                    )
-                }
+                repository.restoreFromTrash(mediaIds).fold(
+                    onSuccess = {
+                        val restoredIds = mediaIds.toSet()
+                        setStateOf<TrashUiState.Content> { content ->
+                            content.copy(
+                                mediaToBeDeleted = content.mediaToBeDeleted
+                                    .filterNot { it.id in restoredIds }
+                            )
+                        }
+                    },
+                    onFailure = { setState { TrashUiState.Error } }
+                )
             }
         }
     }
@@ -97,7 +106,9 @@ internal class TrashViewModel @Inject constructor(
     private fun deleteMediaPermanently(mediaList: List<Media>) = viewModelScope.launch {
         val count = mediaList.size
         val size = mediaList.sumOf { it.size }
-        repository.permanentlyDelete(mediaList)
-        sendEffect { TrashUiEffect.NavigateToCongratulations(count, size) }
+        repository.permanentlyDelete(mediaList).fold(
+            onSuccess = { sendEffect { TrashUiEffect.NavigateToCongratulations(count, size) } },
+            onFailure = { setState { TrashUiState.Error } }
+        )
     }
 }

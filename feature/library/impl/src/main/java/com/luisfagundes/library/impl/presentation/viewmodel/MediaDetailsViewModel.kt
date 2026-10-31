@@ -35,8 +35,8 @@ internal class MediaDetailsViewModel @Inject constructor(
             onSuccess = { mediaList ->
                 val filteredList = mediaList.filterBy(albumId.toMediaFilter())
                 val initialIndex = filteredList.indexOfFirst { it.id == initialMediaId }.coerceAtLeast(0)
-                val trashCount = repository.getItemsInTrashCount()
-                val hasSeenOnboarding = repository.hasSeenSwipeUpTrashOnboarding()
+                val trashCount = repository.getItemsInTrashCount().getOrDefault(0)
+                val hasSeenOnboarding = repository.hasSeenSwipeUpTrashOnboarding().getOrDefault(true)
                 setState {
                     MediaDetailsUiState.Content(
                         mediaList = filteredList,
@@ -53,18 +53,27 @@ internal class MediaDetailsViewModel @Inject constructor(
     }
 
     private fun moveToTrash(mediaId: Long) = viewModelScope.launch {
-        repository.moveToTrash(mediaId)
+        repository.moveToTrash(mediaId).fold(
+            onSuccess = { removeFromContent(mediaId) },
+            onFailure = { setState { MediaDetailsUiState.Error } }
+        )
+    }
+
+    private fun removeFromContent(mediaId: Long) {
         runIfStateIs<MediaDetailsUiState.Content> { currentState ->
             val updatedMedia = currentState.mediaList.filterNot { it.id == mediaId }
             if (updatedMedia.isEmpty()) {
                 sendEffect { MediaDetailsUiEffect.NavigateBack }
             } else {
-                val trashCount = repository.getItemsInTrashCount()
-                setState {
-                    currentState.copy(
-                        mediaList = updatedMedia,
-                        trashCount = trashCount
-                    )
+                viewModelScope.launch {
+                    val trashCount = repository.getItemsInTrashCount()
+                        .getOrDefault(currentState.trashCount + 1)
+                    setState {
+                        currentState.copy(
+                            mediaList = updatedMedia,
+                            trashCount = trashCount
+                        )
+                    }
                 }
             }
         }

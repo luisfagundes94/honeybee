@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
@@ -52,9 +53,22 @@ internal class OnboardingRepositoryImplTest {
         coEvery { dataSource.setOnboardingCompleted() } returns Unit
 
         // When
-        repository.completeOnboarding()
+        val result = repository.completeOnboarding()
 
         // Then
+        assertTrue(result.isSuccess)
         coVerify(exactly = 1) { dataSource.setOnboardingCompleted() }
+    }
+
+    @Test
+    fun `completeOnboarding returns failure when dataSource throws`() = runTest {
+        // Given
+        coEvery { dataSource.setOnboardingCompleted() } throws IllegalStateException("boom")
+
+        // When
+        val result = repository.completeOnboarding()
+
+        // Then
+        assertTrue(result.isFailure)
     }
 }

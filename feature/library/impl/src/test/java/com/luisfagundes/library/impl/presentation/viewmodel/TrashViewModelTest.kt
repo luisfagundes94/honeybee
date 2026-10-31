@@ -95,7 +95,7 @@ internal class TrashViewModelTest {
         val mediaList = listOf(fakeMedia, secondMedia)
 
         coEvery { repository.getTrashMedia() } returns Result.success(mediaList)
-        coEvery { repository.restoreFromTrash(listOf(1L)) } returns Unit
+        coEvery { repository.restoreFromTrash(listOf(1L)) } returns Result.success(Unit)
 
         viewModel.uiState.test {
             assertEquals(TrashUiState.Loading, awaitItem())
@@ -120,7 +120,7 @@ internal class TrashViewModelTest {
         // Given
         val mediaList = listOf(fakeMedia, secondMedia)
         coEvery { repository.getTrashMedia() } returns Result.success(mediaList)
-        coEvery { repository.restoreFromTrash(listOf(1L, 2L)) } returns Unit
+        coEvery { repository.restoreFromTrash(listOf(1L, 2L)) } returns Result.success(Unit)
         viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
 
         viewModel.uiState.test {
@@ -234,7 +234,7 @@ internal class TrashViewModelTest {
 
         coEvery { repository.getTrashMedia() } returns Result.success(mediaList)
         coEvery { repository.createDeleteRequest(listOf(1L, 2L)) } returns Result.success(null)
-        coEvery { repository.permanentlyDelete(mediaList) } returns Unit
+        coEvery { repository.permanentlyDelete(mediaList) } returns Result.success(Unit)
 
         viewModel.uiState.test {
             assertEquals(TrashUiState.Loading, awaitItem())
@@ -257,12 +257,52 @@ internal class TrashViewModelTest {
     }
 
     @Test
+    fun `dispatchEvent ApproveDeletion shows error and does not navigate when deletion fails`() = runTest {
+        // Given
+        val mediaList = listOf(fakeMedia, secondMedia)
+
+        coEvery { repository.getTrashMedia() } returns Result.success(mediaList)
+        coEvery { repository.permanentlyDelete(mediaList) } returns Result.failure(IllegalStateException())
+
+        viewModel.uiState.test {
+            assertEquals(TrashUiState.Loading, awaitItem())
+            viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
+            awaitItem() // Skip Content state emissions
+
+            // When
+            viewModel.dispatchEvent(TrashUiEvent.ApproveDeletion)
+
+            // Then
+            assertEquals(TrashUiState.Error, awaitItem())
+        }
+    }
+
+    @Test
+    fun `dispatchEvent RestoreMedia shows error when restore fails`() = runTest {
+        // Given
+        coEvery { repository.getTrashMedia() } returns Result.success(listOf(fakeMedia))
+        coEvery { repository.restoreFromTrash(listOf(1L)) } returns Result.failure(IllegalStateException())
+
+        viewModel.uiState.test {
+            assertEquals(TrashUiState.Loading, awaitItem())
+            viewModel.dispatchEvent(TrashUiEvent.LoadTrash)
+            awaitItem() // Skip Content state emissions
+
+            // When
+            viewModel.dispatchEvent(TrashUiEvent.RestoreMedia(1L))
+
+            // Then
+            assertEquals(TrashUiState.Error, awaitItem())
+        }
+    }
+
+    @Test
     fun `dispatchEvent ApproveDeletion should permanently delete media and navigate to congratulations`() = runTest {
         // Given
         val mediaList = listOf(fakeMedia, secondMedia)
 
         coEvery { repository.getTrashMedia() } returns Result.success(mediaList)
-        coEvery { repository.permanentlyDelete(mediaList) } returns Unit
+        coEvery { repository.permanentlyDelete(mediaList) } returns Result.success(Unit)
 
         viewModel.uiState.test {
             assertEquals(TrashUiState.Loading, awaitItem())

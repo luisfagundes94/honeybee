@@ -54,41 +54,51 @@ internal class LibraryRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getItemsInTrashCount(): Int = withContext(dispatcher) {
-        val trashedIds = preferences.getTrashedPhotoIds()
-        val deletedIds = preferences.getDeletedPhotoIds()
-        trashedIds.subtract(deletedIds).size
+    override suspend fun getItemsInTrashCount(): Result<Int> = withContext(dispatcher) {
+        safeRunCatching {
+            val trashedIds = preferences.getTrashedPhotoIds()
+            val deletedIds = preferences.getDeletedPhotoIds()
+            trashedIds.subtract(deletedIds).size
+        }
     }
 
-    override suspend fun hasSeenSwipeUpTrashOnboarding(): Boolean = withContext(dispatcher) {
-        preferences.hasSeenSwipeUpTrashOnboarding()
+    override suspend fun hasSeenSwipeUpTrashOnboarding(): Result<Boolean> = withContext(dispatcher) {
+        safeRunCatching { preferences.hasSeenSwipeUpTrashOnboarding() }
     }
 
-    override suspend fun markSwipeUpTrashOnboardingSeen() = withContext(dispatcher) {
-        preferences.markSwipeUpTrashOnboardingSeen()
+    override suspend fun markSwipeUpTrashOnboardingSeen(): Result<Unit> = withContext(dispatcher) {
+        safeRunCatching { preferences.markSwipeUpTrashOnboardingSeen() }
     }
 
-    override suspend fun moveToTrash(mediaId: Long) = withContext(dispatcher) {
-        val trashedIds = preferences.getTrashedPhotoIds().toMutableSet()
-        trashedIds.add(mediaId)
-        preferences.setTrashedPhotoIds(trashedIds)
+    override suspend fun moveToTrash(mediaId: Long): Result<Unit> = withContext(dispatcher) {
+        safeRunCatching {
+            val trashedIds = preferences.getTrashedPhotoIds().toMutableSet()
+            trashedIds.add(mediaId)
+            preferences.setTrashedPhotoIds(trashedIds)
+        }
     }
 
-    override suspend fun restoreFromTrash(mediaIds: List<Long>) = withContext(dispatcher) {
-        val trashedIds = preferences.getTrashedPhotoIds().toMutableSet()
-        trashedIds.removeAll(mediaIds.toSet())
-        preferences.setTrashedPhotoIds(trashedIds)
-    }
+    override suspend fun restoreFromTrash(mediaIds: List<Long>): Result<Unit> =
+        withContext(dispatcher) {
+            safeRunCatching {
+                val trashedIds = preferences.getTrashedPhotoIds().toMutableSet()
+                trashedIds.removeAll(mediaIds.toSet())
+                preferences.setTrashedPhotoIds(trashedIds)
+            }
+        }
 
-    override suspend fun permanentlyDelete(mediaList: List<Media>) = withContext(dispatcher) {
-        val mediaIds = mediaList.map { it.id }
-        updatePreferencesForDeletion(mediaIds)
+    override suspend fun permanentlyDelete(mediaList: List<Media>): Result<Unit> =
+        withContext(dispatcher) {
+            safeRunCatching {
+                val mediaIds = mediaList.map { it.id }
+                updatePreferencesForDeletion(mediaIds)
 
-        val videoIds = mediaList.filter { it.isVideo }.map { it.id }.toSet()
+                val videoIds = mediaList.filter { it.isVideo }.map { it.id }.toSet()
 
-        updateStatisticsForDeletedMedia(mediaList)
-        deleteFromMediaStore(mediaIds, videoIds)
-    }
+                updateStatisticsForDeletedMedia(mediaList)
+                deleteFromMediaStore(mediaIds, videoIds)
+            }
+        }
 
     override suspend fun createDeleteRequest(mediaIds: List<Long>): Result<MediaDeleteRequest?> =
         withContext(dispatcher) {

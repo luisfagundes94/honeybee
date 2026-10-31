@@ -57,6 +57,7 @@ internal fun PermissionScreen(
 ) {
     val context = LocalContext.current
     val permissionsDeniedMessage = stringResource(R.string.permissions_denied_message)
+    val completionErrorMessage = stringResource(R.string.onboarding_completion_error_message)
     val (showSettingsDialog, setShowSettingsDialog) = remember { mutableStateOf(false) }
     val requestPermissions = rememberPermissionsHandler(
         onPermissionsGranted = {
@@ -72,6 +73,9 @@ internal fun PermissionScreen(
             is PermissionUiEffect.NavigateToLibrary -> onNavigateToLibrary()
             is PermissionUiEffect.ShowDeniedMessage -> {
                 Toast.makeText(context, permissionsDeniedMessage, Toast.LENGTH_LONG).show()
+            }
+            is PermissionUiEffect.ShowCompletionError -> {
+                Toast.makeText(context, completionErrorMessage, Toast.LENGTH_LONG).show()
             }
             is PermissionUiEffect.ShowSettingsDialog -> {
                 setShowSettingsDialog(true)

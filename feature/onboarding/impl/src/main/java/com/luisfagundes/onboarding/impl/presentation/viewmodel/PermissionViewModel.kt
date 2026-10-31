@@ -21,8 +21,10 @@ internal class PermissionViewModel @Inject constructor(
     }
 
     private fun completeOnboarding() = viewModelScope.launch {
-        repository.completeOnboarding()
-        sendEffect { PermissionUiEffect.NavigateToLibrary }
+        repository.completeOnboarding().fold(
+            onSuccess = { sendEffect { PermissionUiEffect.NavigateToLibrary } },
+            onFailure = { sendEffect { PermissionUiEffect.ShowCompletionError } }
+        )
     }
 
     private fun handlePermissionsDenied(event: PermissionUiEvent.PermissionsDenied) {

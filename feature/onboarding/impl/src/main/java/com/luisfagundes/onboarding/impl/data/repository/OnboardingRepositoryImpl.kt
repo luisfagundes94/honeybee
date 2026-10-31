@@ -1,6 +1,7 @@
 package com.luisfagundes.onboarding.impl.data.repository
 
 import com.luisfagundes.core.common.di.IoDispatcher
+import com.luisfagundes.core.common.tools.safeRunCatching
 import com.luisfagundes.onboarding.impl.data.datasource.OnboardingDataSource
 import com.luisfagundes.onboarding.api.domain.repository.OnboardingRepository
 import kotlinx.coroutines.CoroutineDispatcher
@@ -17,9 +18,7 @@ internal class OnboardingRepositoryImpl @Inject constructor(
     override fun getOnboardingStatus(): Flow<Boolean> = dataSource.isOnboardingCompleted()
         .flowOn(dispatcher)
 
-    override suspend fun completeOnboarding() {
-        withContext(dispatcher) {
-            dataSource.setOnboardingCompleted()
-        }
+    override suspend fun completeOnboarding(): Result<Unit> = withContext(dispatcher) {
+        safeRunCatching { dataSource.setOnboardingCompleted() }
     }
 }

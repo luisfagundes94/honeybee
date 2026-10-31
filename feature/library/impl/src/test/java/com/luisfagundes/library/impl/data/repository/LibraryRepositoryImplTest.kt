@@ -20,6 +20,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -108,7 +109,7 @@ internal class LibraryRepositoryImplTest {
         val hasSeenOnboarding = repository.hasSeenSwipeUpTrashOnboarding()
 
         // Then
-        assertEquals(true, hasSeenOnboarding)
+        assertEquals(Result.success(true), hasSeenOnboarding)
         verify(exactly = 1) { preferences.hasSeenSwipeUpTrashOnboarding() }
     }
 
@@ -122,6 +123,18 @@ internal class LibraryRepositoryImplTest {
 
         // Then
         verify(exactly = 1) { preferences.markSwipeUpTrashOnboardingSeen() }
+    }
+
+    @Test
+    fun `moveToTrash returns failure when preferences throw`() = runTest {
+        // Given
+        every { preferences.getTrashedPhotoIds() } throws IllegalStateException("boom")
+
+        // When
+        val result = repository.moveToTrash(1L)
+
+        // Then
+        assertTrue(result.isFailure)
     }
 
     @Test
@@ -155,9 +168,10 @@ internal class LibraryRepositoryImplTest {
         every { statisticsDao.insertOrUpdate(any()) } returns 1L
 
         // When
-        repository.permanentlyDelete(listOf(media))
+        val result = repository.permanentlyDelete(listOf(media))
 
         // Then
+        assertTrue(result.isSuccess)
         verify {
             statisticsDao.insertOrUpdate(match { entity ->
                 entity.id == 1 &&

@@ -58,7 +58,7 @@ internal class LibraryViewModelTest {
         )
         val trashCount = 5
 
-        coEvery { repository.getItemsInTrashCount() } returns trashCount
+        coEvery { repository.getItemsInTrashCount() } returns Result.success(trashCount)
         coEvery { getMediaByMonthUseCase() } returns Result.success(mediaSections)
 
         viewModel.uiState.test {
@@ -86,7 +86,7 @@ internal class LibraryViewModelTest {
         // Given
         val exception = Exception("Network error")
 
-        coEvery { repository.getItemsInTrashCount() } returns 2
+        coEvery { repository.getItemsInTrashCount() } returns Result.success(2)
         coEvery { getMediaByMonthUseCase() } returns Result.failure(exception)
 
         viewModel.uiState.test {

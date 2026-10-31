@@ -7,12 +7,12 @@ import com.luisfagundes.library.api.domain.model.Statistics
 interface LibraryRepository {
     suspend fun getActiveMedia(): Result<List<Media>>
     suspend fun getTrashMedia(): Result<List<Media>>
-    suspend fun getItemsInTrashCount(): Int
-    suspend fun hasSeenSwipeUpTrashOnboarding(): Boolean
-    suspend fun markSwipeUpTrashOnboardingSeen()
-    suspend fun moveToTrash(mediaId: Long)
-    suspend fun restoreFromTrash(mediaIds: List<Long>)
-    suspend fun permanentlyDelete(mediaList: List<Media>)
+    suspend fun getItemsInTrashCount(): Result<Int>
+    suspend fun hasSeenSwipeUpTrashOnboarding(): Result<Boolean>
+    suspend fun markSwipeUpTrashOnboardingSeen(): Result<Unit>
+    suspend fun moveToTrash(mediaId: Long): Result<Unit>
+    suspend fun restoreFromTrash(mediaIds: List<Long>): Result<Unit>
+    suspend fun permanentlyDelete(mediaList: List<Media>): Result<Unit>
     suspend fun createDeleteRequest(mediaIds: List<Long>): Result<MediaDeleteRequest?>
     suspend fun getStatistics(): Result<Statistics>
 }

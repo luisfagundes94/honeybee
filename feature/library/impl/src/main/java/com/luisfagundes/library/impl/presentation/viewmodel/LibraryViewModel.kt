@@ -29,7 +29,7 @@ internal class LibraryViewModel @Inject constructor(
     private fun loadMedia() = viewModelScope.launch {
         setState { LibraryUiState.Loading }
 
-        val trashCount = repository.getItemsInTrashCount()
+        val trashCount = repository.getItemsInTrashCount().getOrDefault(0)
 
         getMediaByMonthUseCase().fold(
             onSuccess = { mediaSectionList ->

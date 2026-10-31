@@ -12,6 +12,7 @@
     <string name="privacy_assurance">Sua mídia permanece segura, armazenada somente no seu dispositivo</string>
     <string name="permission_screen_title">Conceda as permissões para usar o Honeybee</string>
     <string name="permissions_denied_message">Precisamos dessas permissões para que o app funcione</string>
+    <string name="onboarding_completion_error_message">Algo deu errado. Tente novamente.</string>
     <string name="permissions_required_title">Permissões necessárias</string>
     <string name="permissions_required_description">Você negou as permissões necessárias. Ative-as nas configurações para continuar.</string>
     <string name="go_to_settings">Ir para configurações</string>

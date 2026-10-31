@@ -42,8 +42,8 @@ internal class MediaDetailsViewModelTest {
 
     @BeforeEach
     fun setUp() {
-        coEvery { repository.hasSeenSwipeUpTrashOnboarding() } returns true
-        coEvery { repository.markSwipeUpTrashOnboardingSeen() } returns Unit
+        coEvery { repository.hasSeenSwipeUpTrashOnboarding() } returns Result.success(true)
+        coEvery { repository.markSwipeUpTrashOnboardingSeen() } returns Result.success(Unit)
 
         viewModel = MediaDetailsViewModel(
             repository = repository
@@ -67,7 +67,7 @@ internal class MediaDetailsViewModelTest {
         val trashCount = 2
 
         coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
-        coEvery { repository.getItemsInTrashCount() } returns trashCount
+        coEvery { repository.getItemsInTrashCount() } returns Result.success(trashCount)
 
         viewModel.uiState.test {
             assertEquals(MediaDetailsUiState.Loading, awaitItem())
@@ -89,10 +89,11 @@ internal class MediaDetailsViewModelTest {
         val mediaList = listOf(fakeMedia)
         var hasSeenOnboarding = false
         coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
-        coEvery { repository.getItemsInTrashCount() } returns 0
-        coEvery { repository.hasSeenSwipeUpTrashOnboarding() } coAnswers { hasSeenOnboarding }
+        coEvery { repository.getItemsInTrashCount() } returns Result.success(0)
+        coEvery { repository.hasSeenSwipeUpTrashOnboarding() } coAnswers { Result.success(hasSeenOnboarding) }
         coEvery { repository.markSwipeUpTrashOnboardingSeen() } coAnswers {
             hasSeenOnboarding = true
+            Result.success(Unit)
         }
 
         viewModel.uiState.test {
@@ -151,7 +152,7 @@ internal class MediaDetailsViewModelTest {
         val trashCount = 0
 
         coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
-        coEvery { repository.getItemsInTrashCount() } returns trashCount
+        coEvery { repository.getItemsInTrashCount() } returns Result.success(trashCount)
 
         viewModel.uiState.test {
             assertEquals(MediaDetailsUiState.Loading, awaitItem())
@@ -195,8 +196,8 @@ internal class MediaDetailsViewModelTest {
         val trashCountAfter = 3
 
         coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
-        coEvery { repository.getItemsInTrashCount() } returnsMany listOf(trashCountBefore, trashCountAfter)
-        coEvery { repository.moveToTrash(1L) } returns Unit
+        coEvery { repository.getItemsInTrashCount() } returnsMany listOf(Result.success(trashCountBefore), Result.success(trashCountAfter))
+        coEvery { repository.moveToTrash(1L) } returns Result.success(Unit)
 
         viewModel.uiState.test {
             assertEquals(MediaDetailsUiState.Loading, awaitItem())
@@ -219,14 +220,36 @@ internal class MediaDetailsViewModelTest {
     }
 
     @Test
+    fun `dispatchEvent SwipeUp shows error when moving to trash fails`() = runTest {
+        // Given
+        val mediaList = listOf(fakeMedia, secondMedia)
+
+        coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
+        coEvery { repository.getItemsInTrashCount() } returns Result.success(2)
+        coEvery { repository.moveToTrash(1L) } returns Result.failure(IllegalStateException())
+
+        viewModel.uiState.test {
+            assertEquals(MediaDetailsUiState.Loading, awaitItem())
+            viewModel.dispatchEvent(MediaDetailsUiEvent.LoadDetails(initialMediaId = 1L))
+            assertEquals(MediaDetailsUiState.Content(mediaList, 0, 2), awaitItem())
+
+            // When
+            viewModel.dispatchEvent(MediaDetailsUiEvent.SwipeUp(mediaId = 1L))
+
+            // Then
+            assertEquals(MediaDetailsUiState.Error, awaitItem())
+        }
+    }
+
+    @Test
     fun `swiping the last media moves it to trash and navigates back`() = runTest {
         // Given
         val mediaList = listOf(fakeMedia)
         val trashCount = 2
 
         coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
-        coEvery { repository.getItemsInTrashCount() } returns trashCount
-        coEvery { repository.moveToTrash(1L) } returns Unit
+        coEvery { repository.getItemsInTrashCount() } returns Result.success(trashCount)
+        coEvery { repository.moveToTrash(1L) } returns Result.success(Unit)
 
         viewModel.uiState.test {
             assertEquals(MediaDetailsUiState.Loading, awaitItem())
@@ -267,7 +290,7 @@ internal class MediaDetailsViewModelTest {
         val trashCount = 2
 
         coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
-        coEvery { repository.getItemsInTrashCount() } returns trashCount
+        coEvery { repository.getItemsInTrashCount() } returns Result.success(trashCount)
 
         viewModel.uiState.test {
             assertEquals(MediaDetailsUiState.Loading, awaitItem())
@@ -300,7 +323,7 @@ internal class MediaDetailsViewModelTest {
         val trashCount = 1
 
         coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
-        coEvery { repository.getItemsInTrashCount() } returns trashCount
+        coEvery { repository.getItemsInTrashCount() } returns Result.success(trashCount)
 
         viewModel.uiState.test {
             assertEquals(MediaDetailsUiState.Loading, awaitItem())
@@ -325,7 +348,7 @@ internal class MediaDetailsViewModelTest {
         val trashCount = 1
 
         coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
-        coEvery { repository.getItemsInTrashCount() } returns trashCount
+        coEvery { repository.getItemsInTrashCount() } returns Result.success(trashCount)
 
         viewModel.uiState.test {
             assertEquals(MediaDetailsUiState.Loading, awaitItem())
@@ -352,7 +375,7 @@ internal class MediaDetailsViewModelTest {
         val trashCount = 1
 
         coEvery { repository.getActiveMedia() } returns Result.success(mediaList)
-        coEvery { repository.getItemsInTrashCount() } returns trashCount
+        coEvery { repository.getItemsInTrashCount() } returns Result.success(trashCount)
 
         viewModel.uiState.test {
             assertEquals(MediaDetailsUiState.Loading, awaitItem())

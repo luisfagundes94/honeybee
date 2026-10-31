@@ -35,7 +35,7 @@ internal class PermissionViewModelTest {
     @Test
     fun `dispatchEvent PermissionsGranted should complete onboarding and navigate to library`() = runTest {
         // Given
-        coEvery { repository.completeOnboarding() } returns Unit
+        coEvery { repository.completeOnboarding() } returns Result.success(Unit)
 
         viewModel.uiEffect.test {
             // When
@@ -44,6 +44,20 @@ internal class PermissionViewModelTest {
             // Then
             assertEquals(PermissionUiEffect.NavigateToLibrary, awaitItem())
             coVerify(exactly = 1) { repository.completeOnboarding() }
+        }
+    }
+
+    @Test
+    fun `dispatchEvent PermissionsGranted should show error when completing onboarding fails`() = runTest {
+        // Given
+        coEvery { repository.completeOnboarding() } returns Result.failure(IllegalStateException())
+
+        viewModel.uiEffect.test {
+            // When
+            viewModel.dispatchEvent(PermissionUiEvent.PermissionsGranted)
+
+            // Then
+            assertEquals(PermissionUiEffect.ShowCompletionError, awaitItem())
         }
     }
 
